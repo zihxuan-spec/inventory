@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP Fiori Style Inventory</title>
+    <style>
+        /* --- SAP Fiori Style Variables (Quartz Light Theme) --- */
+        :root {
+            --sap-shell-color: #354a5f;
+            --sap-bg-color: #edf0f4; /* 經典企業灰底 */
+            --sap-surface-color: #ffffff;
+            --sap-text-color: #32363a;
+            --sap-label-color: #6a6d70;
+            --sap-border-color: #d9d9d9;
+            --sap-highlight-color: #0a6ed1; /* SAP Blue Focus */
+            --sap-success-color: #107e3e;
+            --sap-critical-color: #bb0000;
+            --sap-font: "72", "Arial", sans-serif; /* SAP 專用字體 fallback */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--sap-font);
+            background-color: var(--sap-bg-color);
+            color: var(--sap-text-color);
+            font-size: 14px;
+        }
+
+        /* --- Shell Bar (Top Nav) --- */
+        .shell-bar {
+            background-color: var(--sap-shell-color);
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .shell-title {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+        .shell-logo {
+            font-weight: 900;
+            color: #fff;
+            margin-right: 10px;
+            font-style: italic;
+        }
+
+        /* --- Page Layout --- */
+        .page-header {
+            background-color: var(--sap-surface-color);
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--sap-border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: normal;
+            color: var(--sap-text-color);
+        }
+        .subtitle {
+            font-size: 12px;
+            color: var(--sap-label-color);
+            margin-top: 4px;
+        }
+
+        .content-area {
+            padding: 20px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Search Toolbar --- */
+        .toolbar {
+            background: transparent;
+            padding: 10px 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .sap-input {
+            padding: 8px 12px;
+            border: 1px solid #89919a;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            width: 250px;
+            transition: border-color 0.2s;
+        }
+        .sap-input:focus {
+            outline: none;
+            border-color: var(--sap-highlight-color);
+            box-shadow: 0 0 0 2px rgba(10, 110, 209, 0.1);
+        }
+
+        /* --- SAP Data Table --- */
+        .sap-table-container {
+            background: var(--sap-surface-color);
+            border: 1px solid var(--sap-border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        thead {
+            background-color: #f7f7f7;
+            border-bottom: 1px solid var(--sap-border-color);
+        }
+        th {
+            padding: 12px 16px;
+            font-weight: normal;
+            color: var(--sap-label-color);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        tr:hover {
+            background-color: #f5f7fa;
+            cursor: pointer;
+        }
+        
+        /* Status Indicators */
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-ok { background-color: var(--sap-success-color); }
+        .status-low { background-color: #e9730c; }
+        .status-crit { background-color: var(--sap-critical-color); }
+
+        /* --- Action Modal (Dialog) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .sap-dialog {
+            background: white;
+            width: 400px;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .dialog-header {
+            background: #f2f2f2;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--sap-border-color);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .dialog-content {
+            padding: 20px;
+        }
+        .dialog-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--sap-border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fcfcfc;
+        }
+
+        /* --- Buttons --- */
+        .sap-btn {
+            border: 1px solid var(--sap-highlight-color);
+            color: var(--sap-highlight-color);
+            background: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .sap-btn:hover { background: #f0f8ff; }
+        
+        .sap-btn-emphasized {
+            background: var(--sap-highlight-color);
+            color: white;
+        }
+        .sap-btn-emphasized:hover { background: #0854a0; }
+
+        .sap-btn-transparent {
+            border: 1px solid transparent;
+            color: var(--sap-text-color);
+        }
+        .sap-btn-transparent:hover { background: #eaeaea; }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .qty-input {
+            width: 80px;
+            text-align: right;
+        }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #32363a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell-bar">
+    <div class="shell-logo">SAP</div>
+    <div class="shell-title">庫存管理系統 (Inventory Management)</div>
+</div>
+
+<div class="page-header">
+    <div>
+        <div class="page-title">備品總覽 (Stock Overview)</div>
+        <div class="subtitle">庫存地點: Arizona Warehouse / Plant 1000</div>
+    </div>
+    <div>
+        <button class="sap-btn sap-btn-transparent" onclick="renderTable()">刷新 (Refresh)</button>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="toolbar">
+        <input type="text" id="searchInput" class="sap-input" placeholder="搜尋料號或名稱..." onkeyup="renderTable()">
+    </div>
+
+    <div class="sap-table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px;">狀態</th>
+                    <th style="width: 100px;">料號 (ID)</th>
+                    <th>備品名稱 (Description)</th>
+                    <th style="text-align: right;">現有庫存</th>
+                    <th style="width: 80px;">單位</th>
+                    <th style="width: 120px;">操作</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="actionModal" class="modal-overlay">
+    <div class="sap-dialog">
+        <div class="dialog-header">
+            <span id="modalTitle">貨物移動 (Goods Movement)</span>
+            <span style="cursor:pointer;" onclick="closeModal()">✕</span>
+        </div>
+        <div class="dialog-content">
+            <div style="margin-bottom: 5px; color: var(--sap-label-color); font-size: 12px;">物料 (Material)</div>
+            <div id="modalItemName" style="font-weight: bold; font-size: 16px; margin-bottom: 20px;">Item Name</div>
+
+            <div style="margin-bottom: 5px; color: var(--sap-label-color); font-size: 12px;">異動數量 (Quantity)</div>
+            <div class="qty-control">
+                <input type="number" id="qtyInput" class="sap-input qty-input" value="1" min="1">
+                <span id="modalUnit">PC</span>
+            </div>
+            
+            <div style="margin-top: 20px; font-size: 12px; color: var(--sap-label-color);">
+                交易代碼: <span id="tCode">MIGO</span>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="sap-btn sap-btn-transparent" onclick="closeModal()">取消 (Cancel)</button>
+            <button class="sap-btn" style="border-color: #bb0000; color: #bb0000;" onclick="confirmAction(-1)">領用 (GI)</button>
+            <button class="sap-btn sap-btn-emphasized" onclick="confirmAction(1)">入庫 (GR)</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">資料已儲存</div>
+
+<script>
+    // --- Mock Data (模擬 Excel 資料) ---
+    let inventoryData = [
+        { id: "M-1001", name: "3號電池 (AA Battery)", stock: 15, unit: "PC", minStock: 10 },
+        { id: "P-2044", name: "印表機 A4 紙 (A4 Paper)", stock: 3, unit: "BAG", minStock: 5 },
+        { id: "S-3001", name: "黑色原子筆 (Ballpoint Pen Black)", stock: 54, unit: "PC", minStock: 10 },
+        { id: "H-5002", name: "衛生紙 (Tissue Paper)", stock: 2, unit: "BAG", minStock: 5 },
+        { id: "L-9001", name: "LEGO 清潔刷 (Brush)", stock: 1, unit: "PC", minStock: 1 }
+    ];
+
+    let currentSelectedIndex = -1;
+
+    // --- Render Function ---
+    function renderTable() {
+        const tbody = document.getElementById('inventoryBody');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        tbody.innerHTML = '';
+
+        inventoryData.forEach((item, index) => {
+            if (item.name.toLowerCase().includes(searchTerm) || item.id.toLowerCase().includes(searchTerm)) {
+                
+                // 狀態燈號邏輯
+                let statusClass = 'status-ok';
+                if (item.stock <= 0) statusClass = 'status-crit';
+                else if (item.stock < item.minStock) statusClass = 'status-low';
+
+                const tr = document.createElement('tr');
+                tr.onclick = () => openModal(index); // 點擊整行觸發
+                
+                tr.innerHTML = `
+                    <td><span class="status-dot ${statusClass}"></span></td>
+                    <td>${item.id}</td>
+                    <td style="font-weight: 500;">${item.name}</td>
+                    <td style="text-align: right; font-weight: bold;">${item.stock}</td>
+                    <td style="color: #666;">${item.unit}</td>
+                    <td><span style="font-size:12px; color: #0a6ed1;">管理 (Manage)</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+    }
+
+    // --- Modal Logic ---
+    function openModal(index) {
+        currentSelectedIndex = index;
+        const item = inventoryData[index];
+        document.getElementById('modalItemName').innerText = `${item.id} - ${item.name}`;
+        document.getElementById('modalUnit').innerText = item.unit;
+        document.getElementById('qtyInput').value = 1;
+        document.getElementById('actionModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('actionModal').style.display = 'none';
+    }
+
+    // --- Action Logic (GR/GI) ---
+    function confirmAction(direction) {
+        const qty = parseInt(document.getElementById('qtyInput').value);
+        if (qty <= 0) return;
+
+        const item = inventoryData[currentSelectedIndex];
+        
+        // 檢查領用庫存
+        if (direction === -1 && item.stock < qty) {
+            showToast("錯誤: 庫存不足 (Stock Deficit)", true);
+            return;
+        }
+
+        // 更新數據
+        item.stock += (qty * direction);
+        
+        // 這裡未來要加上呼叫 Google Script API 的代碼
+        console.log(`Updated ${item.id}: New Stock = ${item.stock}`);
+
+        closeModal();
+        renderTable();
+        
+        const msg = direction === 1 ? "入庫過帳成功 (Goods Receipt Posted)" : "領用過帳成功 (Goods Issue Posted)";
+        showToast(msg);
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.style.opacity = 1;
+        toast.style.backgroundColor = isError ? '#bb0000' : '#32363a';
+        
+        setTimeout(() => {
+            toast.style.opacity = 0;
+        }, 3000);
+    }
+
+    // Init
+    renderTable();
+</script>
+
+</body>
+</html>

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory System</title>
+    <title>Inventory Management System</title>
     <style>
-        /* --- 核心風格 --- */
+        /* --- 核心風格 (Enterprise Style) --- */
         :root {
             --theme-primary: #354a5f; --theme-bg: #edf0f4; --theme-surface: #ffffff;
             --theme-text: #32363a; --theme-label: #6a6d70; --theme-border: #d9d9d9;
@@ -14,6 +14,7 @@
         }
         body { margin: 0; padding: 0; font-family: var(--font-family); background-color: var(--theme-bg); color: var(--theme-text); font-size: 14px; }
         
+        /* Layout */
         .shell-bar { background-color: var(--theme-primary); height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); color: white; }
         .page-header { background-color: var(--theme-surface); padding: 16px 32px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
         .content-area { padding: 20px 32px; max-width: 1200px; margin: 0 auto; }
@@ -22,28 +23,29 @@
         .std-input { padding: 8px 12px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
         .std-input:focus { outline: none; border-color: var(--theme-highlight); }
         
+        /* Table Layout - Fixed layout to handle long text */
         .table-container { background: var(--theme-surface); border: 1px solid var(--theme-border); border-radius: 4px; overflow: hidden; margin-top: 10px;}
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; } 
-        /* 固定表格寬度佈局，防止 Description 撐壞版面 */
         
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--theme-border); }
         th { padding: 12px 16px; font-weight: 600; color: var(--theme-label); font-size: 12px; text-transform: uppercase; }
         td { padding: 12px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         tr:hover { background-color: #f5f7fa; cursor: pointer; }
 
-        /* 欄位寬度設定 */
-        .col-pn { width: 120px; font-weight: bold; font-family: monospace; }
+        /* Column Widths */
+        .col-pn { width: 130px; font-weight: bold; font-family: monospace; }
         .col-model { width: 200px; }
         .col-desc { color: #666; font-size: 13px; } 
         .col-stock { width: 80px; text-align: right; font-weight: bold; }
         .col-unit { width: 60px; color: #888; font-size: 12px; }
         .col-action { width: 80px; text-align: center; }
 
+        /* Status Dots */
         .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-ok { background-color: var(--theme-success); }
-        .status-low { background-color: var(--theme-warning); }
         .status-crit { background-color: var(--theme-critical); }
 
+        /* Buttons */
         .std-btn { border: 1px solid var(--theme-highlight); color: var(--theme-highlight); background: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
         .std-btn:hover { background: #f0f8ff; }
         .std-btn-primary { background: var(--theme-highlight); color: white; }
@@ -53,8 +55,9 @@
         .std-btn-transparent { border-color: transparent; color: var(--theme-text); }
         .std-btn-transparent:hover { background: #eaeaea; }
 
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .std-dialog { background: white; width: 450px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; }
+        .std-dialog { background: white; width: 480px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .dialog-header { background: #f4f6f8; padding: 12px 20px; font-weight: 600; display: flex; justify-content: space-between; }
         .dialog-content { padding: 20px; }
@@ -63,16 +66,16 @@
         .form-group { margin-bottom: 15px; }
         .form-label { font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block; color: var(--theme-label); }
 
+        /* Loading & Toast */
         .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--theme-highlight); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
     </style>
 </head>
 <body>
 
 <div class="shell-bar">
-    <div style="font-weight:600; font-size:16px;">Parts Inventory</div>
+    <div style="font-weight:600; font-size:16px;">Inventory System</div>
     <div style="cursor:pointer; font-size:12px; border:1px solid rgba(255,255,255,0.4); padding:4px 8px; border-radius:4px;" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
 
@@ -161,7 +164,7 @@
             <div class="form-group">
                 <label class="form-label" data-i18n="col_pn">Part Number (ID)</label>
                 <input type="text" id="newId" class="std-input" placeholder="e.g. 70401609" onchange="autoFillMaterial()">
-                <div style="font-size:11px; color:#aaa; margin-top:2px;">Type Part No. & Enter to lookup Master</div>
+                <div id="idFeedback" style="font-size:12px; margin-top:4px; font-weight:bold; min-height:18px;"></div>
             </div>
             
             <div class="form-group">
@@ -198,7 +201,7 @@
     // ==========================================
     // 請將您的 Google Script 網址貼在下方
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxSKZnU-yuzB4UI-UU5RmZ5Kz5VxXrOsF0K9EE_E1ogpJQzOowtOpB2qv1SYUAeaKLp/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwLk4AfXAWHPtmzCpAD-xip9T36TcLKtMSQYwX8VaaJntm_Xc6kUQBosXULscv3q8m8/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -206,6 +209,7 @@
     let currentLang = 'en';
     let selectedItemIndex = -1;
 
+    // Translations
     const translations = {
         en: { 
             overview_title: "Inventory Overview", btn_refresh: "Refresh", btn_add_item: "New Part", 
@@ -225,6 +229,8 @@
         }
     };
 
+    // --- Core Logic ---
+
     async function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { alert("Please setup API URL!"); return; }
         
@@ -234,12 +240,7 @@
             const data = await res.json();
             
             materialMaster = data.master; 
-            // 如果 Master 有資料，但 Inventory 只有 ID，可以在這裡補全
-            inventoryList = data.inventory.map(item => {
-                // 優先使用 Inventory 表裡的資料，如果沒有則去 Master 找
-                return item;
-            });
-
+            inventoryList = data.inventory;
             renderTable();
         } catch (e) {
             console.error(e);
@@ -259,15 +260,8 @@
         if (newStock < 0) { showToast("Stock cannot be negative", true); return; }
 
         setButtonsLoading(true);
-
-        const payload = {
-            action: "update",
-            id: item.id,
-            newStock: newStock
-        };
-
         try {
-            await sendPost(payload);
+            await sendPost({ action: "update", id: item.id, newStock: newStock });
             item.stock = newStock;
             closeModal('actionModal');
             renderTable();
@@ -286,21 +280,18 @@
         const stock = parseInt(document.getElementById('newStock').value);
         const unit = document.getElementById('newUnit').value;
 
-        if(!id) return;
+        if(!id) { showToast("Part Number is required", true); return; }
 
         setButtonsLoading(true);
-        
-        const payload = {
-            action: "create",
-            id: id,
-            model: model,
-            description: desc,
-            stock: stock || 0,
-            unit: unit || "PC"
-        };
-
         try {
-            await sendPost(payload);
+            await sendPost({
+                action: "create",
+                id: id,
+                model: model,
+                description: desc,
+                stock: stock || 0,
+                unit: unit || "PC"
+            });
             closeModal('createModal');
             fetchData(); 
             showToast(translations[currentLang].msg_saved);
@@ -312,10 +303,47 @@
     }
 
     async function sendPost(payload) {
-        await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if(json.status === 'error') throw new Error(json.message);
+        return json;
+    }
+
+    // --- UI Helpers ---
+
+    function autoFillMaterial() {
+        const idInput = document.getElementById('newId');
+        const id = idInput.value.trim();
+        const feedback = document.getElementById('idFeedback');
+
+        // 1. 清空舊資料
+        document.getElementById('newModel').value = "";
+        document.getElementById('newDesc').value = "";
+        document.getElementById('newUnit').value = "";
+        
+        if (!id) { feedback.innerText = ""; return; }
+
+        // 2. 檢查 Inventory 是否已存在
+        const exists = inventoryList.find(item => item.id === id);
+        if (exists) {
+            feedback.innerText = "⚠️ ID exists in Inventory (已存在庫存表)";
+            feedback.style.color = "#bb0000";
+            return;
+        }
+
+        // 3. 檢查 Master 是否有資料
+        if (materialMaster[id]) {
+            // (A) 有資料：自動帶入
+            document.getElementById('newModel').value = materialMaster[id].model;
+            document.getElementById('newDesc').value = materialMaster[id].description;
+            document.getElementById('newUnit').value = materialMaster[id].unit;
+            feedback.innerText = "✅ Found in Database (已從資料庫帶入)";
+            feedback.style.color = "#107e3e";
+        } else {
+            // (B) 無資料：橘色提醒
+            feedback.innerText = "ℹ️ New Item (新料號，請手動輸入)";
+            feedback.style.color = "#e9730c";
+        }
     }
 
     function renderTable() {
@@ -345,15 +373,6 @@
         });
     }
 
-    function autoFillMaterial() {
-        const id = document.getElementById('newId').value;
-        if(materialMaster[id]) {
-            document.getElementById('newModel').value = materialMaster[id].model;
-            document.getElementById('newDesc').value = materialMaster[id].description;
-            document.getElementById('newUnit').value = materialMaster[id].unit;
-        }
-    }
-
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'zh' : 'en';
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -379,6 +398,7 @@
         document.getElementById('newDesc').value = '';
         document.getElementById('newStock').value = 0;
         document.getElementById('newUnit').value = '';
+        document.getElementById('idFeedback').innerText = ''; // Reset feedback
         document.getElementById('createModal').style.display = 'flex';
     }
     

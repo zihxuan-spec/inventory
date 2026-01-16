@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spare Part Management System</title>
+    <title>WMS - Warehouse Management System</title>
     <style>
         /* --- SAP Fiori Style Theme --- */
         :root {
             /* SAP Color Palette */
-            --sap-shell-color: #354a5f;       /* The classic SAP top bar blue */
-            --sap-bg-color: #edf0f4;          /* Standard Fiori background gray */
+            --sap-shell-color: #354a5f;
+            --sap-bg-color: #edf0f4;
             --sap-surface-color: #ffffff;
-            --sap-text-color: #32363a;        /* Dark gray text, not pure black */
+            --sap-text-color: #32363a;
             --sap-border-color: #d9d9d9;
-            --sap-primary: #0a6ed1;           /* SAP "Emphasized" Blue */
+            --sap-primary: #0a6ed1;
             --sap-primary-hover: #0854a0;
-            --sap-success: #107e3e;           /* SAP Positive Green */
-            --sap-critical: #bb0000;          /* SAP Negative Red */
-            --sap-warning: #e9730c;           /* SAP Critical Orange */
-            --sap-font-family: "72", "Arial", "Helvetica", sans-serif; /* SAP's font "72" fallback */
+            --sap-success: #107e3e;
+            --sap-critical: #bb0000;
+            --sap-warning: #e9730c;
+            --sap-font-family: "72", "Arial", "Helvetica", sans-serif;
         }
 
         body { 
@@ -26,14 +26,14 @@
             font-family: var(--sap-font-family); 
             background-color: var(--sap-bg-color); 
             color: var(--sap-text-color); 
-            font-size: 0.875rem; /* 14px */
+            font-size: 0.875rem; 
             line-height: 1.4;
         }
         
         /* Layout - Shell Bar */
         .shell-bar { 
             background-color: var(--sap-shell-color); 
-            height: 44px; /* SAP Fiori standard height is usually 44px or 48px */
+            height: 44px; 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 0 1rem; 
             color: white; 
@@ -41,7 +41,7 @@
         }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         
-        /* Page Header (Object Page Header) */
+        /* Page Header */
         .page-header { 
             background-color: var(--sap-surface-color); 
             padding: 1.5rem 2rem; 
@@ -55,7 +55,7 @@
         .std-input { 
             height: 36px;
             padding: 0 10px; 
-            border: 1px solid #89919a; /* SAP Input border */
+            border: 1px solid #89919a; 
             border-radius: 4px; 
             font-size: 14px; 
             width: 100%; box-sizing: border-box; 
@@ -66,11 +66,11 @@
         .std-input:focus { 
             outline: none; 
             border-color: var(--sap-primary); 
-            box-shadow: 0 0 0 1px var(--sap-primary) inset; /* Inner focus ring */
+            box-shadow: 0 0 0 1px var(--sap-primary) inset; 
         }
         .std-input:disabled { background-color: #f2f2f2; color: #666; cursor: not-allowed; }
         
-        /* Buttons (Fiori Style) */
+        /* Buttons */
         .std-btn { 
             height: 36px; 
             padding: 0 16px; 
@@ -84,7 +84,6 @@
             border: 1px solid transparent;
         }
         
-        /* Button: Emphasized (Primary) */
         .btn-primary, .btn-po, .btn-issue { 
             background-color: var(--sap-primary); 
             color: white; 
@@ -93,22 +92,18 @@
         }
         .btn-primary:hover, .btn-po:hover, .btn-issue:hover { background-color: var(--sap-primary-hover); border-color: var(--sap-primary-hover); }
         
-        /* Button: Transparent / Ghost */
         .btn-transparent, .btn-master { 
             background-color: transparent; 
             color: var(--sap-primary); 
             border: 1px solid var(--sap-primary);
         }
-        .btn-transparent:hover, .btn-master:hover { 
-            background-color: rgba(10, 110, 209, 0.05); /* Light blue tint */
-        }
+        .btn-transparent:hover, .btn-master:hover { background-color: rgba(10, 110, 209, 0.05); }
 
-        /* Specific Button Colors override for semantic meaning */
-        .btn-po { background-color: var(--sap-primary); border-color: var(--sap-primary); } /* Standard Blue */
-        .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } /* Warning/Negative Style Ghost */
+        .btn-po { background-color: var(--sap-primary); border-color: var(--sap-primary); } 
+        .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } 
         .btn-issue:hover { background-color: #fff5f5; }
 
-        /* Table (Grid Table Style) */
+        /* Inventory Table */
         .table-container { 
             background: var(--sap-surface-color); 
             border: 1px solid var(--sap-border-color); 
@@ -119,69 +114,46 @@
         }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         
-        thead { 
-            background-color: #f7f7f7; /* Very light gray header */
-            border-bottom: 1px solid var(--sap-border-color); 
-        }
-        th { 
-            padding: 10px 16px; 
-            font-weight: normal; 
-            color: #6a6d70; /* SAP Label color */
-            font-size: 12px; 
-            text-transform: uppercase; 
-        }
-        td { 
-            padding: 10px 16px; 
-            border-bottom: 1px solid #eeeeee; 
-            vertical-align: middle; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            color: var(--sap-text-color);
-        }
-        tr:hover { background-color: #ebf5fe; cursor: pointer; } /* SAP Selection Blue */
+        thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
+        th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
+        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
+        tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
         /* Toolbar */
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; }
         .spacer { flex-grow: 1; }
 
-        /* Status & Columns */
+        /* Status Dots */
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
         .status-ok { background-color: var(--sap-success); }
         .status-low { background-color: var(--sap-warning); }
         .status-crit { background-color: var(--sap-critical); }
         
-        .col-pn { font-weight: bold; color: var(--sap-primary); } /* Link color style */
+        .col-pn { font-weight: bold; color: var(--sap-primary); } 
         .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em;}
 
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { 
-            background: white; 
-            width: 500px; 
-            border-radius: 6px; /* Fiori 3 radius */
-            display: flex; flex-direction: column; 
-            animation: fadeIn 0.2s; 
-            max-height: 90vh; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.15); 
+            background: white; width: 500px; border-radius: 6px; 
+            display: flex; flex-direction: column; animation: fadeIn 0.2s; 
+            max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); 
             border: 1px solid var(--sap-border-color);
         }
-        .std-dialog.large { width: 900px; }
+        .std-dialog.large { width: 950px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .dialog-header { 
-            padding: 10px 20px; 
-            border-bottom: 1px solid var(--sap-border-color); 
+            padding: 10px 20px; border-bottom: 1px solid var(--sap-border-color); 
             display: flex; justify-content: space-between; align-items: center; 
             font-size: 16px; font-weight: bold; color: var(--sap-text-color);
-            background: var(--sap-surface-color);
-            border-radius: 6px 6px 0 0;
+            background: var(--sap-surface-color); border-radius: 6px 6px 0 0;
         }
         .dialog-content { padding: 20px; overflow-y: auto; background: var(--sap-surface-color); }
         .dialog-footer { 
-            padding: 10px 20px; 
-            border-top: 1px solid var(--sap-border-color); 
+            padding: 10px 20px; border-top: 1px solid var(--sap-border-color); 
             display: flex; justify-content: flex-end; gap: 10px; 
-            background: #fdfdfd; 
-            border-radius: 0 0 6px 6px;
+            background: #fdfdfd; border-radius: 0 0 6px 6px;
         }
 
         /* Form Grid */
@@ -189,13 +161,36 @@
         .form-full { grid-column: span 2; }
         .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
         
-        /* Transaction Table */
+        /* --- Transaction Table (Updated for Professional Look) --- */
         .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
-        .tx-table th { background: #f2f2f2; padding: 8px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; }
-        .tx-table td { padding: 0; border-bottom: 1px solid var(--sap-border-color); background: #fff; }
-        .tx-input { width: 100%; border: none; padding: 8px; background: transparent; font-family: inherit; font-size: 13px;}
-        .tx-input:focus { background: #fff; outline: 2px solid var(--sap-primary); z-index: 2; position: relative;}
+        .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
+        .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
         
+        /* 表格內的輸入框樣式優化 */
+        .tx-input { 
+            width: 100%; 
+            padding: 6px 8px; 
+            border: 1px solid #89919a; /* 實體邊框 */
+            border-radius: 4px; 
+            background: #fff; 
+            font-family: inherit; 
+            font-size: 13px;
+            box-sizing: border-box; 
+            transition: border-color 0.2s;
+        }
+        .tx-input:focus { 
+            outline: none; 
+            border-color: var(--sap-primary); 
+            box-shadow: 0 0 0 1px var(--sap-primary) inset; 
+        }
+        /* 唯讀欄位變成淺灰底，看起來像 Disabled */
+        .tx-input[readonly] {
+            background-color: #f5f5f5;
+            border-color: #d9d9d9;
+            color: #666;
+            cursor: default;
+        }
+
         /* Loading & Toast */
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -206,7 +201,7 @@
 
 <div class="shell-bar">
     <div class="shell-logo">
-        <span style="font-weight:bold; font-size:1.2em;">Sunlit</span> WMS
+        <span style="font-weight:bold; font-size:1.2em;">SAP</span> Fiori WMS
     </div>
     <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
@@ -214,7 +209,7 @@
 <div class="page-header">
     <div>
         <div style="font-size:20px; font-weight:normal; color:var(--sap-text-color);" data-i18n="overview_title">Inventory Overview</div>
-        <div style="color:#6a6d70; font-size:12px; margin-top:4px;">Sunlit AZ / Storage Location 0001</div>
+        <div style="color:#6a6d70; font-size:12px; margin-top:4px;">Plant 1000 / Storage Location 0001</div>
     </div>
     <button class="std-btn btn-transparent" onclick="fetchData()">
         <span style="font-size:16px;">↻</span> <span data-i18n="btn_refresh">Refresh</span>
@@ -286,7 +281,7 @@
                         <th style="width:140px;">Part Number</th>
                         <th>Material Description</th>
                         <th style="width:100px;">Quantity</th>
-                        <th style="width:60px;">Unit</th>
+                        <th style="width:80px;">Unit</th>
                         <th style="width:30px;"></th>
                     </tr>
                 </thead>
@@ -378,15 +373,16 @@
 
 <script>
     // ==========================================
+    // 請填寫您的 Google Script URL
+    // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbyK5z87M1ixJ9imVdkHGpgmBQBF5B1yU0T4AhFYjkwfKr9KY__CvlkwByxIN_dLDuPo/exec"; 
     // ==========================================
 
     let inventoryList = [];
     let materialMaster = {}; 
-    let currentTxType = 'receive'; // 'receive' or 'issue'
+    let currentTxType = 'receive'; 
     let currentLang = 'en';
 
-    // Text Resources (Adapted for SAP Terminology)
     const i18n = {
         en: {
             overview_title: "Inventory Overview", btn_refresh: "Refresh",
@@ -436,18 +432,15 @@
         currentTxType = type;
         const isReceive = type === 'receive';
         
-        // UI Adjustments
         document.getElementById('txTitle').innerText = isReceive ? i18n[currentLang].tx_po_title : i18n[currentLang].tx_issue_title;
         document.getElementById('txRefLabel').innerText = isReceive ? i18n[currentLang].lbl_po : i18n[currentLang].lbl_usage;
         document.getElementById('txRef').placeholder = isReceive ? "e.g. 4500000123" : "e.g. 1000-CC";
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('txRef').value = "";
         
-        // Reset Table
         document.getElementById('txBody').innerHTML = "";
-        addTxRow(); addTxRow(); addTxRow(); // Default 3 rows
+        addTxRow(); addTxRow(); addTxRow(); 
         
-        // Button Color
         const btn = document.getElementById('txSubmitBtn');
         btn.innerText = "Post";
 
@@ -458,9 +451,9 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><input type="text" class="tx-input tx-id" placeholder="" onchange="resolvePart(this)"></td>
-            <td><input type="text" class="tx-input tx-info" readonly tabindex="-1" style="color:#777;"></td>
+            <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
             <td><input type="number" class="tx-input tx-qty" placeholder=""></td>
-            <td><input type="text" class="tx-input tx-unit" readonly tabindex="-1" style="color:#777;"></td>
+            <td><input type="text" class="tx-input tx-unit" readonly tabindex="-1"></td>
             <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
         `;
         document.getElementById('txBody').appendChild(tr);
@@ -472,10 +465,7 @@
         const info = row.querySelector('.tx-info');
         const unit = row.querySelector('.tx-unit');
         
-        // 1. Check Inventory
         let item = inventoryList.find(i => i.id === id);
-        
-        // 2. If not in Inventory, check Master (only allowed for PO)
         if (!item && currentTxType === 'receive') {
             item = materialMaster[id]; 
         }
@@ -483,8 +473,6 @@
         if (item) {
             info.value = (item.description || item.desc || item.model || "");
             unit.value = item.unit;
-            
-            // If issuing, show current stock in placeholder
             if (currentTxType === 'issue') {
                 const stock = inventoryList.find(i => i.id === id)?.stock || 0;
                 row.querySelector('.tx-qty').placeholder = `Max: ${stock}`;
@@ -502,16 +490,11 @@
 
         const rows = document.querySelectorAll('#txBody tr');
         const items = [];
-        
-        // Validate & Collect
         for(let row of rows) {
             const id = row.querySelector('.tx-id').value.trim();
             const qty = Number(row.querySelector('.tx-qty').value);
-            if(id && qty > 0) {
-                items.push({ id, qty });
-            }
+            if(id && qty > 0) items.push({ id, qty });
         }
-
         if(items.length === 0) return;
 
         setLoading(true);
@@ -524,11 +507,8 @@
             closeModal('txModal');
             fetchData();
             showToast("Document Posted Successfully");
-        } catch(e) {
-            showToast(e.message, true);
-        } finally {
-            setLoading(false);
-        }
+        } catch(e) { showToast(e.message, true); }
+        finally { setLoading(false); }
     }
 
     // --- Master Data Logic ---
@@ -557,7 +537,6 @@
     async function submitCreateMaster() {
         const id = document.getElementById('newId').value.trim();
         if(!id) return;
-        
         setLoading(true);
         try {
             await sendPost({
@@ -575,7 +554,6 @@
         finally { setLoading(false); }
     }
 
-    // --- View Details ---
     function openDetails(index) {
         const item = inventoryList[index];
         document.getElementById('detId').innerText = item.id;
@@ -586,12 +564,10 @@
         openModal('detailsModal');
     }
 
-    // --- Shared UI ---
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInput').value.toLowerCase();
         tbody.innerHTML = '';
-        
         inventoryList.forEach((item, index) => {
             if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
                 let statusClass = 'status-ok';
@@ -607,9 +583,7 @@
                     <td style="color:#666; font-size:13px;">${item.description}</td>
                     <td class="col-stock">${item.stock}</td>
                     <td style="color:#666; font-size:12px;">${item.unit}</td>
-                    <td style="text-align:center;">
-                        <span style="color:#0a6ed1; font-weight:bold; font-size:12px;">Display</span>
-                    </td>
+                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">Display</span></td>
                 `;
                 tbody.appendChild(tr);
             }

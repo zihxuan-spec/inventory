@@ -5,257 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management</title>
     <style>
-        /* --- Professional Enterprise Style (Fiori-inspired) --- */
+        /* --- 核心配色 (保持不變) --- */
         :root {
-            --theme-primary: #354a5f; /* Professional Shell Blue */
-            --theme-bg: #edf0f4;      /* Enterprise Gray Background */
+            --theme-primary: #354a5f;
+            --theme-bg: #edf0f4;
             --theme-surface: #ffffff;
             --theme-text: #32363a;
             --theme-label: #6a6d70;
             --theme-border: #d9d9d9;
-            --theme-highlight: #0a6ed1; /* Focus Blue */
+            --theme-highlight: #0a6ed1;
             --theme-success: #107e3e;
             --theme-critical: #bb0000;
             --theme-warning: #e9730c;
             --font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-family);
-            background-color: var(--theme-bg);
-            color: var(--theme-text);
-            font-size: 14px;
-        }
+        body { margin: 0; padding: 0; font-family: var(--font-family); background-color: var(--theme-bg); color: var(--theme-text); font-size: 14px; }
 
-        /* --- Shell Bar (Top Nav) --- */
-        .shell-bar {
-            background-color: var(--theme-primary);
-            height: 48px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-        }
-        .shell-title {
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-        }
-        .lang-switch {
-            color: rgba(255,255,255,0.8);
-            cursor: pointer;
-            font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 4px 10px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .lang-switch:hover {
-            color: white;
-            border-color: white;
-            background: rgba(255,255,255,0.1);
-        }
+        /* --- Shell Bar --- */
+        .shell-bar { background-color: var(--theme-primary); height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .shell-title { color: white; font-weight: 600; font-size: 16px; letter-spacing: 0.5px; }
+        .lang-switch { color: rgba(255,255,255,0.8); cursor: pointer; font-size: 13px; border: 1px solid rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 4px; transition: all 0.2s; }
+        .lang-switch:hover { color: white; border-color: white; background: rgba(255,255,255,0.1); }
 
-        /* --- Page Layout --- */
-        .page-header {
-            background-color: var(--theme-surface);
-            padding: 16px 32px;
-            border-bottom: 1px solid var(--theme-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .page-title {
-            font-size: 20px;
-            font-weight: normal;
-            color: var(--theme-text);
-        }
-        .subtitle {
-            font-size: 12px;
-            color: var(--theme-label);
-            margin-top: 4px;
-        }
+        /* --- Page Header --- */
+        .page-header { background-color: var(--theme-surface); padding: 16px 32px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 20px; font-weight: normal; color: var(--theme-text); }
+        .subtitle { font-size: 12px; color: var(--theme-label); margin-top: 4px; }
 
-        .content-area {
-            padding: 20px 32px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .content-area { padding: 20px 32px; max-width: 1200px; margin: 0 auto; }
 
-        /* --- Controls & Inputs --- */
-        .toolbar {
-            background: transparent;
-            padding: 10px 0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .std-input {
-            padding: 8px 12px;
-            border: 1px solid #89919a;
-            border-radius: 4px;
-            background: white;
-            font-size: 14px;
-            width: 250px;
-            transition: border-color 0.2s;
-        }
-        .std-input:focus {
-            outline: none;
-            border-color: var(--theme-highlight);
-            box-shadow: 0 0 0 2px rgba(10, 110, 209, 0.1);
-        }
+        /* --- Toolbar --- */
+        .toolbar { background: transparent; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .search-wrapper { flex-grow: 1; display: flex; justify-content: flex-end; }
+        .std-input { padding: 8px 12px; border: 1px solid #89919a; border-radius: 4px; background: white; font-size: 14px; transition: border-color 0.2s; }
+        .std-input:focus { outline: none; border-color: var(--theme-highlight); box-shadow: 0 0 0 2px rgba(10, 110, 209, 0.1); }
+        .w-full { width: 100%; box-sizing: border-box; margin-bottom: 15px; }
 
-        /* --- Data Table --- */
-        .table-container {
-            background: var(--theme-surface);
-            border: 1px solid var(--theme-border);
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        thead {
-            background-color: #f7f7f7;
-            border-bottom: 1px solid var(--theme-border);
-        }
-        th {
-            padding: 12px 16px;
-            font-weight: 600;
-            color: var(--theme-label);
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eeeeee;
-            vertical-align: middle;
-        }
-        tr:hover {
-            background-color: #f5f7fa;
-            cursor: pointer;
-        }
+        /* --- Table --- */
+        .table-container { background: var(--theme-surface); border: 1px solid var(--theme-border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead { background-color: #f7f7f7; border-bottom: 1px solid var(--theme-border); }
+        th { padding: 12px 16px; font-weight: 600; color: var(--theme-label); font-size: 12px; text-transform: uppercase; }
+        td { padding: 12px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; }
+        tr:hover { background-color: #f5f7fa; cursor: pointer; }
 
-        /* Status Indicators */
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        /* --- Status Dots --- */
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
         .status-ok { background-color: var(--theme-success); }
         .status-low { background-color: var(--theme-warning); }
         .status-crit { background-color: var(--theme-critical); }
 
-        /* --- Modal (Dialog) --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .std-dialog {
-            background: white;
-            width: 400px;
-            border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            animation: fadeIn 0.2s ease-out;
-        }
+        /* --- Modals --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .std-dialog { background: white; width: 400px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .dialog-header {
-            background: #f4f6f8;
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--theme-border);
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            color: var(--theme-text);
-        }
-        .dialog-content {
-            padding: 24px 20px;
-        }
-        .dialog-footer {
-            padding: 12px 20px;
-            border-top: 1px solid var(--theme-border);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            background: #fcfcfc;
-        }
+        .dialog-header { background: #f4f6f8; padding: 12px 20px; border-bottom: 1px solid var(--theme-border); font-weight: 600; display: flex; justify-content: space-between; color: var(--theme-text); }
+        .dialog-content { padding: 24px 20px; }
+        .dialog-footer { padding: 12px 20px; border-top: 1px solid var(--theme-border); display: flex; justify-content: flex-end; gap: 10px; background: #fcfcfc; }
+        
+        /* Form Labels */
+        .form-label { font-size: 12px; color: var(--theme-label); margin-bottom: 4px; display: block; font-weight: 600; }
 
         /* --- Buttons --- */
-        .std-btn {
-            border: 1px solid var(--theme-highlight);
-            color: var(--theme-highlight);
-            background: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            min-width: 80px;
-        }
+        .std-btn { border: 1px solid var(--theme-highlight); color: var(--theme-highlight); background: white; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; min-width: 80px; }
         .std-btn:hover { background: #f0f8ff; }
-        
-        .std-btn-primary {
-            background: var(--theme-highlight);
-            color: white;
-        }
+        .std-btn-primary { background: var(--theme-highlight); color: white; }
         .std-btn-primary:hover { background: #0854a0; }
-
-        .std-btn-danger {
-            border-color: var(--theme-critical);
-            color: var(--theme-critical);
-        }
+        .std-btn-danger { border-color: var(--theme-critical); color: var(--theme-critical); }
         .std-btn-danger:hover { background: #fff0f0; }
-
-        .std-btn-transparent {
-            border: 1px solid transparent;
-            color: var(--theme-text);
-        }
+        .std-btn-transparent { border: 1px solid transparent; color: var(--theme-text); min-width: auto; }
         .std-btn-transparent:hover { background: #eaeaea; }
 
-        .qty-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .qty-input {
-            width: 80px;
-            text-align: right;
-            font-weight: bold;
-        }
+        .qty-control { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .qty-input { width: 80px; text-align: right; font-weight: bold; }
 
-        /* Toast Message */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--theme-text);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 13px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        /* Toast */
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 12px 24px; border-radius: 4px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -277,7 +104,13 @@
 
 <div class="content-area">
     <div class="toolbar">
-        <input type="text" id="searchInput" class="std-input" placeholder="Search..." onkeyup="renderTable()">
+        <button class="std-btn std-btn-primary" onclick="openCreateModal()">
+            <span style="font-size:14px; margin-right:5px;">+</span> <span data-i18n="btn_add_item">Add Item</span>
+        </button>
+
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="std-input" style="width: 250px;" placeholder="Search..." onkeyup="renderTable()">
+        </div>
     </div>
 
     <div class="table-container">
@@ -301,23 +134,54 @@
 <div id="actionModal" class="modal-overlay">
     <div class="std-dialog">
         <div class="dialog-header">
-            <span id="modalTitle" data-i18n="modal_title">Goods Movement</span>
-            <span style="cursor:pointer;" onclick="closeModal()">✕</span>
+            <span data-i18n="modal_title">Goods Movement</span>
+            <span style="cursor:pointer;" onclick="closeModal('actionModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <div style="margin-bottom: 5px; color: var(--theme-label); font-size: 12px;" data-i18n="modal_material">Material</div>
+            <div class="form-label" data-i18n="modal_material">Material</div>
             <div id="modalItemName" style="font-weight: 600; font-size: 16px; margin-bottom: 24px;">Item Name</div>
 
-            <div style="margin-bottom: 5px; color: var(--theme-label); font-size: 12px;" data-i18n="modal_qty">Quantity</div>
+            <div class="form-label" data-i18n="modal_qty">Quantity</div>
             <div class="qty-control">
                 <input type="number" id="qtyInput" class="std-input qty-input" value="1" min="1">
                 <span id="modalUnit" style="font-weight:600; color: var(--theme-label);">PC</span>
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn std-btn-transparent" onclick="closeModal()" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn std-btn-transparent" onclick="closeModal('actionModal')" data-i18n="btn_cancel">Cancel</button>
             <button class="std-btn std-btn-danger" onclick="confirmAction(-1)" data-i18n="btn_issue">Issue (-)</button>
             <button class="std-btn std-btn-primary" onclick="confirmAction(1)" data-i18n="btn_receive">Receive (+)</button>
+        </div>
+    </div>
+</div>
+
+<div id="createModal" class="modal-overlay">
+    <div class="std-dialog">
+        <div class="dialog-header">
+            <span data-i18n="modal_create_title">Create New Item</span>
+            <span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span>
+        </div>
+        <div class="dialog-content">
+            <label class="form-label" data-i18n="col_id">ID</label>
+            <input type="text" id="newId" class="std-input w-full" placeholder="e.g. M-9001">
+
+            <label class="form-label" data-i18n="col_desc">Description</label>
+            <input type="text" id="newName" class="std-input w-full" placeholder="Product Name">
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label class="form-label" data-i18n="col_stock">Initial Stock</label>
+                    <input type="number" id="newStock" class="std-input w-full" value="0">
+                </div>
+                <div style="flex: 1;">
+                    <label class="form-label" data-i18n="col_unit">Unit</label>
+                    <input type="text" id="newUnit" class="std-input w-full" placeholder="PC/BAG/KG">
+                </div>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="std-btn std-btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn std-btn-primary" onclick="confirmCreate()" data-i18n="btn_create_confirm">Create</button>
         </div>
     </div>
 </div>
@@ -325,13 +189,14 @@
 <div id="toast" class="toast">Data Saved</div>
 
 <script>
-    // --- 1. Localization (i18n) Configuration ---
+    // --- 1. Localization Config ---
     const translations = {
         en: {
             app_title: "Inventory Manager",
             overview_title: "Stock Overview",
             location: "Location",
             btn_refresh: "Refresh",
+            btn_add_item: "Add Item",
             col_id: "ID",
             col_desc: "Description",
             col_stock: "Stock Level",
@@ -339,14 +204,18 @@
             col_action: "Action",
             manage: "Manage",
             modal_title: "Goods Movement",
+            modal_create_title: "Create New Material",
             modal_material: "Material",
             modal_qty: "Quantity",
             btn_cancel: "Cancel",
             btn_issue: "Issue (-)",
             btn_receive: "Receive (+)",
+            btn_create_confirm: "Create",
             msg_stock_deficit: "Error: Insufficient Stock",
             msg_success_in: "Goods Receipt Posted",
             msg_success_out: "Goods Issue Posted",
+            msg_created: "Material Created Successfully",
+            msg_incomplete: "Please fill in all fields",
             placeholder_search: "Search ID or Name..."
         },
         zh: {
@@ -354,26 +223,31 @@
             overview_title: "庫存總覽",
             location: "倉庫位置",
             btn_refresh: "重新整理",
+            btn_add_item: "新增項目",
             col_id: "料號",
             col_desc: "備品名稱",
-            col_stock: "現有庫存",
+            col_stock: "庫存數量",
             col_unit: "單位",
             col_action: "操作",
             manage: "管理",
             modal_title: "貨物移動",
+            modal_create_title: "新增備品資料",
             modal_material: "物料名稱",
             modal_qty: "異動數量",
             btn_cancel: "取消",
             btn_issue: "領料 (-)",
             btn_receive: "入庫 (+)",
+            btn_create_confirm: "建立",
             msg_stock_deficit: "錯誤：庫存不足",
             msg_success_in: "入庫過帳成功",
             msg_success_out: "領用過帳成功",
+            msg_created: "備品建立成功",
+            msg_incomplete: "請填寫所有欄位",
             placeholder_search: "搜尋料號或名稱..."
         }
     };
 
-    let currentLang = 'en'; // Default Language
+    let currentLang = 'en';
 
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'zh' : 'en';
@@ -381,29 +255,21 @@
     }
 
     function updateTexts() {
-        // Update all elements with data-i18n attribute
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (translations[currentLang][key]) {
                 el.innerText = translations[currentLang][key];
             }
         });
-
-        // Special case for input placeholder
-        const searchInput = document.getElementById('searchInput');
-        searchInput.placeholder = translations[currentLang]['placeholder_search'];
-
-        // Re-render table to update dynamic "Manage" button text
+        document.getElementById('searchInput').placeholder = translations[currentLang]['placeholder_search'];
         renderTable();
     }
 
-    // --- 2. Mock Data ---
+    // --- 2. Data ---
     let inventoryData = [
         { id: "M-1001", name: "AA Battery (3號電池)", stock: 15, unit: "PC", minStock: 10 },
         { id: "P-2044", name: "A4 Paper (印表機紙)", stock: 3, unit: "BAG", minStock: 5 },
-        { id: "S-3001", name: "Ballpoint Pen Black (原子筆)", stock: 54, unit: "PC", minStock: 10 },
-        { id: "H-5002", name: "Tissue Paper (衛生紙)", stock: 2, unit: "BAG", minStock: 5 },
-        { id: "L-9001", name: "LEGO Brush (清潔刷)", stock: 1, unit: "PC", minStock: 1 }
+        { id: "S-3001", name: "Ballpoint Pen Black", stock: 54, unit: "PC", minStock: 10 }
     ];
 
     let currentSelectedIndex = -1;
@@ -413,18 +279,16 @@
         const tbody = document.getElementById('inventoryBody');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         tbody.innerHTML = '';
-
         const manageText = translations[currentLang]['manage'];
 
         inventoryData.forEach((item, index) => {
             if (item.name.toLowerCase().includes(searchTerm) || item.id.toLowerCase().includes(searchTerm)) {
-                
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
                 else if (item.stock < item.minStock) statusClass = 'status-low';
 
                 const tr = document.createElement('tr');
-                tr.onclick = () => openModal(index);
+                tr.onclick = () => openActionModal(index); // Click row to manage
                 
                 tr.innerHTML = `
                     <td><span class="status-dot ${statusClass}"></span></td>
@@ -439,65 +303,95 @@
         });
     }
 
-    function openModal(index) {
+    // --- Modal Control ---
+    function openActionModal(index) {
         currentSelectedIndex = index;
         const item = inventoryData[index];
         document.getElementById('modalItemName').innerText = `${item.id} - ${item.name}`;
         document.getElementById('modalUnit').innerText = item.unit;
         document.getElementById('qtyInput').value = 1;
         document.getElementById('actionModal').style.display = 'flex';
-        // Focus on input for quick typing
         setTimeout(() => document.getElementById('qtyInput').focus(), 100);
     }
 
-    function closeModal() {
-        document.getElementById('actionModal').style.display = 'none';
+    function openCreateModal() {
+        // Clear fields
+        document.getElementById('newId').value = '';
+        document.getElementById('newName').value = '';
+        document.getElementById('newStock').value = 0;
+        document.getElementById('newUnit').value = '';
+        document.getElementById('createModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('newId').focus(), 100);
     }
 
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // --- Actions ---
     function confirmAction(direction) {
         const qty = parseInt(document.getElementById('qtyInput').value);
         if (qty <= 0 || isNaN(qty)) return;
 
         const item = inventoryData[currentSelectedIndex];
         
-        // Stock check
         if (direction === -1 && item.stock < qty) {
             showToast(translations[currentLang]['msg_stock_deficit'], true);
             return;
         }
 
         item.stock += (qty * direction);
-        
-        // --- API Call Placeholder ---
         console.log(`Updated ${item.id}: New Stock = ${item.stock}`);
 
-        closeModal();
+        closeModal('actionModal');
         renderTable();
-        
-        const msg = direction === 1 ? translations[currentLang]['msg_success_in'] : translations[currentLang]['msg_success_out'];
-        showToast(msg);
+        showToast(direction === 1 ? translations[currentLang]['msg_success_in'] : translations[currentLang]['msg_success_out']);
+    }
+
+    function confirmCreate() {
+        const id = document.getElementById('newId').value;
+        const name = document.getElementById('newName').value;
+        const stock = parseInt(document.getElementById('newStock').value);
+        const unit = document.getElementById('newUnit').value;
+
+        if(!id || !name || !unit) {
+            showToast(translations[currentLang]['msg_incomplete'], true);
+            return;
+        }
+
+        const newItem = {
+            id: id,
+            name: name,
+            stock: isNaN(stock) ? 0 : stock,
+            unit: unit,
+            minStock: 0 // Default
+        };
+
+        inventoryData.push(newItem);
+        console.log("Created:", newItem);
+
+        closeModal('createModal');
+        renderTable();
+        showToast(translations[currentLang]['msg_created']);
     }
 
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast');
         toast.innerText = message;
         toast.style.opacity = 1;
-        toast.style.backgroundColor = isError ? var(--theme-critical) : var(--theme-text); // fallback managed in CSS
-        if(isError) toast.style.backgroundColor = "#bb0000";
-        else toast.style.backgroundColor = "#32363a";
-        
-        setTimeout(() => {
-            toast.style.opacity = 0;
-        }, 2000);
+        toast.style.backgroundColor = isError ? "#bb0000" : "#32363a";
+        setTimeout(() => { toast.style.opacity = 0; }, 2000);
     }
 
-    // Close modal when clicking outside
-    document.getElementById('actionModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.style.display = "none";
+        }
+    }
 
-    // Init Language and Table
-    updateTexts(); 
+    // Init
+    updateTexts();
 </script>
 
 </body>

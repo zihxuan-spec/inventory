@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management</title>
     <style>
-        /* --- 核心配色 (保持不變) --- */
+        /* --- 核心配色 --- */
         :root {
             --theme-primary: #354a5f;
             --theme-bg: #edf0f4;
@@ -28,11 +28,10 @@
         .lang-switch { color: rgba(255,255,255,0.8); cursor: pointer; font-size: 13px; border: 1px solid rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 4px; transition: all 0.2s; }
         .lang-switch:hover { color: white; border-color: white; background: rgba(255,255,255,0.1); }
 
-        /* --- Page Header --- */
+        /* --- Page Layout --- */
         .page-header { background-color: var(--theme-surface); padding: 16px 32px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
         .page-title { font-size: 20px; font-weight: normal; color: var(--theme-text); }
         .subtitle { font-size: 12px; color: var(--theme-label); margin-top: 4px; }
-
         .content-area { padding: 20px 32px; max-width: 1200px; margin: 0 auto; }
 
         /* --- Toolbar --- */
@@ -40,6 +39,7 @@
         .search-wrapper { flex-grow: 1; display: flex; justify-content: flex-end; }
         .std-input { padding: 8px 12px; border: 1px solid #89919a; border-radius: 4px; background: white; font-size: 14px; transition: border-color 0.2s; }
         .std-input:focus { outline: none; border-color: var(--theme-highlight); box-shadow: 0 0 0 2px rgba(10, 110, 209, 0.1); }
+        .std-input[readonly] { background-color: #f4f4f4; color: #666; cursor: not-allowed; } /* Readonly style */
         .w-full { width: 100%; box-sizing: border-box; margin-bottom: 15px; }
 
         /* --- Table --- */
@@ -64,9 +64,8 @@
         .dialog-header { background: #f4f6f8; padding: 12px 20px; border-bottom: 1px solid var(--theme-border); font-weight: 600; display: flex; justify-content: space-between; color: var(--theme-text); }
         .dialog-content { padding: 24px 20px; }
         .dialog-footer { padding: 12px 20px; border-top: 1px solid var(--theme-border); display: flex; justify-content: flex-end; gap: 10px; background: #fcfcfc; }
-        
-        /* Form Labels */
         .form-label { font-size: 12px; color: var(--theme-label); margin-bottom: 4px; display: block; font-weight: 600; }
+        .input-hint { font-size: 11px; color: var(--theme-highlight); margin-bottom: 4px; display: block; text-align: right; }
 
         /* --- Buttons --- */
         .std-btn { border: 1px solid var(--theme-highlight); color: var(--theme-highlight); background: white; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; min-width: 80px; }
@@ -107,7 +106,6 @@
         <button class="std-btn std-btn-primary" onclick="openCreateModal()">
             <span style="font-size:14px; margin-right:5px;">+</span> <span data-i18n="btn_add_item">Add Item</span>
         </button>
-
         <div class="search-wrapper">
             <input type="text" id="searchInput" class="std-input" style="width: 250px;" placeholder="Search..." onkeyup="renderTable()">
         </div>
@@ -125,8 +123,7 @@
                     <th style="width: 120px; text-align:center;" data-i18n="col_action">Action</th>
                 </tr>
             </thead>
-            <tbody id="inventoryBody">
-                </tbody>
+            <tbody id="inventoryBody"></tbody>
         </table>
     </div>
 </div>
@@ -140,7 +137,6 @@
         <div class="dialog-content">
             <div class="form-label" data-i18n="modal_material">Material</div>
             <div id="modalItemName" style="font-weight: 600; font-size: 16px; margin-bottom: 24px;">Item Name</div>
-
             <div class="form-label" data-i18n="modal_qty">Quantity</div>
             <div class="qty-control">
                 <input type="number" id="qtyInput" class="std-input qty-input" value="1" min="1">
@@ -162,11 +158,14 @@
             <span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <label class="form-label" data-i18n="col_id">ID</label>
-            <input type="text" id="newId" class="std-input w-full" placeholder="e.g. M-9001">
+            <div style="display:flex; justify-content:space-between;">
+                <label class="form-label" data-i18n="col_id">ID</label>
+                <span class="input-hint" data-i18n="hint_enter">Press Enter to lookup</span>
+            </div>
+            <input type="text" id="newId" class="std-input w-full" placeholder="e.g. T-800" onchange="autoFillMaterial()">
 
             <label class="form-label" data-i18n="col_desc">Description</label>
-            <input type="text" id="newName" class="std-input w-full" placeholder="Product Name">
+            <input type="text" id="newName" class="std-input w-full" placeholder="Auto-filled from Master Data">
 
             <div style="display: flex; gap: 10px;">
                 <div style="flex: 1;">
@@ -175,7 +174,7 @@
                 </div>
                 <div style="flex: 1;">
                     <label class="form-label" data-i18n="col_unit">Unit</label>
-                    <input type="text" id="newUnit" class="std-input w-full" placeholder="PC/BAG/KG">
+                    <input type="text" id="newUnit" class="std-input w-full" placeholder="Unit">
                 </div>
             </div>
         </div>
@@ -189,6 +188,18 @@
 <div id="toast" class="toast">Data Saved</div>
 
 <script>
+    // --- 0. Master Data (您的料表) ---
+    // 在這裡定義您的所有料件資料庫
+    const materialMaster = {
+        "M-1001": { name: "AA Battery (3號電池)", unit: "PC" },
+        "P-2044": { name: "A4 Paper (印表機紙)", unit: "BAG" },
+        "S-3001": { name: "Ballpoint Pen Black", unit: "PC" },
+        "T-800":  { name: "Terminator CPU (魔鬼終結者晶片)", unit: "PC" },
+        "C-2077": { name: "Cyberdeck (網路監控臺)", unit: "SET" },
+        "L-5500": { name: "LEGO Star Wars Set", unit: "BOX" },
+        "F-101":  { name: "Fertilizer NPK 20-20-20", unit: "KG" }
+    };
+
     // --- 1. Localization Config ---
     const translations = {
         en: {
@@ -216,7 +227,10 @@
             msg_success_out: "Goods Issue Posted",
             msg_created: "Material Created Successfully",
             msg_incomplete: "Please fill in all fields",
-            placeholder_search: "Search ID or Name..."
+            msg_found: "Material Data Found",
+            msg_not_found: "Material Not Found in Master Data",
+            placeholder_search: "Search ID or Name...",
+            hint_enter: "Type ID & Enter to lookup"
         },
         zh: {
             app_title: "庫存管理系統",
@@ -243,7 +257,10 @@
             msg_success_out: "領用過帳成功",
             msg_created: "備品建立成功",
             msg_incomplete: "請填寫所有欄位",
-            placeholder_search: "搜尋料號或名稱..."
+            msg_found: "已帶入料表資料",
+            msg_not_found: "查無此料號，請手動輸入",
+            placeholder_search: "搜尋料號或名稱...",
+            hint_enter: "輸入料號後按 Enter 帶入資料"
         }
     };
 
@@ -265,11 +282,10 @@
         renderTable();
     }
 
-    // --- 2. Data ---
+    // --- 2. Current Inventory Data ---
     let inventoryData = [
         { id: "M-1001", name: "AA Battery (3號電池)", stock: 15, unit: "PC", minStock: 10 },
-        { id: "P-2044", name: "A4 Paper (印表機紙)", stock: 3, unit: "BAG", minStock: 5 },
-        { id: "S-3001", name: "Ballpoint Pen Black", stock: 54, unit: "PC", minStock: 10 }
+        { id: "P-2044", name: "A4 Paper (印表機紙)", stock: 3, unit: "BAG", minStock: 5 }
     ];
 
     let currentSelectedIndex = -1;
@@ -288,7 +304,7 @@
                 else if (item.stock < item.minStock) statusClass = 'status-low';
 
                 const tr = document.createElement('tr');
-                tr.onclick = () => openActionModal(index); // Click row to manage
+                tr.onclick = () => openActionModal(index);
                 
                 tr.innerHTML = `
                     <td><span class="status-dot ${statusClass}"></span></td>
@@ -303,6 +319,30 @@
         });
     }
 
+    // --- NEW: Auto Fill Logic ---
+    function autoFillMaterial() {
+        const idInput = document.getElementById('newId');
+        const nameInput = document.getElementById('newName');
+        const unitInput = document.getElementById('newUnit');
+        
+        const inputId = idInput.value.trim(); // Case sensitive mostly, or use .toUpperCase() if needed
+
+        if(materialMaster[inputId]) {
+            // Found
+            nameInput.value = materialMaster[inputId].name;
+            unitInput.value = materialMaster[inputId].unit;
+            
+            // Visual feedback
+            nameInput.style.borderColor = "var(--theme-success)";
+            setTimeout(() => nameInput.style.borderColor = "#89919a", 1000);
+            showToast(translations[currentLang]['msg_found']);
+        } else {
+            // Not Found
+            showToast(translations[currentLang]['msg_not_found'], true); // true for error color
+            // Optional: clear fields or let user type manually
+        }
+    }
+
     // --- Modal Control ---
     function openActionModal(index) {
         currentSelectedIndex = index;
@@ -315,7 +355,6 @@
     }
 
     function openCreateModal() {
-        // Clear fields
         document.getElementById('newId').value = '';
         document.getElementById('newName').value = '';
         document.getElementById('newStock').value = 0;
@@ -341,8 +380,6 @@
         }
 
         item.stock += (qty * direction);
-        console.log(`Updated ${item.id}: New Stock = ${item.stock}`);
-
         closeModal('actionModal');
         renderTable();
         showToast(direction === 1 ? translations[currentLang]['msg_success_in'] : translations[currentLang]['msg_success_out']);
@@ -359,17 +396,22 @@
             return;
         }
 
+        // Check if ID already exists in current inventory
+        const exists = inventoryData.find(i => i.id === id);
+        if(exists) {
+            alert("This ID already exists in inventory list!");
+            return;
+        }
+
         const newItem = {
             id: id,
             name: name,
             stock: isNaN(stock) ? 0 : stock,
             unit: unit,
-            minStock: 0 // Default
+            minStock: 0
         };
 
         inventoryData.push(newItem);
-        console.log("Created:", newItem);
-
         closeModal('createModal');
         renderTable();
         showToast(translations[currentLang]['msg_created']);
@@ -383,14 +425,12 @@
         setTimeout(() => { toast.style.opacity = 0; }, 2000);
     }
 
-    // Close modal on outside click
     window.onclick = function(event) {
         if (event.target.classList.contains('modal-overlay')) {
             event.target.style.display = "none";
         }
     }
 
-    // Init
     updateTexts();
 </script>
 

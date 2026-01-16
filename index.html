@@ -1,60 +1,70 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Fiori Style Inventory</title>
+    <title>Inventory Management</title>
     <style>
-        /* --- SAP Fiori Style Variables (Quartz Light Theme) --- */
+        /* --- Professional Enterprise Style (Fiori-inspired) --- */
         :root {
-            --sap-shell-color: #354a5f;
-            --sap-bg-color: #edf0f4; /* 經典企業灰底 */
-            --sap-surface-color: #ffffff;
-            --sap-text-color: #32363a;
-            --sap-label-color: #6a6d70;
-            --sap-border-color: #d9d9d9;
-            --sap-highlight-color: #0a6ed1; /* SAP Blue Focus */
-            --sap-success-color: #107e3e;
-            --sap-critical-color: #bb0000;
-            --sap-font: "72", "Arial", sans-serif; /* SAP 專用字體 fallback */
+            --theme-primary: #354a5f; /* Professional Shell Blue */
+            --theme-bg: #edf0f4;      /* Enterprise Gray Background */
+            --theme-surface: #ffffff;
+            --theme-text: #32363a;
+            --theme-label: #6a6d70;
+            --theme-border: #d9d9d9;
+            --theme-highlight: #0a6ed1; /* Focus Blue */
+            --theme-success: #107e3e;
+            --theme-critical: #bb0000;
+            --theme-warning: #e9730c;
+            --font-family: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: var(--sap-font);
-            background-color: var(--sap-bg-color);
-            color: var(--sap-text-color);
+            font-family: var(--font-family);
+            background-color: var(--theme-bg);
+            color: var(--theme-text);
             font-size: 14px;
         }
 
         /* --- Shell Bar (Top Nav) --- */
         .shell-bar {
-            background-color: var(--sap-shell-color);
-            height: 44px;
+            background-color: var(--theme-primary);
+            height: 48px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 0 16px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         .shell-title {
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
             letter-spacing: 0.5px;
         }
-        .shell-logo {
-            font-weight: 900;
-            color: #fff;
-            margin-right: 10px;
-            font-style: italic;
+        .lang-switch {
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 4px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .lang-switch:hover {
+            color: white;
+            border-color: white;
+            background: rgba(255,255,255,0.1);
         }
 
         /* --- Page Layout --- */
         .page-header {
-            background-color: var(--sap-surface-color);
+            background-color: var(--theme-surface);
             padding: 16px 32px;
-            border-bottom: 1px solid var(--sap-border-color);
+            border-bottom: 1px solid var(--theme-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -62,11 +72,11 @@
         .page-title {
             font-size: 20px;
             font-weight: normal;
-            color: var(--sap-text-color);
+            color: var(--theme-text);
         }
         .subtitle {
             font-size: 12px;
-            color: var(--sap-label-color);
+            color: var(--theme-label);
             margin-top: 4px;
         }
 
@@ -76,7 +86,7 @@
             margin: 0 auto;
         }
 
-        /* --- Search Toolbar --- */
+        /* --- Controls & Inputs --- */
         .toolbar {
             background: transparent;
             padding: 10px 0;
@@ -84,7 +94,7 @@
             justify-content: flex-end;
             gap: 10px;
         }
-        .sap-input {
+        .std-input {
             padding: 8px 12px;
             border: 1px solid #89919a;
             border-radius: 4px;
@@ -93,16 +103,16 @@
             width: 250px;
             transition: border-color 0.2s;
         }
-        .sap-input:focus {
+        .std-input:focus {
             outline: none;
-            border-color: var(--sap-highlight-color);
+            border-color: var(--theme-highlight);
             box-shadow: 0 0 0 2px rgba(10, 110, 209, 0.1);
         }
 
-        /* --- SAP Data Table --- */
-        .sap-table-container {
-            background: var(--sap-surface-color);
-            border: 1px solid var(--sap-border-color);
+        /* --- Data Table --- */
+        .table-container {
+            background: var(--theme-surface);
+            border: 1px solid var(--theme-border);
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -114,37 +124,37 @@
         }
         thead {
             background-color: #f7f7f7;
-            border-bottom: 1px solid var(--sap-border-color);
+            border-bottom: 1px solid var(--theme-border);
         }
         th {
             padding: 12px 16px;
-            font-weight: normal;
-            color: var(--sap-label-color);
+            font-weight: 600;
+            color: var(--theme-label);
             font-size: 12px;
             text-transform: uppercase;
         }
         td {
             padding: 12px 16px;
             border-bottom: 1px solid #eeeeee;
+            vertical-align: middle;
         }
         tr:hover {
             background-color: #f5f7fa;
             cursor: pointer;
         }
-        
+
         /* Status Indicators */
         .status-dot {
             height: 10px;
             width: 10px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 8px;
         }
-        .status-ok { background-color: var(--sap-success-color); }
-        .status-low { background-color: #e9730c; }
-        .status-crit { background-color: var(--sap-critical-color); }
+        .status-ok { background-color: var(--theme-success); }
+        .status-low { background-color: var(--theme-warning); }
+        .status-crit { background-color: var(--theme-critical); }
 
-        /* --- Action Modal (Dialog) --- */
+        /* --- Modal (Dialog) --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -154,29 +164,32 @@
             align-items: center;
             z-index: 1000;
         }
-        .sap-dialog {
+        .std-dialog {
             background: white;
             width: 400px;
             border-radius: 6px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            animation: fadeIn 0.2s ease-out;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .dialog-header {
-            background: #f2f2f2;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--sap-border-color);
-            font-weight: bold;
+            background: #f4f6f8;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--theme-border);
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
+            color: var(--theme-text);
         }
         .dialog-content {
-            padding: 20px;
+            padding: 24px 20px;
         }
         .dialog-footer {
-            padding: 12px 16px;
-            border-top: 1px solid var(--sap-border-color);
+            padding: 12px 20px;
+            border-top: 1px solid var(--theme-border);
             display: flex;
             justify-content: flex-end;
             gap: 10px;
@@ -184,29 +197,36 @@
         }
 
         /* --- Buttons --- */
-        .sap-btn {
-            border: 1px solid var(--sap-highlight-color);
-            color: var(--sap-highlight-color);
+        .std-btn {
+            border: 1px solid var(--theme-highlight);
+            color: var(--theme-highlight);
             background: white;
             padding: 8px 16px;
             border-radius: 4px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
+            min-width: 80px;
         }
-        .sap-btn:hover { background: #f0f8ff; }
+        .std-btn:hover { background: #f0f8ff; }
         
-        .sap-btn-emphasized {
-            background: var(--sap-highlight-color);
+        .std-btn-primary {
+            background: var(--theme-highlight);
             color: white;
         }
-        .sap-btn-emphasized:hover { background: #0854a0; }
+        .std-btn-primary:hover { background: #0854a0; }
 
-        .sap-btn-transparent {
-            border: 1px solid transparent;
-            color: var(--sap-text-color);
+        .std-btn-danger {
+            border-color: var(--theme-critical);
+            color: var(--theme-critical);
         }
-        .sap-btn-transparent:hover { background: #eaeaea; }
+        .std-btn-danger:hover { background: #fff0f0; }
+
+        .std-btn-transparent {
+            border: 1px solid transparent;
+            color: var(--theme-text);
+        }
+        .std-btn-transparent:hover { background: #eaeaea; }
 
         .qty-control {
             display: flex;
@@ -217,6 +237,7 @@
         .qty-input {
             width: 80px;
             text-align: right;
+            font-weight: bold;
         }
 
         /* Toast Message */
@@ -225,49 +246,50 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #32363a;
+            background: var(--theme-text);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 4px;
             font-size: 13px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
 
 <div class="shell-bar">
-    <div class="shell-logo">SAP</div>
-    <div class="shell-title">庫存管理系統 (Inventory Management)</div>
+    <div class="shell-title" data-i18n="app_title">Inventory Manager</div>
+    <div class="lang-switch" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
 
 <div class="page-header">
     <div>
-        <div class="page-title">備品總覽 (Stock Overview)</div>
-        <div class="subtitle">庫存地點: Arizona Warehouse / Plant 1000</div>
+        <div class="page-title" data-i18n="overview_title">Stock Overview</div>
+        <div class="subtitle"><span data-i18n="location">Location</span>: Arizona Warehouse</div>
     </div>
     <div>
-        <button class="sap-btn sap-btn-transparent" onclick="renderTable()">刷新 (Refresh)</button>
+        <button class="std-btn std-btn-transparent" onclick="renderTable()" data-i18n="btn_refresh">Refresh</button>
     </div>
 </div>
 
 <div class="content-area">
     <div class="toolbar">
-        <input type="text" id="searchInput" class="sap-input" placeholder="搜尋料號或名稱..." onkeyup="renderTable()">
+        <input type="text" id="searchInput" class="std-input" placeholder="Search..." onkeyup="renderTable()">
     </div>
 
-    <div class="sap-table-container">
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 50px;">狀態</th>
-                    <th style="width: 100px;">料號 (ID)</th>
-                    <th>備品名稱 (Description)</th>
-                    <th style="text-align: right;">現有庫存</th>
-                    <th style="width: 80px;">單位</th>
-                    <th style="width: 120px;">操作</th>
+                    <th style="width: 50px;"></th>
+                    <th style="width: 120px;" data-i18n="col_id">ID</th>
+                    <th data-i18n="col_desc">Description</th>
+                    <th style="text-align: right;" data-i18n="col_stock">Stock Level</th>
+                    <th style="width: 80px;" data-i18n="col_unit">Unit</th>
+                    <th style="width: 120px; text-align:center;" data-i18n="col_action">Action</th>
                 </tr>
             </thead>
             <tbody id="inventoryBody">
@@ -277,78 +299,146 @@
 </div>
 
 <div id="actionModal" class="modal-overlay">
-    <div class="sap-dialog">
+    <div class="std-dialog">
         <div class="dialog-header">
-            <span id="modalTitle">貨物移動 (Goods Movement)</span>
+            <span id="modalTitle" data-i18n="modal_title">Goods Movement</span>
             <span style="cursor:pointer;" onclick="closeModal()">✕</span>
         </div>
         <div class="dialog-content">
-            <div style="margin-bottom: 5px; color: var(--sap-label-color); font-size: 12px;">物料 (Material)</div>
-            <div id="modalItemName" style="font-weight: bold; font-size: 16px; margin-bottom: 20px;">Item Name</div>
+            <div style="margin-bottom: 5px; color: var(--theme-label); font-size: 12px;" data-i18n="modal_material">Material</div>
+            <div id="modalItemName" style="font-weight: 600; font-size: 16px; margin-bottom: 24px;">Item Name</div>
 
-            <div style="margin-bottom: 5px; color: var(--sap-label-color); font-size: 12px;">異動數量 (Quantity)</div>
+            <div style="margin-bottom: 5px; color: var(--theme-label); font-size: 12px;" data-i18n="modal_qty">Quantity</div>
             <div class="qty-control">
-                <input type="number" id="qtyInput" class="sap-input qty-input" value="1" min="1">
-                <span id="modalUnit">PC</span>
-            </div>
-            
-            <div style="margin-top: 20px; font-size: 12px; color: var(--sap-label-color);">
-                交易代碼: <span id="tCode">MIGO</span>
+                <input type="number" id="qtyInput" class="std-input qty-input" value="1" min="1">
+                <span id="modalUnit" style="font-weight:600; color: var(--theme-label);">PC</span>
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="sap-btn sap-btn-transparent" onclick="closeModal()">取消 (Cancel)</button>
-            <button class="sap-btn" style="border-color: #bb0000; color: #bb0000;" onclick="confirmAction(-1)">領用 (GI)</button>
-            <button class="sap-btn sap-btn-emphasized" onclick="confirmAction(1)">入庫 (GR)</button>
+            <button class="std-btn std-btn-transparent" onclick="closeModal()" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn std-btn-danger" onclick="confirmAction(-1)" data-i18n="btn_issue">Issue (-)</button>
+            <button class="std-btn std-btn-primary" onclick="confirmAction(1)" data-i18n="btn_receive">Receive (+)</button>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast">資料已儲存</div>
+<div id="toast" class="toast">Data Saved</div>
 
 <script>
-    // --- Mock Data (模擬 Excel 資料) ---
+    // --- 1. Localization (i18n) Configuration ---
+    const translations = {
+        en: {
+            app_title: "Inventory Manager",
+            overview_title: "Stock Overview",
+            location: "Location",
+            btn_refresh: "Refresh",
+            col_id: "ID",
+            col_desc: "Description",
+            col_stock: "Stock Level",
+            col_unit: "Unit",
+            col_action: "Action",
+            manage: "Manage",
+            modal_title: "Goods Movement",
+            modal_material: "Material",
+            modal_qty: "Quantity",
+            btn_cancel: "Cancel",
+            btn_issue: "Issue (-)",
+            btn_receive: "Receive (+)",
+            msg_stock_deficit: "Error: Insufficient Stock",
+            msg_success_in: "Goods Receipt Posted",
+            msg_success_out: "Goods Issue Posted",
+            placeholder_search: "Search ID or Name..."
+        },
+        zh: {
+            app_title: "庫存管理系統",
+            overview_title: "庫存總覽",
+            location: "倉庫位置",
+            btn_refresh: "重新整理",
+            col_id: "料號",
+            col_desc: "備品名稱",
+            col_stock: "現有庫存",
+            col_unit: "單位",
+            col_action: "操作",
+            manage: "管理",
+            modal_title: "貨物移動",
+            modal_material: "物料名稱",
+            modal_qty: "異動數量",
+            btn_cancel: "取消",
+            btn_issue: "領料 (-)",
+            btn_receive: "入庫 (+)",
+            msg_stock_deficit: "錯誤：庫存不足",
+            msg_success_in: "入庫過帳成功",
+            msg_success_out: "領用過帳成功",
+            placeholder_search: "搜尋料號或名稱..."
+        }
+    };
+
+    let currentLang = 'en'; // Default Language
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'zh' : 'en';
+        updateTexts();
+    }
+
+    function updateTexts() {
+        // Update all elements with data-i18n attribute
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[currentLang][key]) {
+                el.innerText = translations[currentLang][key];
+            }
+        });
+
+        // Special case for input placeholder
+        const searchInput = document.getElementById('searchInput');
+        searchInput.placeholder = translations[currentLang]['placeholder_search'];
+
+        // Re-render table to update dynamic "Manage" button text
+        renderTable();
+    }
+
+    // --- 2. Mock Data ---
     let inventoryData = [
-        { id: "M-1001", name: "3號電池 (AA Battery)", stock: 15, unit: "PC", minStock: 10 },
-        { id: "P-2044", name: "印表機 A4 紙 (A4 Paper)", stock: 3, unit: "BAG", minStock: 5 },
-        { id: "S-3001", name: "黑色原子筆 (Ballpoint Pen Black)", stock: 54, unit: "PC", minStock: 10 },
-        { id: "H-5002", name: "衛生紙 (Tissue Paper)", stock: 2, unit: "BAG", minStock: 5 },
-        { id: "L-9001", name: "LEGO 清潔刷 (Brush)", stock: 1, unit: "PC", minStock: 1 }
+        { id: "M-1001", name: "AA Battery (3號電池)", stock: 15, unit: "PC", minStock: 10 },
+        { id: "P-2044", name: "A4 Paper (印表機紙)", stock: 3, unit: "BAG", minStock: 5 },
+        { id: "S-3001", name: "Ballpoint Pen Black (原子筆)", stock: 54, unit: "PC", minStock: 10 },
+        { id: "H-5002", name: "Tissue Paper (衛生紙)", stock: 2, unit: "BAG", minStock: 5 },
+        { id: "L-9001", name: "LEGO Brush (清潔刷)", stock: 1, unit: "PC", minStock: 1 }
     ];
 
     let currentSelectedIndex = -1;
 
-    // --- Render Function ---
+    // --- 3. UI Logic ---
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         tbody.innerHTML = '';
 
+        const manageText = translations[currentLang]['manage'];
+
         inventoryData.forEach((item, index) => {
             if (item.name.toLowerCase().includes(searchTerm) || item.id.toLowerCase().includes(searchTerm)) {
                 
-                // 狀態燈號邏輯
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
                 else if (item.stock < item.minStock) statusClass = 'status-low';
 
                 const tr = document.createElement('tr');
-                tr.onclick = () => openModal(index); // 點擊整行觸發
+                tr.onclick = () => openModal(index);
                 
                 tr.innerHTML = `
                     <td><span class="status-dot ${statusClass}"></span></td>
-                    <td>${item.id}</td>
+                    <td style="font-family: monospace; font-size: 13px;">${item.id}</td>
                     <td style="font-weight: 500;">${item.name}</td>
                     <td style="text-align: right; font-weight: bold;">${item.stock}</td>
                     <td style="color: #666;">${item.unit}</td>
-                    <td><span style="font-size:12px; color: #0a6ed1;">管理 (Manage)</span></td>
+                    <td style="text-align: center;"><span style="font-size:12px; color: var(--theme-highlight); font-weight:600;">${manageText}</span></td>
                 `;
                 tbody.appendChild(tr);
             }
         });
     }
 
-    // --- Modal Logic ---
     function openModal(index) {
         currentSelectedIndex = index;
         const item = inventoryData[index];
@@ -356,35 +446,35 @@
         document.getElementById('modalUnit').innerText = item.unit;
         document.getElementById('qtyInput').value = 1;
         document.getElementById('actionModal').style.display = 'flex';
+        // Focus on input for quick typing
+        setTimeout(() => document.getElementById('qtyInput').focus(), 100);
     }
 
     function closeModal() {
         document.getElementById('actionModal').style.display = 'none';
     }
 
-    // --- Action Logic (GR/GI) ---
     function confirmAction(direction) {
         const qty = parseInt(document.getElementById('qtyInput').value);
-        if (qty <= 0) return;
+        if (qty <= 0 || isNaN(qty)) return;
 
         const item = inventoryData[currentSelectedIndex];
         
-        // 檢查領用庫存
+        // Stock check
         if (direction === -1 && item.stock < qty) {
-            showToast("錯誤: 庫存不足 (Stock Deficit)", true);
+            showToast(translations[currentLang]['msg_stock_deficit'], true);
             return;
         }
 
-        // 更新數據
         item.stock += (qty * direction);
         
-        // 這裡未來要加上呼叫 Google Script API 的代碼
+        // --- API Call Placeholder ---
         console.log(`Updated ${item.id}: New Stock = ${item.stock}`);
 
         closeModal();
         renderTable();
         
-        const msg = direction === 1 ? "入庫過帳成功 (Goods Receipt Posted)" : "領用過帳成功 (Goods Issue Posted)";
+        const msg = direction === 1 ? translations[currentLang]['msg_success_in'] : translations[currentLang]['msg_success_out'];
         showToast(msg);
     }
 
@@ -392,15 +482,22 @@
         const toast = document.getElementById('toast');
         toast.innerText = message;
         toast.style.opacity = 1;
-        toast.style.backgroundColor = isError ? '#bb0000' : '#32363a';
+        toast.style.backgroundColor = isError ? var(--theme-critical) : var(--theme-text); // fallback managed in CSS
+        if(isError) toast.style.backgroundColor = "#bb0000";
+        else toast.style.backgroundColor = "#32363a";
         
         setTimeout(() => {
             toast.style.opacity = 0;
-        }, 3000);
+        }, 2000);
     }
 
-    // Init
-    renderTable();
+    // Close modal when clicking outside
+    document.getElementById('actionModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // Init Language and Table
+    updateTexts(); 
 </script>
 
 </body>

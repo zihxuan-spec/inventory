@@ -181,7 +181,9 @@
                 </div>
                 <div style="flex:1;">
                     <label class="form-label" data-i18n="col_min_stock">Min Stock (Safety)</label>
-                    <input type="number" id="newMinStock" class="std-input" value="0" style="border-color:#e9730c;">
+                    <input type="number" id="newMinStock" class="std-input" value="0" 
+                           style="border-color:#e9730c; background-color: #f0f0f0; color: #666; cursor: not-allowed;" 
+                           readonly>
                 </div>
                 <div style="flex:1;">
                     <label class="form-label" data-i18n="col_unit">Unit</label>
@@ -189,6 +191,12 @@
                 </div>
             </div>
         </div>
+        <div class="dialog-footer">
+            <button class="std-btn std-btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn std-btn-primary" onclick="submitCreate()" id="btnCreate" data-i18n="btn_create_confirm">Create</button>
+        </div>
+    </div>
+</div>
         <div class="dialog-footer">
             <button class="std-btn std-btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
             <button class="std-btn std-btn-primary" onclick="submitCreate()" data-i18n="btn_create_confirm">Create</button>

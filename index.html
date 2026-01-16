@@ -3,136 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management System</title>
+    <title>WMS - Warehouse Management System</title>
     <style>
-        /* --- 核心風格 (Enterprise Style) --- */
+        /* --- Enterprise Style --- */
         :root {
-            --theme-primary: #354a5f; --theme-bg: #edf0f4; --theme-surface: #ffffff;
-            --theme-text: #32363a; --theme-label: #6a6d70; --theme-border: #d9d9d9;
-            --theme-highlight: #0a6ed1; --theme-success: #107e3e; --theme-critical: #bb0000;
-            --theme-warning: #e9730c; --font-family: "Segoe UI", "Roboto", sans-serif;
+            --theme-primary: #2c3e50; --theme-bg: #f4f7f6; --theme-surface: #ffffff;
+            --theme-text: #333; --theme-border: #ddd;
+            --theme-highlight: #3498db; --theme-success: #27ae60; --theme-critical: #c0392b; --theme-warning: #f39c12;
+            --font-family: "Segoe UI", "Roboto", sans-serif;
         }
         body { margin: 0; padding: 0; font-family: var(--font-family); background-color: var(--theme-bg); color: var(--theme-text); font-size: 14px; }
         
         /* Layout */
-        .shell-bar { background-color: var(--theme-primary); height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); color: white; }
-        .page-header { background-color: var(--theme-surface); padding: 16px 32px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
-        .content-area { padding: 20px 32px; max-width: 1200px; margin: 0 auto; }
+        .shell-bar { background-color: var(--theme-primary); height: 50px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .page-header { background-color: var(--theme-surface); padding: 15px 30px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
+        .content-area { padding: 20px 30px; max-width: 1400px; margin: 0 auto; }
         
-        .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; }
+        .toolbar { padding: 15px 0; display: flex; gap: 10px; align-items: center; }
         .spacer { flex-grow: 1; }
-        .std-input { padding: 8px 12px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .std-input:focus { outline: none; border-color: var(--theme-highlight); }
         
-        /* Table Layout */
-        .table-container { background: var(--theme-surface); border: 1px solid var(--theme-border); border-radius: 4px; overflow: hidden; margin-top: 10px;}
-        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; } 
+        /* Inputs & Buttons */
+        .std-input { padding: 8px 10px; border: 1px solid #bbb; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        .std-input:focus { outline: none; border-color: var(--theme-highlight); box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
         
-        thead { background-color: #f7f7f7; border-bottom: 1px solid var(--theme-border); }
-        th { padding: 12px 16px; font-weight: 600; color: var(--theme-label); font-size: 12px; text-transform: uppercase; }
-        td { padding: 12px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        tr:hover { background-color: #f5f7fa; cursor: pointer; }
+        .std-btn { padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
+        .std-btn:hover { filter: brightness(95%); transform: translateY(-1px); }
+        .btn-po { background-color: #2980b9; color: white; } /* Blue for Inbound */
+        .btn-issue { background-color: #e67e22; color: white; } /* Orange for Outbound */
+        .btn-master { background-color: white; border-color: #bbb; color: #333; } /* White for Master */
+        .btn-primary { background-color: var(--theme-highlight); color: white; }
+        .btn-danger { background-color: var(--theme-critical); color: white; }
+        .btn-transparent { background: transparent; color: #555; }
 
-        /* Column Widths */
-        .col-status { width: 30px; text-align: center; }
-        .col-pn { width: 130px; font-weight: bold; font-family: monospace; }
-        .col-model { width: 200px; }
-        .col-desc { color: #666; font-size: 13px; } 
-        .col-stock { width: 80px; text-align: right; font-weight: bold; }
-        .col-unit { width: 60px; color: #888; font-size: 12px; }
-        .col-action { width: 80px; text-align: center; }
+        /* Table */
+        .table-container { background: var(--theme-surface); border: 1px solid var(--theme-border); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        thead { background-color: #f8f9fa; border-bottom: 2px solid var(--theme-border); }
+        th { padding: 12px 15px; font-weight: 700; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover { background-color: #f1f8ff; cursor: pointer; }
 
-        /* Status Dots */
+        /* Status & Columns */
         .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-        .status-ok { background-color: var(--theme-success); }   
-        .status-low { background-color: var(--theme-warning); }  
+        .status-ok { background-color: var(--theme-success); }
+        .status-low { background-color: var(--theme-warning); }
         .status-crit { background-color: var(--theme-critical); }
-
-        /* Buttons */
-        .std-btn { border: 1px solid var(--theme-highlight); color: var(--theme-highlight); background: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;}
-        .std-btn:hover { background: #f0f8ff; }
-        .std-btn-primary { background: var(--theme-highlight); color: white; }
-        .std-btn-primary:hover { background: #0854a0; }
-        .std-btn-danger { border-color: var(--theme-critical); color: var(--theme-critical); }
-        .std-btn-danger:hover { background: #fff0f0; }
-        .std-btn-transparent { border-color: transparent; color: var(--theme-text); }
-        .std-btn-transparent:hover { background: #eaeaea; }
+        
+        .col-pn { width: 140px; font-weight: bold; font-family: monospace; color: #2c3e50; }
+        .col-stock { font-weight: bold; text-align: right; }
 
         /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .std-dialog { background: white; width: 480px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; }
-        .std-dialog.large { width: 800px; } /* 寬版 Modal for PO */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+        .std-dialog { background: white; width: 500px; border-radius: 8px; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .std-dialog.large { width: 900px; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .dialog-header { background: #f4f6f8; padding: 12px 20px; font-weight: 600; display: flex; justify-content: space-between; }
+        .dialog-header { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 600; color: #2c3e50; }
         .dialog-content { padding: 20px; overflow-y: auto; }
-        .dialog-footer { padding: 12px 20px; border-top: 1px solid var(--theme-border); display: flex; justify-content: flex-end; gap: 10px; }
+        .dialog-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; background: #fafafa; border-radius: 0 0 8px 8px; }
+
+        /* Form Grid */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-full { grid-column: span 2; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: #7f8c8d; margin-bottom: 5px; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-label { font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block; color: var(--theme-label); }
-
-        /* PO Table Styles */
-        .po-table { width: 100%; border-collapse: collapse; }
-        .po-table th { background: #f4f6f8; padding: 8px; font-size: 12px; border: 1px solid #ddd; }
-        .po-table td { padding: 5px; border: 1px solid #ddd; }
-        .po-input { width: 100%; border: 1px solid transparent; padding: 4px; box-sizing: border-box; }
-        .po-input:focus { border: 1px solid var(--theme-highlight); outline: none; background: #fff; }
-        .po-row-new { background-color: #fff9e6; } /* Highlight new items */
-
-        /* Loading & Toast */
-        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--theme-highlight); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        /* Transaction Table */
+        .tx-table { width: 100%; border: 1px solid #ddd; border-radius: 4px; border-collapse: separate; border-spacing: 0; }
+        .tx-table th { background: #eee; padding: 8px; font-size: 12px; border-bottom: 1px solid #ddd; }
+        .tx-table td { padding: 5px; border-bottom: 1px solid #ddd; background: #fff; }
+        .tx-input { width: 100%; border: none; padding: 5px; background: transparent; }
+        .tx-input:focus { background: #fff; outline: 2px solid var(--theme-highlight); border-radius: 2px; }
+        
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--theme-highlight); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-weight: 500; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
 <div class="shell-bar">
-    <div style="font-weight:600; font-size:16px;">Inventory System</div>
-    <div style="cursor:pointer; font-size:12px; border:1px solid rgba(255,255,255,0.4); padding:4px 8px; border-radius:4px;" onclick="toggleLanguage()">EN / 繁中</div>
+    <div style="font-size:18px; font-weight:700;">📦 WMS System</div>
+    <div style="cursor:pointer; opacity:0.8;" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
 
 <div class="page-header">
     <div>
-        <div style="font-size:20px;" data-i18n="overview_title">Inventory Overview</div>
-        <div style="font-size:12px; color:var(--theme-label); margin-top:4px;">Warehouse A</div>
+        <div style="font-size:24px; font-weight:600; color:#2c3e50;" data-i18n="overview_title">Inventory Overview</div>
+        <div style="color:#7f8c8d; margin-top:5px;">Central Warehouse</div>
     </div>
-    <div>
-        <button class="std-btn std-btn-transparent" onclick="fetchData()" id="refreshBtn" data-i18n="btn_refresh">Refresh</button>
-    </div>
+    <button class="std-btn btn-transparent" onclick="fetchData()">🔄 <span data-i18n="btn_refresh">Refresh</span></button>
 </div>
 
 <div class="content-area">
     <div class="toolbar">
-        <button class="std-btn std-btn-primary" style="background-color: #2b3e50; border-color: #2b3e50;" onclick="openPOModal()">
-            <span style="margin-right:5px;">📥</span> Goods Receipt (PO)
+        <button class="std-btn btn-po" onclick="openTxModal('receive')">
+            📥 <span data-i18n="btn_po">Goods Receipt (PO)</span>
+        </button>
+        <button class="std-btn btn-issue" onclick="openTxModal('issue')">
+            📤 <span data-i18n="btn_issue_usage">Goods Issue (Usage)</span>
+        </button>
+        <button class="std-btn btn-master" onclick="openCreateMasterModal()">
+            ✨ <span data-i18n="btn_create_master">Create Master Data</span>
         </button>
 
-        <button class="std-btn std-btn-transparent" style="border:1px solid #d9d9d9;" onclick="openCreateModal()">
-            <span style="margin-right:5px;">+</span> <span data-i18n="btn_add_item">New Part (Single)</span>
-        </button>
-        
         <div class="spacer"></div>
-        
         <input type="text" id="searchInput" class="std-input" style="width: 250px;" placeholder="Search..." onkeyup="renderTable()">
     </div>
 
     <div id="loading" style="display:none; text-align:center;">
         <div class="loading-spinner"></div>
-        <div style="color:var(--theme-label);">Syncing data...</div>
+        <div style="color:#777;">Syncing data...</div>
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th class="col-status"></th>
+                    <th style="width:40px;"></th>
                     <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                    <th class="col-model" data-i18n="col_model">Model</th>
-                    <th class="col-desc" data-i18n="col_desc">Description</th>
-                    <th class="col-stock" data-i18n="col_stock">Stock</th>
-                    <th class="col-unit" data-i18n="col_unit">Unit</th>
-                    <th class="col-action" data-i18n="col_action">Action</th>
+                    <th data-i18n="col_model">Model</th>
+                    <th data-i18n="col_desc">Description</th>
+                    <th class="col-stock" style="width:80px;" data-i18n="col_stock">Stock</th>
+                    <th style="width:60px;" data-i18n="col_unit">Unit</th>
+                    <th style="width:80px; text-align:center;"></th>
                 </tr>
             </thead>
             <tbody id="inventoryBody"></tbody>
@@ -140,34 +133,41 @@
     </div>
 </div>
 
-<div id="actionModal" class="modal-overlay">
-    <div class="std-dialog">
+<div id="txModal" class="modal-overlay">
+    <div class="std-dialog large">
         <div class="dialog-header">
-            <span data-i18n="modal_title">Goods Movement</span>
-            <span style="cursor:pointer;" onclick="closeModal('actionModal')">✕</span>
+            <span id="txTitle">Transaction</span>
+            <span style="cursor:pointer; color:#aaa;" onclick="closeModal('txModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <div class="form-group">
-                <div class="form-label" data-i18n="modal_pn">Part Number</div>
-                <div id="modalPn" style="font-weight:bold; font-size:16px; color:#333;"></div>
-            </div>
-            <div class="form-group">
-                <div class="form-label" data-i18n="modal_model">Model</div>
-                <div id="modalModel" style="color:#555;"></div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" data-i18n="modal_qty">Quantity</label>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="number" id="qtyInput" class="std-input" value="1" min="1" style="width:100px; text-align:right; font-weight:bold; font-size:16px;">
-                    <span id="modalUnit" style="font-weight:600;">PC</span>
+            <div style="display:flex; gap:20px; margin-bottom:15px; background:#f8f9fa; padding:15px; border-radius:6px;">
+                <div style="flex:1;">
+                    <label class="form-label" id="txRefLabel">Reference No.</label>
+                    <input type="text" id="txRef" class="std-input">
+                </div>
+                <div style="flex:0 0 150px;">
+                    <label class="form-label">Date</label>
+                    <input type="text" id="txDate" class="std-input" disabled style="background:transparent; border:none; font-weight:bold;">
                 </div>
             </div>
+
+            <table class="tx-table">
+                <thead>
+                    <tr>
+                        <th style="width:150px;">Part Number</th>
+                        <th>Info</th>
+                        <th style="width:80px;">Qty</th>
+                        <th style="width:60px;">Unit</th>
+                        <th style="width:30px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="txBody"></tbody>
+            </table>
+            <button class="std-btn btn-transparent" style="width:100%; margin-top:10px; border:1px dashed #ccc;" onclick="addTxRow()">+ Add Line</button>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn std-btn-transparent" onclick="closeModal('actionModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn std-btn-danger" onclick="submitTransaction(-1, 0)" data-i18n="btn_issue">Issue (-)</button>
-            <button class="std-btn std-btn-primary" onclick="submitTransaction(1, 0)" data-i18n="btn_receive">Receive (+)</button>
+            <button class="std-btn btn-transparent" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn btn-primary" id="txSubmitBtn" onclick="submitTx()">Submit</button>
         </div>
     </div>
 </div>
@@ -175,107 +175,115 @@
 <div id="createModal" class="modal-overlay">
     <div class="std-dialog">
         <div class="dialog-header">
-            <span data-i18n="modal_create_title">Create New Part</span>
+            <span data-i18n="modal_create_title">Create Master Data</span>
             <span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <div class="form-group">
-                <label class="form-label" data-i18n="col_pn">Part Number (ID)</label>
-                <input type="text" id="newId" class="std-input" placeholder="e.g. 70401609" onchange="autoFillMaterial()">
-                <div id="idFeedback" style="font-size:12px; margin-top:4px; font-weight:bold; min-height:18px;"></div>
+            <div class="form-grid">
+                <div class="form-full">
+                    <label class="form-label" data-i18n="col_pn">Part Number</label>
+                    <input type="text" id="newId" class="std-input" placeholder="e.g. 70401609" onchange="checkMasterExists()">
+                    <div id="masterFeedback" style="font-size:11px; margin-top:2px; height:15px;"></div>
+                </div>
+                <div class="form-full">
+                    <label class="form-label" data-i18n="col_model">Model</label>
+                    <input type="text" id="newModel" class="std-input">
+                </div>
+                <div class="form-full">
+                    <label class="form-label" data-i18n="col_desc">Description</label>
+                    <input type="text" id="newDesc" class="std-input">
+                </div>
+                <div>
+                    <label class="form-label" data-i18n="col_min_stock">Min Stock</label>
+                    <input type="number" id="newMinStock" class="std-input" value="0">
+                </div>
+                <div>
+                    <label class="form-label" data-i18n="col_unit">Unit</label>
+                    <input type="text" id="newUnit" class="std-input" placeholder="PC">
+                </div>
             </div>
-            <div class="form-group"><label class="form-label">Model</label><input type="text" id="newModel" class="std-input"></div>
-            <div class="form-group"><label class="form-label">Description</label><input type="text" id="newDesc" class="std-input"></div>
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label class="form-label">Init Stock</label><input type="number" id="newStock" class="std-input" value="0"></div>
-                <div style="flex:1;"><label class="form-label">Min Stock</label><input type="number" id="newMinStock" class="std-input" value="0" style="background:#f0f0f0; color:#666;" readonly></div>
-                <div style="flex:1;"><label class="form-label">Unit</label><input type="text" id="newUnit" class="std-input" placeholder="PC"></div>
+            <div style="margin-top:15px; font-size:12px; color:#e67e22; background:#fff3e0; padding:10px; border-radius:4px;">
+                ℹ️ <span data-i18n="msg_master_note">Initial stock will be 0. Please use 'Goods Receipt' to add stock.</span>
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn std-btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn std-btn-primary" onclick="submitCreate()" data-i18n="btn_create_confirm">Create</button>
+            <button class="std-btn btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn btn-primary" onclick="submitCreateMaster()" data-i18n="btn_create_confirm">Create Definition</button>
         </div>
     </div>
 </div>
 
-<div id="poModal" class="modal-overlay">
-    <div class="std-dialog large">
+<div id="detailsModal" class="modal-overlay">
+    <div class="std-dialog">
         <div class="dialog-header">
-            <span>Goods Receipt (Inbound Delivery)</span>
-            <span style="cursor:pointer;" onclick="closeModal('poModal')">✕</span>
+            <span data-i18n="col_action_details">Item Details</span>
+            <span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <div class="form-group" style="display:flex; gap:20px; align-items:center; background:#f9f9f9; padding:10px; border-radius:4px;">
-                <div style="flex:1;">
-                    <label class="form-label">PO Number / Reference</label>
-                    <input type="text" id="poNumber" class="std-input" placeholder="e.g. PO-2023-001">
+            <h2 id="detId" style="margin:0 0 5px 0; color:#2c3e50;"></h2>
+            <div id="detModel" style="color:#7f8c8d; margin-bottom:20px; font-weight:600;"></div>
+            
+            <div style="background:#f8f9fa; padding:15px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:11px; color:#aaa; text-transform:uppercase;">Current Stock</div>
+                    <div id="detStock" style="font-size:28px; font-weight:bold; color:#2c3e50;">0</div>
                 </div>
-                <div style="flex:0 0 100px; text-align:right;">
-                    <label class="form-label">Date</label>
-                    <div style="font-weight:bold; color:#555;">Today</div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px; color:#aaa; text-transform:uppercase;">Unit</div>
+                    <div id="detUnit" style="font-size:16px; font-weight:bold;">PC</div>
                 </div>
             </div>
-
-            <table class="po-table">
-                <thead>
-                    <tr>
-                        <th style="width: 140px;">Part Number</th>
-                        <th>Model / Description</th>
-                        <th style="width: 80px;">Qty</th>
-                        <th style="width: 60px;">Unit</th>
-                        <th style="width: 40px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="poTableBody">
-                    </tbody>
-            </table>
-            <button class="std-btn std-btn-transparent" style="margin-top:10px; width:100%; border:1px dashed #aaa;" onclick="addPORow()">+ Add Line Item</button>
+            
+            <div style="margin-top:20px;">
+                <label class="form-label">Description</label>
+                <div id="detDesc" style="padding:10px; background:#fff; border:1px solid #eee; border-radius:4px; color:#555;"></div>
+            </div>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn std-btn-transparent" onclick="closeModal('poModal')">Cancel</button>
-            <button class="std-btn std-btn-primary" onclick="submitPO()">Post Goods Receipt</button>
+            <button class="std-btn btn-transparent" onclick="closeModal('detailsModal')">Close</button>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast">Data Saved</div>
+<div id="toast" class="toast">Action Successful</div>
 
 <script>
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxG3_vpQa99DT_Tq56MxE2SVv3yCV-AFzak4Ms1BwNn5UMdKaghAzkAnGD3Bx3T_gnC/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyK5z87M1ixJ9imVdkHGpgmBQBF5B1yU0T4AhFYjkwfKr9KY__CvlkwByxIN_dLDuPo/exec"; 
     // ==========================================
 
     let inventoryList = [];
     let materialMaster = {}; 
+    let currentTxType = 'receive'; // 'receive' or 'issue'
     let currentLang = 'en';
-    let selectedItemIndex = -1;
 
-    const translations = {
-        en: { 
-            overview_title: "Inventory Overview", btn_refresh: "Refresh", btn_add_item: "New Part", 
-            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_stock: "Stock", col_unit: "Unit", col_action: "Action", col_min_stock: "Min Stock",
-            modal_title: "Goods Movement", modal_pn: "Part Number", modal_model: "Model", modal_qty: "Quantity",
-            btn_cancel: "Cancel", btn_issue: "Issue (-)", btn_receive: "Receive (+)", btn_create_confirm: "Create",
-            modal_create_title: "Create New Part",
-            msg_saved: "Saved successfully", msg_error: "Error occurred",
-            hint_new: "ℹ️ New Item", hint_found: "✅ Found", hint_exists: "⚠️ Exists"
+    // Text Resources
+    const i18n = {
+        en: {
+            overview_title: "Inventory Overview", btn_refresh: "Refresh",
+            btn_po: "Goods Receipt (PO)", btn_issue_usage: "Goods Issue (Usage)", btn_create_master: "Create Master Data",
+            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_stock: "Stock", col_unit: "Unit", col_min_stock: "Min Stock",
+            col_action_details: "Details",
+            modal_create_title: "Create Master Data", msg_master_note: "Initial stock will be 0. Use 'Goods Receipt' to add stock.",
+            btn_cancel: "Cancel", btn_create_confirm: "Create",
+            lbl_po: "PO Number", lbl_usage: "Usage / Purpose",
+            tx_po_title: "Inbound Delivery (PO)", tx_issue_title: "Outbound Delivery (Usage)"
         },
-        zh: { 
-            overview_title: "庫存總覽", btn_refresh: "重新整理", btn_add_item: "新增料件", 
-            col_pn: "料號", col_model: "型號", col_desc: "規格/描述", col_stock: "庫存", col_unit: "單位", col_action: "操作", col_min_stock: "安全庫存",
-            modal_title: "庫存異動", modal_pn: "料號", modal_model: "型號", modal_qty: "數量",
-            btn_cancel: "取消", btn_issue: "領用 (-)", btn_receive: "入庫 (+)", btn_create_confirm: "建立",
-            modal_create_title: "新增料號資料",
-            msg_saved: "儲存成功", msg_error: "發生錯誤",
-            hint_new: "ℹ️ 新料號", hint_found: "✅ 已帶入", hint_exists: "⚠️ 已存在"
+        zh: {
+            overview_title: "庫存總覽", btn_refresh: "重新整理",
+            btn_po: "採購收貨 (PO)", btn_issue_usage: "領料出庫 (用途)", btn_create_master: "建立新料號主檔",
+            col_pn: "料號", col_model: "型號", col_desc: "規格/描述", col_stock: "庫存", col_unit: "單位", col_min_stock: "安全庫存",
+            col_action_details: "詳細",
+            modal_create_title: "建立料號主檔", msg_master_note: "建立後庫存為 0，請使用「採購收貨」來入庫。",
+            btn_cancel: "取消", btn_create_confirm: "建立",
+            lbl_po: "採購單號 (PO No.)", lbl_usage: "領料用途 (Purpose)",
+            tx_po_title: "入庫單 (收貨)", tx_issue_title: "領料單 (出庫)"
         }
     };
 
-    // --- Core Logic ---
-
+    // --- Core ---
     async function fetchData() {
-        if(API_URL.includes("YOUR_GOOGLE")) { alert("Please setup API URL!"); return; }
+        if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
         setLoading(true);
         try {
             const res = await fetch(API_URL);
@@ -283,153 +291,8 @@
             materialMaster = data.master; 
             inventoryList = data.inventory;
             renderTable();
-        } catch (e) {
-            console.error(e);
-            showToast("Connection Error", true);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    // Single Update
-    async function submitTransaction(direction, dummy) {
-        const qty = parseInt(document.getElementById('qtyInput').value);
-        if (qty <= 0) return;
-        const item = inventoryList[selectedItemIndex];
-        const newStock = item.stock + (qty * direction);
-        if (newStock < 0) { showToast("Stock cannot be negative", true); return; }
-
-        setButtonsLoading(true);
-        try {
-            await sendPost({ action: "update", id: item.id, newStock: newStock, changeQty: qty * direction });
-            item.stock = newStock;
-            closeModal('actionModal');
-            renderTable();
-            showToast(translations[currentLang].msg_saved);
-        } catch (e) {
-            showToast(translations[currentLang].msg_error, true);
-        } finally {
-            setButtonsLoading(false);
-        }
-    }
-
-    // Single Create
-    async function submitCreate() {
-        const id = document.getElementById('newId').value;
-        const model = document.getElementById('newModel').value;
-        const desc = document.getElementById('newDesc').value;
-        const stock = parseInt(document.getElementById('newStock').value);
-        const minStock = parseInt(document.getElementById('newMinStock').value);
-        const unit = document.getElementById('newUnit').value;
-
-        if(!id) return;
-        setButtonsLoading(true);
-        try {
-            await sendPost({
-                action: "create", id: id, model: model, description: desc,
-                stock: stock || 0, unit: unit || "PC", minStock: minStock || 0
-            });
-            closeModal('createModal');
-            fetchData(); 
-            showToast(translations[currentLang].msg_saved);
-        } catch (e) {
-            showToast(translations[currentLang].msg_error, true);
-        } finally {
-            setButtonsLoading(false);
-        }
-    }
-
-    // --- PO / Bulk Logic ---
-
-    function openPOModal() {
-        document.getElementById('poNumber').value = "";
-        document.getElementById('poTableBody').innerHTML = "";
-        addPORow(); // Add one empty row
-        addPORow(); 
-        addPORow(); 
-        document.getElementById('poModal').style.display = 'flex';
-    }
-
-    function addPORow() {
-        const tbody = document.getElementById('poTableBody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="text" class="po-input po-id" placeholder="Part No." onchange="checkPOLine(this)"></td>
-            <td><input type="text" class="po-input po-desc" placeholder="Model / Desc" readonly></td>
-            <td><input type="number" class="po-input po-qty" placeholder="0"></td>
-            <td><input type="text" class="po-input po-unit" placeholder="Unit" readonly></td>
-            <td style="text-align:center; cursor:pointer; color:#aaa;" onclick="this.parentElement.remove()">✕</td>
-        `;
-        tbody.appendChild(row);
-    }
-
-    function checkPOLine(input) {
-        const row = input.parentElement.parentElement;
-        const id = input.value.trim();
-        const descInput = row.querySelector('.po-desc');
-        const unitInput = row.querySelector('.po-unit');
-
-        if (!id) return;
-
-        // Check Inventory or Master
-        if (inventoryList.find(i => i.id === id) || materialMaster[id]) {
-            // Existing Item
-            const item = inventoryList.find(i => i.id === id) || materialMaster[id];
-            descInput.value = item.model + " / " + (item.description || item.desc || "");
-            unitInput.value = item.unit;
-            
-            descInput.readOnly = true;
-            unitInput.readOnly = true;
-            row.style.backgroundColor = "white";
-        } else {
-            // New Item
-            descInput.value = "";
-            descInput.placeholder = "New Item: Enter Model/Desc";
-            descInput.readOnly = false; // Allow edit
-            unitInput.readOnly = false;
-            row.style.backgroundColor = "#fff9e6"; // Highlight yellow
-        }
-    }
-
-    async function submitPO() {
-        const poNum = document.getElementById('poNumber').value;
-        if (!poNum) { alert("Please enter PO Number"); return; }
-
-        const rows = document.querySelectorAll('#poTableBody tr');
-        const items = [];
-
-        rows.forEach(row => {
-            const id = row.querySelector('.po-id').value.trim();
-            const qty = parseInt(row.querySelector('.po-qty').value);
-            
-            if (id && qty > 0) {
-                items.push({
-                    id: id,
-                    qty: qty,
-                    model: row.querySelector('.po-desc').value, // In case it's new
-                    unit: row.querySelector('.po-unit').value,
-                    minStock: 0 // Default for bulk new items
-                });
-            }
-        });
-
-        if (items.length === 0) return;
-
-        setButtonsLoading(true);
-        try {
-            await sendPost({
-                action: "bulk_receive",
-                po: poNum,
-                items: items
-            });
-            closeModal('poModal');
-            fetchData();
-            showToast("PO Posted Successfully!");
-        } catch (e) {
-            showToast("Error posting PO", true);
-        } finally {
-            setButtonsLoading(false);
-        }
+        } catch(e) { console.error(e); showToast("Network Error", true); }
+        finally { setLoading(false); }
     }
 
     async function sendPost(payload) {
@@ -439,63 +302,184 @@
         return json;
     }
 
-    // --- UI Helpers ---
+    // --- Transaction Logic (PO & Issue) ---
+    function openTxModal(type) {
+        currentTxType = type;
+        const isReceive = type === 'receive';
+        
+        // UI Adjustments
+        document.getElementById('txTitle').innerText = isReceive ? i18n[currentLang].tx_po_title : i18n[currentLang].tx_issue_title;
+        document.getElementById('txRefLabel').innerText = isReceive ? i18n[currentLang].lbl_po : i18n[currentLang].lbl_usage;
+        document.getElementById('txRef').placeholder = isReceive ? "e.g. PO-2026-001" : "e.g. Machine Maintenance";
+        document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('txRef').value = "";
+        
+        // Reset Table
+        document.getElementById('txBody').innerHTML = "";
+        addTxRow(); addTxRow(); addTxRow(); // Default 3 rows
+        
+        // Button Color
+        const btn = document.getElementById('txSubmitBtn');
+        btn.className = isReceive ? "std-btn btn-po" : "std-btn btn-issue";
+        btn.innerText = isReceive ? "Post Receipt (+)" : "Post Issue (-)";
 
-    function autoFillMaterial() {
-        const idInput = document.getElementById('newId');
-        const id = idInput.value.trim();
-        const feedback = document.getElementById('idFeedback');
+        openModal('txModal');
+    }
 
+    function addTxRow() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="tx-input tx-id" placeholder="Part No." onchange="resolvePart(this)"></td>
+            <td><input type="text" class="tx-input tx-info" placeholder="..." readonly tabindex="-1" style="color:#777; font-size:12px;"></td>
+            <td><input type="number" class="tx-input tx-qty" placeholder="0"></td>
+            <td><input type="text" class="tx-input tx-unit" placeholder="Unit" readonly tabindex="-1"></td>
+            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
+        `;
+        document.getElementById('txBody').appendChild(tr);
+    }
+
+    function resolvePart(input) {
+        const id = input.value.trim();
+        const row = input.parentElement.parentElement;
+        const info = row.querySelector('.tx-info');
+        const unit = row.querySelector('.tx-unit');
+        
+        // 1. Check Inventory
+        let item = inventoryList.find(i => i.id === id);
+        
+        // 2. If not in Inventory, check Master (only allowed for PO)
+        if (!item && currentTxType === 'receive') {
+            item = materialMaster[id]; 
+        }
+
+        if (item) {
+            info.value = (item.model || "") + " " + (item.description || item.desc || "");
+            unit.value = item.unit;
+            
+            // If issuing, show current stock in placeholder
+            if (currentTxType === 'issue') {
+                const stock = inventoryList.find(i => i.id === id)?.stock || 0;
+                row.querySelector('.tx-qty').placeholder = `Max: ${stock}`;
+            }
+        } else {
+            info.value = currentTxType === 'receive' ? "(New Item? Create Master first)" : "(Not Found)";
+            unit.value = "";
+            if(currentTxType === 'issue') input.style.color = 'red';
+        }
+    }
+
+    async function submitTx() {
+        const ref = document.getElementById('txRef').value;
+        if(!ref) { showToast("Reference/PO is required", true); return; }
+
+        const rows = document.querySelectorAll('#txBody tr');
+        const items = [];
+        
+        // Validate & Collect
+        for(let row of rows) {
+            const id = row.querySelector('.tx-id').value.trim();
+            const qty = Number(row.querySelector('.tx-qty').value);
+            if(id && qty > 0) {
+                items.push({ id, qty });
+            }
+        }
+
+        if(items.length === 0) return;
+
+        setLoading(true);
+        try {
+            await sendPost({
+                action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue',
+                [currentTxType === 'receive' ? 'po' : 'purpose']: ref,
+                items: items
+            });
+            closeModal('txModal');
+            fetchData();
+            showToast("Transaction Posted!");
+        } catch(e) {
+            showToast(e.message, true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // --- Master Data Logic ---
+    function openCreateMasterModal() {
+        document.getElementById('newId').value = "";
         document.getElementById('newModel').value = "";
         document.getElementById('newDesc').value = "";
         document.getElementById('newUnit').value = "";
         document.getElementById('newMinStock').value = 0;
-        
-        if (!id) { feedback.innerText = ""; return; }
+        document.getElementById('masterFeedback').innerText = "";
+        openModal('createModal');
+    }
 
-        const exists = inventoryList.find(item => item.id === id);
-        if (exists) {
-            feedback.innerText = translations[currentLang].hint_exists;
-            feedback.style.color = "#bb0000";
-            return;
-        }
-
-        if (materialMaster[id]) {
-            document.getElementById('newModel').value = materialMaster[id].model;
-            document.getElementById('newDesc').value = materialMaster[id].description;
-            document.getElementById('newUnit').value = materialMaster[id].unit;
-            document.getElementById('newMinStock').value = materialMaster[id].minStock || 0; 
-            feedback.innerText = translations[currentLang].hint_found;
-            feedback.style.color = "#107e3e";
+    function checkMasterExists() {
+        const id = document.getElementById('newId').value.trim();
+        const fb = document.getElementById('masterFeedback');
+        if(inventoryList.find(i => i.id === id) || materialMaster[id]) {
+            fb.innerText = "⚠️ ID already exists.";
+            fb.style.color = "red";
         } else {
-            feedback.innerText = translations[currentLang].hint_new;
-            feedback.style.color = "#e9730c";
+            fb.innerText = "✅ Available";
+            fb.style.color = "green";
         }
     }
 
+    async function submitCreateMaster() {
+        const id = document.getElementById('newId').value.trim();
+        if(!id) return;
+        
+        setLoading(true);
+        try {
+            await sendPost({
+                action: 'create_master',
+                id: id,
+                model: document.getElementById('newModel').value,
+                description: document.getElementById('newDesc').value,
+                unit: document.getElementById('newUnit').value,
+                minStock: document.getElementById('newMinStock').value
+            });
+            closeModal('createModal');
+            fetchData();
+            showToast("Master Data Created");
+        } catch(e) { showToast(e.message, true); }
+        finally { setLoading(false); }
+    }
+
+    // --- View Details ---
+    function openDetails(index) {
+        const item = inventoryList[index];
+        document.getElementById('detId').innerText = item.id;
+        document.getElementById('detModel').innerText = item.model;
+        document.getElementById('detDesc').innerText = item.description;
+        document.getElementById('detStock').innerText = item.stock;
+        document.getElementById('detUnit').innerText = item.unit;
+        openModal('detailsModal');
+    }
+
+    // --- Shared UI ---
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInput').value.toLowerCase();
         tbody.innerHTML = '';
         
         inventoryList.forEach((item, index) => {
-            if ((item.id && item.id.toLowerCase().includes(term)) || 
-                (item.model && item.model.toLowerCase().includes(term))) {
-                
+            if ((item.id+item.model).toLowerCase().includes(term)) {
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
-                else if (item.stock <= (item.minStock || 0)) statusClass = 'status-low';
-                
+                else if (item.stock <= (item.minStock||0)) statusClass = 'status-low';
+
                 const tr = document.createElement('tr');
-                tr.onclick = () => openActionModal(index);
+                tr.onclick = () => openDetails(index);
                 tr.innerHTML = `
-                    <td class="col-status"><span class="status-dot ${statusClass}"></span></td>
+                    <td style="text-align:center;"><span class="status-dot ${statusClass}"></span></td>
                     <td class="col-pn">${item.id}</td>
-                    <td class="col-model">${item.model}</td>
-                    <td class="col-desc">${item.description}</td>
-                    <td class="col-stock" style="color:${statusClass==='status-low' ? '#e9730c' : (statusClass==='status-crit' ? '#bb0000' : 'inherit')}">${item.stock}</td>
-                    <td class="col-unit">${item.unit}</td>
-                    <td class="col-action" style="color:var(--theme-highlight); font-weight:600;">Manage</td>
+                    <td>${item.model}</td>
+                    <td style="color:#777; font-size:13px;">${item.description}</td>
+                    <td class="col-stock">${item.stock}</td>
+                    <td style="color:#999; font-size:12px;">${item.unit}</td>
+                    <td style="text-align:center;"><button class="std-btn btn-transparent" style="font-size:11px; padding:2px 8px; border:1px solid #eee;">${i18n[currentLang].col_action_details}</button></td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -505,55 +489,21 @@
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'zh' : 'en';
         document.querySelectorAll('[data-i18n]').forEach(el => {
-            el.innerText = translations[currentLang][el.getAttribute('data-i18n')];
+            el.innerText = i18n[currentLang][el.getAttribute('data-i18n')];
         });
-        document.getElementById('searchInput').placeholder = currentLang === 'en' ? "Search..." : "搜尋...";
         renderTable();
     }
-
-    function openActionModal(index) {
-        selectedItemIndex = index;
-        const item = inventoryList[index];
-        document.getElementById('modalPn').innerText = item.id;
-        document.getElementById('modalModel').innerText = item.model;
-        document.getElementById('modalUnit').innerText = item.unit;
-        document.getElementById('qtyInput').value = 1;
-        document.getElementById('actionModal').style.display = 'flex';
-    }
     
-    function openCreateModal() {
-        document.getElementById('newId').value = '';
-        document.getElementById('newModel').value = '';
-        document.getElementById('newDesc').value = '';
-        document.getElementById('newStock').value = 0;
-        document.getElementById('newMinStock').value = 0;
-        document.getElementById('newUnit').value = '';
-        document.getElementById('idFeedback').innerText = ''; 
-        document.getElementById('createModal').style.display = 'flex';
-    }
-    
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    
-    function setLoading(isLoading) {
-        document.getElementById('loading').style.display = isLoading ? 'block' : 'none';
-        document.querySelector('.table-container').style.opacity = isLoading ? '0.5' : '1';
-    }
-    
-    function setButtonsLoading(isLoading) {
-        const btns = document.querySelectorAll('.dialog-footer button');
-        btns.forEach(b => b.disabled = isLoading);
-    }
-    
-    function showToast(msg, isError = false) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.backgroundColor = isError ? '#bb0000' : '#32363a';
-        t.style.opacity = 1;
-        setTimeout(() => t.style.opacity = 0, 3000);
+    function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
+    function showToast(msg, err) { 
+        const t = document.getElementById('toast'); 
+        t.innerText = msg; t.style.background = err ? "#c0392b" : "#27ae60"; 
+        t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); 
     }
 
     fetchData();
-
 </script>
 </body>
 </html>

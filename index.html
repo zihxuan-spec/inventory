@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management System</title>
+    <title>Inventory System</title>
     <style>
-        /* --- 核心風格 (Enterprise Style) --- */
+        /* --- 核心風格 --- */
         :root {
             --theme-primary: #354a5f; --theme-bg: #edf0f4; --theme-surface: #ffffff;
             --theme-text: #32363a; --theme-label: #6a6d70; --theme-border: #d9d9d9;
@@ -14,38 +14,37 @@
         }
         body { margin: 0; padding: 0; font-family: var(--font-family); background-color: var(--theme-bg); color: var(--theme-text); font-size: 14px; }
         
-        /* Layout */
         .shell-bar { background-color: var(--theme-primary); height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); color: white; }
         .page-header { background-color: var(--theme-surface); padding: 16px 32px; border-bottom: 1px solid var(--theme-border); display: flex; justify-content: space-between; align-items: center; }
         .content-area { padding: 20px 32px; max-width: 1200px; margin: 0 auto; }
         
         .toolbar { padding: 10px 0; display: flex; justify-content: space-between; gap: 10px; }
         .std-input { padding: 8px 12px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .std-input:focus { outline: none; border-color: var(--theme-highlight); }
         
-        /* Table Layout - Fixed layout to handle long text */
+        /* Table */
         .table-container { background: var(--theme-surface); border: 1px solid var(--theme-border); border-radius: 4px; overflow: hidden; margin-top: 10px;}
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; } 
-        
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--theme-border); }
         th { padding: 12px 16px; font-weight: 600; color: var(--theme-label); font-size: 12px; text-transform: uppercase; }
         td { padding: 12px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         tr:hover { background-color: #f5f7fa; cursor: pointer; }
 
-        /* Column Widths */
+        /* Columns */
+        .col-status { width: 30px; text-align: center; }
         .col-pn { width: 130px; font-weight: bold; font-family: monospace; }
-        .col-model { width: 200px; }
+        .col-model { width: 180px; }
         .col-desc { color: #666; font-size: 13px; } 
         .col-stock { width: 80px; text-align: right; font-weight: bold; }
         .col-unit { width: 60px; color: #888; font-size: 12px; }
         .col-action { width: 80px; text-align: center; }
 
         /* Status Dots */
-        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .status-ok { background-color: var(--theme-success); }
-        .status-crit { background-color: var(--theme-critical); }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+        .status-ok { background-color: var(--theme-success); }   /* 綠燈 */
+        .status-low { background-color: var(--theme-warning); }  /* 橘燈 (低庫存) */
+        .status-crit { background-color: var(--theme-critical); }/* 紅燈 (零庫存) */
 
-        /* Buttons */
+        /* Components */
         .std-btn { border: 1px solid var(--theme-highlight); color: var(--theme-highlight); background: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
         .std-btn:hover { background: #f0f8ff; }
         .std-btn-primary { background: var(--theme-highlight); color: white; }
@@ -55,7 +54,6 @@
         .std-btn-transparent { border-color: transparent; color: var(--theme-text); }
         .std-btn-transparent:hover { background: #eaeaea; }
 
-        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { background: white; width: 480px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -66,7 +64,6 @@
         .form-group { margin-bottom: 15px; }
         .form-label { font-size: 12px; font-weight: 600; margin-bottom: 5px; display: block; color: var(--theme-label); }
 
-        /* Loading & Toast */
         .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--theme-highlight); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; }
@@ -85,7 +82,7 @@
         <div style="font-size:12px; color:var(--theme-label); margin-top:4px;">Warehouse A</div>
     </div>
     <div>
-        <button class="std-btn std-btn-transparent" onclick="fetchData()" id="refreshBtn" data-i18n="btn_refresh">Refresh</button>
+        <button class="std-btn std-btn-transparent" onclick="fetchData()" data-i18n="btn_refresh">Refresh</button>
     </div>
 </div>
 
@@ -95,20 +92,20 @@
             <span style="margin-right:5px;">+</span> <span data-i18n="btn_add_item">New Part</span>
         </button>
         <div style="flex-grow: 1; display: flex; justify-content: flex-end;">
-             <input type="text" id="searchInput" class="std-input" style="width: 250px;" placeholder="Search Part No. or Model..." onkeyup="renderTable()">
+             <input type="text" id="searchInput" class="std-input" style="width: 250px;" placeholder="Search..." onkeyup="renderTable()">
         </div>
     </div>
 
     <div id="loading" style="display:none; text-align:center;">
         <div class="loading-spinner"></div>
-        <div style="color:var(--theme-label);">Syncing data...</div>
+        <div style="color:var(--theme-label);">Syncing...</div>
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th style="width:30px;"></th>
+                    <th class="col-status"></th>
                     <th class="col-pn" data-i18n="col_pn">Part Number</th>
                     <th class="col-model" data-i18n="col_model">Model</th>
                     <th class="col-desc" data-i18n="col_desc">Description</th>
@@ -148,8 +145,8 @@
         </div>
         <div class="dialog-footer">
             <button class="std-btn std-btn-transparent" onclick="closeModal('actionModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn std-btn-danger" onclick="submitTransaction(-1)" id="btnIssue" data-i18n="btn_issue">Issue (-)</button>
-            <button class="std-btn std-btn-primary" onclick="submitTransaction(1)" id="btnReceive" data-i18n="btn_receive">Receive (+)</button>
+            <button class="std-btn std-btn-danger" onclick="submitTransaction(-1)" data-i18n="btn_issue">Issue (-)</button>
+            <button class="std-btn std-btn-primary" onclick="submitTransaction(1)" data-i18n="btn_receive">Receive (+)</button>
         </div>
     </div>
 </div>
@@ -169,18 +166,22 @@
             
             <div class="form-group">
                 <label class="form-label" data-i18n="col_model">Model</label>
-                <input type="text" id="newModel" class="std-input" placeholder="e.g. CKD PFA Manual Valve">
+                <input type="text" id="newModel" class="std-input">
             </div>
 
             <div class="form-group">
                 <label class="form-label" data-i18n="col_desc">Description</label>
-                <input type="text" id="newDesc" class="std-input" placeholder="e.g. 3/4_MMD403RN...">
+                <input type="text" id="newDesc" class="std-input">
             </div>
             
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
                     <label class="form-label" data-i18n="col_stock">Initial Stock</label>
                     <input type="number" id="newStock" class="std-input" value="0">
+                </div>
+                <div style="flex:1;">
+                    <label class="form-label" data-i18n="col_min_stock">Min Stock (Safety)</label>
+                    <input type="number" id="newMinStock" class="std-input" value="0" style="border-color:#e9730c;">
                 </div>
                 <div style="flex:1;">
                     <label class="form-label" data-i18n="col_unit">Unit</label>
@@ -190,7 +191,7 @@
         </div>
         <div class="dialog-footer">
             <button class="std-btn std-btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn std-btn-primary" onclick="submitCreate()" id="btnCreate" data-i18n="btn_create_confirm">Create</button>
+            <button class="std-btn std-btn-primary" onclick="submitCreate()" data-i18n="btn_create_confirm">Create</button>
         </div>
     </div>
 </div>
@@ -199,9 +200,7 @@
 
 <script>
     // ==========================================
-    // 請將您的 Google Script 網址貼在下方
-    // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwLk4AfXAWHPtmzCpAD-xip9T36TcLKtMSQYwX8VaaJntm_Xc6kUQBosXULscv3q8m8/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzAwEEkxwgG1e7vaE_j-bvVxjEMzVhBEs0tPMNNi9EqgIfn8pn8fmW1hOIs6sAVVYjt/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -209,36 +208,33 @@
     let currentLang = 'en';
     let selectedItemIndex = -1;
 
-    // Translations
     const translations = {
         en: { 
             overview_title: "Inventory Overview", btn_refresh: "Refresh", btn_add_item: "New Part", 
-            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_stock: "Stock", col_unit: "Unit", col_action: "Action",
+            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_stock: "Stock", col_unit: "Unit", col_action: "Action", col_min_stock: "Min Stock",
             modal_title: "Goods Movement", modal_pn: "Part Number", modal_model: "Model", modal_qty: "Quantity",
             btn_cancel: "Cancel", btn_issue: "Issue (-)", btn_receive: "Receive (+)", btn_create_confirm: "Create",
             modal_create_title: "Create New Part",
-            msg_saved: "Saved successfully", msg_error: "Error occurred", msg_loading: "Processing..."
+            msg_saved: "Saved successfully", msg_error: "Error occurred",
+            hint_new: "ℹ️ New Item", hint_found: "✅ Found in Database", hint_exists: "⚠️ ID exists in Inventory"
         },
         zh: { 
             overview_title: "庫存總覽", btn_refresh: "重新整理", btn_add_item: "新增料件", 
-            col_pn: "料號", col_model: "型號", col_desc: "規格/描述", col_stock: "庫存", col_unit: "單位", col_action: "操作",
+            col_pn: "料號", col_model: "型號", col_desc: "規格/描述", col_stock: "庫存", col_unit: "單位", col_action: "操作", col_min_stock: "安全庫存",
             modal_title: "庫存異動", modal_pn: "料號", modal_model: "型號", modal_qty: "數量",
             btn_cancel: "取消", btn_issue: "領用 (-)", btn_receive: "入庫 (+)", btn_create_confirm: "建立",
             modal_create_title: "新增料號資料",
-            msg_saved: "儲存成功", msg_error: "發生錯誤", msg_loading: "處理中..."
+            msg_saved: "儲存成功", msg_error: "發生錯誤",
+            hint_new: "ℹ️ 新料號 (請手動輸入)", hint_found: "✅ 已帶入資料庫資料", hint_exists: "⚠️ 此料號已在庫存表中"
         }
     };
 
-    // --- Core Logic ---
-
     async function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { alert("Please setup API URL!"); return; }
-        
         setLoading(true);
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            
             materialMaster = data.master; 
             inventoryList = data.inventory;
             renderTable();
@@ -253,10 +249,8 @@
     async function submitTransaction(direction) {
         const qty = parseInt(document.getElementById('qtyInput').value);
         if (qty <= 0) return;
-
         const item = inventoryList[selectedItemIndex];
         const newStock = item.stock + (qty * direction);
-
         if (newStock < 0) { showToast("Stock cannot be negative", true); return; }
 
         setButtonsLoading(true);
@@ -278,6 +272,7 @@
         const model = document.getElementById('newModel').value;
         const desc = document.getElementById('newDesc').value;
         const stock = parseInt(document.getElementById('newStock').value);
+        const minStock = parseInt(document.getElementById('newMinStock').value); // 讀取安全庫存
         const unit = document.getElementById('newUnit').value;
 
         if(!id) { showToast("Part Number is required", true); return; }
@@ -290,7 +285,8 @@
                 model: model,
                 description: desc,
                 stock: stock || 0,
-                unit: unit || "PC"
+                unit: unit || "PC",
+                minStock: minStock || 0
             });
             closeModal('createModal');
             fetchData(); 
@@ -309,39 +305,34 @@
         return json;
     }
 
-    // --- UI Helpers ---
-
     function autoFillMaterial() {
         const idInput = document.getElementById('newId');
         const id = idInput.value.trim();
         const feedback = document.getElementById('idFeedback');
 
-        // 1. 清空舊資料
         document.getElementById('newModel').value = "";
         document.getElementById('newDesc').value = "";
         document.getElementById('newUnit').value = "";
+        document.getElementById('newMinStock').value = 0; // 重置 Min Stock
         
         if (!id) { feedback.innerText = ""; return; }
 
-        // 2. 檢查 Inventory 是否已存在
         const exists = inventoryList.find(item => item.id === id);
         if (exists) {
-            feedback.innerText = "⚠️ ID exists in Inventory (已存在庫存表)";
+            feedback.innerText = translations[currentLang].hint_exists;
             feedback.style.color = "#bb0000";
             return;
         }
 
-        // 3. 檢查 Master 是否有資料
         if (materialMaster[id]) {
-            // (A) 有資料：自動帶入
             document.getElementById('newModel').value = materialMaster[id].model;
             document.getElementById('newDesc').value = materialMaster[id].description;
             document.getElementById('newUnit').value = materialMaster[id].unit;
-            feedback.innerText = "✅ Found in Database (已從資料庫帶入)";
+            document.getElementById('newMinStock').value = materialMaster[id].minStock || 0; // 自動帶入安全庫存
+            feedback.innerText = translations[currentLang].hint_found;
             feedback.style.color = "#107e3e";
         } else {
-            // (B) 無資料：橘色提醒
-            feedback.innerText = "ℹ️ New Item (新料號，請手動輸入)";
+            feedback.innerText = translations[currentLang].hint_new;
             feedback.style.color = "#e9730c";
         }
     }
@@ -355,16 +346,22 @@
             if ((item.id && item.id.toLowerCase().includes(term)) || 
                 (item.model && item.model.toLowerCase().includes(term))) {
                 
-                let statusClass = item.stock <= 0 ? 'status-crit' : 'status-ok';
+                // 燈號邏輯: 0=紅, 小於等於安全庫存=橘, 其他=綠
+                let statusClass = 'status-ok';
+                if (item.stock <= 0) {
+                    statusClass = 'status-crit';
+                } else if (item.stock <= (item.minStock || 0)) {
+                    statusClass = 'status-low';
+                }
                 
                 const tr = document.createElement('tr');
                 tr.onclick = () => openActionModal(index);
                 tr.innerHTML = `
-                    <td><span class="status-dot ${statusClass}"></span></td>
+                    <td class="col-status"><span class="status-dot ${statusClass}"></span></td>
                     <td class="col-pn">${item.id}</td>
                     <td class="col-model">${item.model}</td>
                     <td class="col-desc">${item.description}</td>
-                    <td class="col-stock">${item.stock}</td>
+                    <td class="col-stock" style="color:${statusClass==='status-low' ? '#e9730c' : (statusClass==='status-crit' ? '#bb0000' : 'inherit')}">${item.stock}</td>
                     <td class="col-unit">${item.unit}</td>
                     <td class="col-action" style="color:var(--theme-highlight); font-weight:600;">Manage</td>
                 `;
@@ -378,7 +375,7 @@
         document.querySelectorAll('[data-i18n]').forEach(el => {
             el.innerText = translations[currentLang][el.getAttribute('data-i18n')];
         });
-        document.getElementById('searchInput').placeholder = currentLang === 'en' ? "Search Part No. or Model..." : "搜尋料號或型號...";
+        document.getElementById('searchInput').placeholder = currentLang === 'en' ? "Search..." : "搜尋...";
         renderTable();
     }
 
@@ -397,8 +394,9 @@
         document.getElementById('newModel').value = '';
         document.getElementById('newDesc').value = '';
         document.getElementById('newStock').value = 0;
+        document.getElementById('newMinStock').value = 0;
         document.getElementById('newUnit').value = '';
-        document.getElementById('idFeedback').innerText = ''; // Reset feedback
+        document.getElementById('idFeedback').innerText = ''; 
         document.getElementById('createModal').style.display = 'flex';
     }
     
@@ -422,7 +420,6 @@
         setTimeout(() => t.style.opacity = 0, 3000);
     }
 
-    // Init
     fetchData();
 
 </script>

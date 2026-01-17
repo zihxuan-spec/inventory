@@ -6,7 +6,6 @@
     <title>WMS - Warehouse Management System</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <style>
-        /* --- SAP Fiori Style Theme --- */
         :root {
             --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
             --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
@@ -14,18 +13,14 @@
             --sap-font-family: "72", "Arial", "Helvetica", sans-serif;
         }
         body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
-        
-        /* Layout */
         .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
-        
         .nav-tabs { display: flex; gap: 20px; }
         .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; }
         .nav-item:hover { color: var(--sap-primary); }
         .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
-
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
         .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
@@ -34,31 +29,26 @@
         .card.alert { border-left: 5px solid var(--sap-critical); }
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
-
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
-
         .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
         .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
-        
         .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
         .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
         .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } .btn-issue:hover { background-color: #fff5f5; }
         .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
         .btn-primary { background-color: var(--sap-primary); color: white; }
         .btn-transparent { background: transparent; color: var(--sap-primary); }
-
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
         .col-pn { font-weight: bold; color: var(--sap-primary); } 
         .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em;}
         .col-loc { font-weight: bold; color: #555; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
         .std-dialog.large { width: 950px; }
@@ -66,22 +56,18 @@
         .dialog-header { padding: 10px 20px; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; color: var(--sap-text-color); background: var(--sap-surface-color); }
         .dialog-content { padding: 20px; overflow-y: auto; background: var(--sap-surface-color); }
         .dialog-footer { padding: 10px 20px; border-top: 1px solid var(--sap-border-color); display: flex; justify-content: flex-end; gap: 10px; background: #fdfdfd; }
-
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-full { grid-column: span 2; }
         .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
-        
         .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
         .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
         .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
         .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
-
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-
         @media (max-width: 768px) {
             .page-header { padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
             .col-model, td:nth-child(3), .col-desc, td:nth-child(4), .col-unit, td:nth-child(7) { display: none; }
@@ -134,8 +120,7 @@
             </div>
             <div class="card">
                 <div class="card-title">Recent Movements</div>
-                <div style="font-size:12px; color:#555; max-height:100px; overflow-y:auto;" id="dashHistory">
-                    </div>
+                <div style="font-size:12px; color:#555; max-height:100px; overflow-y:auto;" id="dashHistory"></div>
             </div>
         </div>
     </div>
@@ -239,9 +224,9 @@
 
 <script>
     // ==========================================
-    // 請確認此處的 URL 是最新部署的 URL
+    // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbz6-SmASd7xIDXNVyune5fhEM7sDe8MbQli7MyVBAjD3JMWTohZ0uYwfCTpo8KDsgLy/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbw4s11e83Ku0sud2wX26JTJFIMprOmOKrkCZFvz5CDlyTlEPIubKc4K0isZEtMkSjoP/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -250,27 +235,24 @@
     let currentTxType = 'receive'; 
     let currentLang = 'en';
 
-    // --- Core ---
     async function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
         setLoading(true);
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            
-            // Handle error from backend robustness check
-            if (data.status === 'error') {
-                alert("Error from Server:\n" + data.message);
-                return;
-            }
+            if (data.status === 'error') { alert("Backend Error:\n" + data.message); return; }
 
             materialMaster = data.master; 
             inventoryList = data.inventory;
             historyList = data.history || [];
             renderTable();
             renderDashboard();
-        } catch(e) { console.error(e); showToast("Network Error", true); }
-        finally { setLoading(false); }
+        } catch(e) { 
+            console.error(e); 
+            // 這裡就是您原本看到 Network Error 的地方，現在已經修正 renderTable 的 bug，應該不會再跳了
+            showToast("Network Error (Check Console)", true); 
+        } finally { setLoading(false); }
     }
 
     async function sendPost(payload) {
@@ -280,7 +262,6 @@
         return json;
     }
 
-    // --- View Switching ---
     function switchView(viewName) {
         document.getElementById('viewInventory').style.display = viewName === 'inventory' ? 'block' : 'none';
         document.getElementById('viewDashboard').style.display = viewName === 'dashboard' ? 'block' : 'none';
@@ -288,7 +269,6 @@
         document.getElementById('tabDash').classList.toggle('active', viewName === 'dashboard');
     }
 
-    // --- Dashboard Logic ---
     function renderDashboard() {
         let crit = 0, low = 0, total = inventoryList.length;
         inventoryList.forEach(i => {
@@ -309,7 +289,6 @@
         `).join('');
     }
 
-    // --- Transaction Logic ---
     function openTxModal(type) {
         currentTxType = type;
         const isReceive = type === 'receive';
@@ -324,7 +303,6 @@
 
     function addTxRow() {
         const tr = document.createElement('tr');
-        // Added explicit classes 'tx-id', 'tx-qty', 'tx-loc' for easier selection
         tr.innerHTML = `
             <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
             <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
@@ -349,16 +327,13 @@
         }
     }
 
-    // ROBUST SUBMIT LOGIC
     async function submitTx() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
         if(!ref || !user) { showToast("Reference & User Required", true); return; }
         
         const items = [];
-        const rows = document.querySelectorAll('#txBody tr');
-        
-        rows.forEach(row => {
+        document.querySelectorAll('#txBody tr').forEach(row => {
             const idInput = row.querySelector('.tx-id');
             const qtyInput = row.querySelector('.tx-qty');
             const locInput = row.querySelector('.tx-loc');
@@ -368,16 +343,11 @@
                 const qty = Number(qtyInput.value);
                 const loc = locInput ? String(locInput.value).trim() : "";
                 
-                if(id && qty > 0) {
-                    items.push({ id: id, qty: qty, loc: loc });
-                }
+                if(id && qty > 0) items.push({ id, qty, loc });
             }
         });
 
-        if(items.length === 0) {
-            showToast("No items to post", true);
-            return;
-        }
+        if(items.length === 0) { showToast("No items to post", true); return; }
 
         setLoading(true);
         try {
@@ -389,15 +359,11 @@
             });
             closeModal('txModal'); 
             fetchData(); 
-            showToast("Transaction Posted Successfully!");
-        } catch(e) { 
-            alert("Error from Server:\n" + e.message); 
-        } finally { 
-            setLoading(false); 
-        }
+            showToast("Transaction Posted!");
+        } catch(e) { alert("Error:\n" + e.message); } 
+        finally { setLoading(false); }
     }
 
-    // --- Master Data ---
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newLoc','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
@@ -431,7 +397,6 @@
         finally { setLoading(false); }
     }
 
-    // --- Shared ---
     function openDetails(index) {
         const item = inventoryList[index];
         document.getElementById('detId').innerText = item.id;
@@ -440,9 +405,8 @@
         document.getElementById('detStock').innerText = item.stock;
         document.getElementById('detLoc').innerText = item.location || "None";
         
-        const histDiv = document.getElementById('detHistory');
         const hList = historyList.filter(h => h.id === item.id);
-        histDiv.innerHTML = hList.length ? hList.map(h => `
+        document.getElementById('detHistory').innerHTML = hList.length ? hList.map(h => `
             <div style="border-bottom:1px dashed #eee; padding:4px 0; display:flex; justify-content:space-between;">
                 <span>${new Date(h.date).toLocaleDateString()}</span>
                 <span>${h.action} (${h.qty})</span>
@@ -460,7 +424,9 @@
             if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
-                else if (item.stock <= i.minStock) statusClass = 'status-low';
+                // 修正重點：原本這裡寫成了 i.minStock，正確應為 item.minStock
+                else if (item.stock <= item.minStock) statusClass = 'status-low'; 
+
                 const tr = document.createElement('tr');
                 tr.onclick = () => openDetails(index);
                 tr.innerHTML = `

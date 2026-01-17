@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WMS</title> <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23354a5f%22 rx=%2220%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2240%22 fill=%22white%22>WMS</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23354a5f%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2240%22 fill=%22white%22>WMS</text></svg>">
+    <title>WMS</title>
+    
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/354a5f/ffffff.png?text=WMS&font=roboto">
+    <link rel="icon" href="https://placehold.co/192x192/354a5f/ffffff.png?text=WMS&font=roboto">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -22,12 +25,9 @@
         .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         
-        /* Page Header Layout */
         .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
-        
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
         
-        /* Tabs */
         .nav-tabs { display: flex; gap: 20px; }
         .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
         .nav-item:hover { color: var(--sap-primary); }
@@ -42,32 +42,13 @@
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
 
-        /* Tables Container */
-        .table-container { 
-            background: var(--sap-surface-color); 
-            border: 1px solid var(--sap-border-color); 
-            border-radius: 4px; 
-            overflow: hidden; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-            margin-top: 1rem; 
-            overflow-x: auto; 
-        }
-
-        /* Table */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            text-align: left; 
-            table-layout: fixed; 
-            min-width: 1000px; 
-        }
-
+        .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; min-width: 1000px; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* Column Widths */
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
@@ -79,11 +60,9 @@
         .col-action { width: 80px; text-align: center; }
         .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        /* Toolbar */
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
         .spacer { flex-grow: 1; }
 
-        /* Inputs & Buttons */
         .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
         .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
@@ -100,7 +79,6 @@
         .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; vertical-align: middle; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
 
-        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
         .std-dialog.large { width: 950px; }
@@ -123,9 +101,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
-        /* ========================================= */
-        /* --- MOBILE RWD (Optimized for iPad) --- */
-        /* ========================================= */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -344,7 +319,6 @@
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display",
-            // 🔥 Added: Dynamic messages
             msg_unknown_title: "Unknown Part Number",
             msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving."
         },
@@ -359,13 +333,11 @@
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看",
-            // 🔥 Added: Dynamic messages
             msg_unknown_title: "未知料號",
             msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。"
         }
     };
 
-    // Custom Message Function
     function showMsg(title, text) {
         document.getElementById('msgTitle').innerText = title;
         document.getElementById('msgContent').innerText = text;
@@ -391,7 +363,6 @@
         finally { setLoading(false); }
     }
 
-    // Excel Export
     function exportToExcel(type) {
         let data = [];
         let filename = "";
@@ -597,7 +568,7 @@
 
         if (currentTxType === 'receive') {
             if (!masterItem) {
-                // 🔥 CHANGED: Use dynamic text from i18n
+                // 🔥 Fixed: Correctly using variable from i18n
                 const lang = i18n[currentLang];
                 showMsg(lang.msg_unknown_title, lang.msg_unknown_body);
                 input.value = ""; 

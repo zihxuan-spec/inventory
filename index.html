@@ -7,7 +7,6 @@
     <style>
         /* --- SAP Fiori Style Theme --- */
         :root {
-            /* SAP Color Palette */
             --sap-shell-color: #354a5f;
             --sap-bg-color: #edf0f4;
             --sap-surface-color: #ffffff;
@@ -38,6 +37,7 @@
             padding: 0 1rem; 
             color: white; 
             box-shadow: 0 4px 5px rgba(0,0,0,0.05); 
+            position: sticky; top: 0; z-index: 100; /* Sticky Header */
         }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         
@@ -63,11 +63,7 @@
             font-family: var(--sap-font-family);
             transition: border-color 0.2s;
         }
-        .std-input:focus { 
-            outline: none; 
-            border-color: var(--sap-primary); 
-            box-shadow: 0 0 0 1px var(--sap-primary) inset; 
-        }
+        .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .std-input:disabled { background-color: #f2f2f2; color: #666; cursor: not-allowed; }
         
         /* Buttons */
@@ -82,21 +78,13 @@
             display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
             transition: all 0.1s;
             border: 1px solid transparent;
+            white-space: nowrap; /* Prevent text wrap inside button */
         }
         
-        .btn-primary, .btn-po, .btn-issue { 
-            background-color: var(--sap-primary); 
-            color: white; 
-            border-color: var(--sap-primary);
-            box-shadow: 0 1px 0 rgba(0,0,0,0.1);
-        }
+        .btn-primary, .btn-po, .btn-issue { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
         .btn-primary:hover, .btn-po:hover, .btn-issue:hover { background-color: var(--sap-primary-hover); border-color: var(--sap-primary-hover); }
         
-        .btn-transparent, .btn-master { 
-            background-color: transparent; 
-            color: var(--sap-primary); 
-            border: 1px solid var(--sap-primary);
-        }
+        .btn-transparent, .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
         .btn-transparent:hover, .btn-master:hover { background-color: rgba(10, 110, 209, 0.05); }
 
         .btn-po { background-color: var(--sap-primary); border-color: var(--sap-primary); } 
@@ -120,7 +108,7 @@
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
         /* Toolbar */
-        .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; }
+        .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .spacer { flex-grow: 1; }
 
         /* Status Dots */
@@ -161,40 +149,56 @@
         .form-full { grid-column: span 2; }
         .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
         
-        /* --- Transaction Table (Updated for Professional Look) --- */
+        /* Transaction Table */
         .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
         .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
         .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
         
-        /* 表格內的輸入框樣式優化 */
-        .tx-input { 
-            width: 100%; 
-            padding: 6px 8px; 
-            border: 1px solid #89919a; /* 實體邊框 */
-            border-radius: 4px; 
-            background: #fff; 
-            font-family: inherit; 
-            font-size: 13px;
-            box-sizing: border-box; 
-            transition: border-color 0.2s;
-        }
-        .tx-input:focus { 
-            outline: none; 
-            border-color: var(--sap-primary); 
-            box-shadow: 0 0 0 1px var(--sap-primary) inset; 
-        }
-        /* 唯讀欄位變成淺灰底，看起來像 Disabled */
-        .tx-input[readonly] {
-            background-color: #f5f5f5;
-            border-color: #d9d9d9;
-            color: #666;
-            cursor: default;
-        }
+        .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
+        .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
+        .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
 
         /* Loading & Toast */
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+        /* ========================================= */
+        /* --- MOBILE RESPONSIVE TWEAKS (RWD) --- */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            /* 1. Header & Layout */
+            .page-header { padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .page-header > div { width: 100%; }
+            .page-header button { width: 100%; margin-top: 5px; }
+            .content-area { padding: 10px; }
+
+            /* 2. Toolbar (Buttons Stack) */
+            .toolbar { gap: 8px; }
+            .std-btn { flex: 1 1 40%; } /* PO and Issue buttons side by side */
+            .btn-master { flex: 1 1 100%; } /* Create button full width */
+            .toolbar input { width: 100% !important; order: 99; margin-top: 5px; } /* Search bar at bottom */
+            .spacer { display: none; }
+            /* Hide the vertical divider on mobile */
+            .toolbar > div[style*="width:1px"] { display: none; }
+
+            /* 3. Inventory Table: Hide less critical columns on mobile */
+            .col-model, td:nth-child(3),
+            .col-desc, td:nth-child(4),
+            .col-unit, td:nth-child(6) {
+                display: none;
+            }
+            
+            /* Give more space to Part No and Stock */
+            .col-pn { width: auto; }
+            .col-stock { width: 70px; }
+            
+            /* 4. Modals */
+            .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
+            
+            /* 5. Transaction Table (Scrollable) */
+            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
@@ -224,7 +228,9 @@
         <button class="std-btn btn-issue" onclick="openTxModal('issue')">
             <span style="font-weight:bold; font-size:16px;">-</span> <span data-i18n="btn_issue_usage">Goods Issue</span>
         </button>
+        
         <div style="width:1px; height:24px; background:#ccc; margin:0 10px;"></div>
+        
         <button class="std-btn btn-master" onclick="openCreateMasterModal()">
             <span data-i18n="btn_create_master">Create Material</span>
         </button>
@@ -244,10 +250,10 @@
                 <tr>
                     <th style="width:40px;"></th>
                     <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                    <th data-i18n="col_model">Model</th>
-                    <th data-i18n="col_desc">Description</th>
+                    <th class="col-model" data-i18n="col_model">Model</th>
+                    <th class="col-desc" data-i18n="col_desc">Description</th>
                     <th class="col-stock" style="width:100px;" data-i18n="col_stock">Unrestricted</th>
-                    <th style="width:60px;" data-i18n="col_unit">UoM</th>
+                    <th class="col-unit" style="width:60px;" data-i18n="col_unit">UoM</th>
                     <th style="width:80px; text-align:center;"></th>
                 </tr>
             </thead>
@@ -279,7 +285,7 @@
                 <thead>
                     <tr>
                         <th style="width:140px;">Part Number</th>
-                        <th>Material Description</th>
+                        <th style="min-width:150px;">Material Description</th>
                         <th style="width:100px;">Quantity</th>
                         <th style="width:80px;">Unit</th>
                         <th style="width:30px;"></th>
@@ -579,10 +585,10 @@
                 tr.innerHTML = `
                     <td style="text-align:center;"><span class="status-dot ${statusClass}"></span></td>
                     <td class="col-pn">${item.id}</td>
-                    <td>${item.model}</td>
-                    <td style="color:#666; font-size:13px;">${item.description}</td>
+                    <td class="col-model">${item.model}</td>
+                    <td class="col-desc" style="color:#666; font-size:13px;">${item.description}</td>
                     <td class="col-stock">${item.stock}</td>
-                    <td style="color:#666; font-size:12px;">${item.unit}</td>
+                    <td class="col-unit" style="color:#666; font-size:12px;">${item.unit}</td>
                     <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">Display</span></td>
                 `;
                 tbody.appendChild(tr);

@@ -47,19 +47,15 @@
             overflow: hidden; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
             margin-top: 1rem; 
-            /* 🔥 Critical Fix: Allow horizontal scroll if table is wider than screen */
             overflow-x: auto; 
         }
 
-        /* Table - Enforce Minimum Width to Prevent Squashing */
+        /* Table - Enforce Minimum Width */
         table { 
             width: 100%; 
             border-collapse: collapse; 
             text-align: left; 
             table-layout: fixed; 
-            /* 🔥 Critical Fix: Force table to be at least 1000px wide. 
-               This ensures columns have breathing room on iPad/Mobile. 
-               The user will scroll horizontally instead of seeing squashed text. */
             min-width: 1000px; 
         }
 
@@ -74,7 +70,6 @@
         th.col-pn, td.col-pn { padding-left: 12px !important; }
         
         .col-model { width: 220px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
-        /* Description takes remaining space, but table min-width ensures it has space */
         .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
 
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
@@ -130,8 +125,7 @@
         /* ========================================= */
         /* --- MOBILE RWD (Optimized for iPad) --- */
         /* ========================================= */
-        @media (max-width: 992px) { /* Changed from 768px to 992px to cover vertical iPad */
-            
+        @media (max-width: 992px) { 
             /* Header Layout */
             .page-header { 
                 padding: 10px 15px; 
@@ -139,25 +133,21 @@
                 align-items: center; 
             }
             
-            /* Tabs: Allow items to sit naturally, scroll ONLY if screen is truly tiny */
             .nav-tabs { 
                 gap: 15px; 
                 overflow-x: auto; 
                 padding-bottom: 0;
             }
             
-            /* 🔥 FIX: No more forced wrapping or weird alignment on iPad */
             .nav-item { 
                 font-size: 14px;
             }
 
-            /* Toolbar: Wrap buttons if needed */
             .toolbar { flex-wrap: wrap; gap: 8px; }
-            .std-btn { flex: 1 1 auto; justify-content: center; } /* Auto width buttons */
+            .std-btn { flex: 1 1 auto; justify-content: center; } 
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
-            /* Show all columns but rely on horizontal scroll */
             .desktop-only { display: table-cell !important; }
             
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
@@ -170,7 +160,7 @@
 
 <div class="shell-bar">
     <div class="shell-logo">
-        <span style="font-weight:bold; font-size:1.2em;">Sunlit AZ</span>
+        <span style="font-weight:bold; font-size:1.2em;">SAP</span> Fiori WMS
     </div>
     <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
@@ -182,7 +172,7 @@
             <div class="nav-item" id="tabInv" onclick="switchView('inventory')" data-i18n="tab_inv">Inventory</div>
             <div class="nav-item" id="tabMaster" onclick="switchView('master')" data-i18n="tab_master">Master Data</div>
         </div>
-        <div style="color:#6a6d70; font-size:12px; margin-top:8px;">Sunlit AZ / Spare Part Management</div>
+        <div style="color:#6a6d70; font-size:12px; margin-top:8px;">Plant 1000 / Storage Location 0001</div>
     </div>
     <button class="std-btn btn-transparent" onclick="fetchData()">
         <span style="font-size:16px;">↻</span> <span data-i18n="btn_refresh">Refresh</span>
@@ -336,7 +326,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyYfdEm5gOAqH7UsdgVVPI17IPkd7_T-GVo6JVjj73rS1lVtD8LCYQHcJrcRolgRh3-/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyO0u2VNECYHvEjOJlZ_Z74J_v07gm_I9AzvXgka3zjrItiuvnFHL-xmAE-doLgoLYv/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -352,7 +342,7 @@
             col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
             lbl_ref: "PO Number", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
             btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close",
-            card_crit: "Critical Stock", sub_crit: "Items Out of Stock",
+            card_crit: "Critical Stock (0)", sub_crit: "Items Out of Stock",
             card_low: "Low Stock", sub_low: "Below Safety Level",
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
@@ -364,7 +354,7 @@
             col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
             lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
             btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉",
-            card_crit: "缺料警告", sub_crit: "庫存為 0",
+            card_crit: "缺料警告 (0)", sub_crit: "庫存為 0",
             card_low: "低庫存", sub_low: "低於安全水位",
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
@@ -586,14 +576,39 @@
     function resolvePart(input) {
         const id = input.value.trim();
         const row = input.parentElement.parentElement;
-        let item = inventoryList.find(i => i.id === id);
-        if (!item && currentTxType === 'receive') item = materialMaster[id]; 
         
-        if (item) {
-            row.querySelector('.tx-info').value = item.description || item.model;
-            row.querySelector('.tx-loc').value = item.location || "";
-        } else {
-            row.querySelector('.tx-info').value = "";
+        // Reset fields
+        row.querySelector('.tx-info').value = "";
+        row.querySelector('.tx-loc').value = "";
+
+        if (!id) return;
+
+        // Try find in inventory
+        let invItem = inventoryList.find(i => i.id === id);
+        // Try find in master
+        let masterItem = materialMaster[id];
+
+        // --- VALIDATION: Check Master Data on Receive ---
+        if (currentTxType === 'receive') {
+            if (!masterItem) {
+                alert("⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.\n\n⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。");
+                input.value = ""; // Clear input
+                return;
+            }
+            // Found: Fill info
+            row.querySelector('.tx-info').value = masterItem.description || masterItem.model;
+            
+            // Suggest old location if available
+            if (invItem) {
+                row.querySelector('.tx-loc').value = invItem.location || "";
+            }
+        } 
+        // --- Issue Logic ---
+        else {
+            if (invItem) {
+                row.querySelector('.tx-info').value = invItem.description || invItem.model;
+                row.querySelector('.tx-loc').value = invItem.location || "";
+            }
         }
     }
 

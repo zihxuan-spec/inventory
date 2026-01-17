@@ -240,7 +240,7 @@
     // ==========================================
     // 請確認此處的 URL 是最新部署的 URL
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbz82URVT9cTWqkJ4ZNaK1McmB6nPR03sGpHpUXbsUwHmaVFn2ORRA1TR8ZJhxZOYV30/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxXAMA25rV-yBrkP1KEAfKVv1jF7cReYbK-gcmFpLm5ai_OZdfd9A6qgWmjiPPiqzsY/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -250,19 +250,31 @@
     let currentLang = 'en';
 
     // --- Core ---
-    async function fetchData() {
+async function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
         setLoading(true);
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
+            
+            // 檢查後端是否回傳 status: error
+            if (data.status === 'error') {
+                alert("後端讀取錯誤:\n" + data.message); // 這裡會告訴我們具體原因！
+                return;
+            }
+
             materialMaster = data.master; 
             inventoryList = data.inventory;
             historyList = data.history || [];
             renderTable();
             renderDashboard();
-        } catch(e) { console.error(e); showToast("Network Error", true); }
-        finally { setLoading(false); }
+        } catch(e) { 
+            console.error(e); 
+            // 這是最常見的錯誤，通常是因為部署失敗或網址錯了
+            alert("連線失敗 (Network Error)\n請檢查：\n1. Google Sheet 分頁名稱是否正確 (History/Master/Inventory)\n2. 欄位數量是否足夠\n3. 是否已重新部署並更新網址"); 
+        } finally { 
+            setLoading(false); 
+        }
     }
 
     async function sendPost(payload) {

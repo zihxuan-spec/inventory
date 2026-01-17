@@ -24,6 +24,7 @@
         
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
         
+        /* Tabs - Flexible & Smart */
         .nav-tabs { display: flex; gap: 20px; }
         .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
         .nav-item:hover { color: var(--sap-primary); }
@@ -38,20 +39,42 @@
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
 
-        /* Tables */
-        .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
-        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        /* Tables Container - Handle Scroll */
+        .table-container { 
+            background: var(--sap-surface-color); 
+            border: 1px solid var(--sap-border-color); 
+            border-radius: 4px; 
+            overflow: hidden; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            margin-top: 1rem; 
+            /* 🔥 Critical Fix: Allow horizontal scroll if table is wider than screen */
+            overflow-x: auto; 
+        }
+
+        /* Table - Enforce Minimum Width to Prevent Squashing */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+            table-layout: fixed; 
+            /* 🔥 Critical Fix: Force table to be at least 1000px wide. 
+               This ensures columns have breathing room on iPad/Mobile. 
+               The user will scroll horizontally instead of seeing squashed text. */
+            min-width: 1000px; 
+        }
+
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* Columns */
+        /* --- Column Widths --- */
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
-        .col-pn { width: 110px; font-weight: bold; color: var(--sap-primary); }
+        .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
         
-        .col-model { width: 240px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
+        .col-model { width: 220px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
+        /* Description takes remaining space, but table min-width ensures it has space */
         .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
 
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
@@ -105,58 +128,37 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         /* ========================================= */
-        /* --- MOBILE RWD (Improved for Headers) --- */
+        /* --- MOBILE RWD (Optimized for iPad) --- */
         /* ========================================= */
-        @media (max-width: 768px) {
-            /* Header Layout: Row to put Refresh on right */
+        @media (max-width: 992px) { /* Changed from 768px to 992px to cover vertical iPad */
+            
+            /* Header Layout */
             .page-header { 
                 padding: 10px 15px; 
-                flex-direction: row; /* Horizontal layout */
+                flex-direction: row; 
                 align-items: center; 
             }
             
-            /* The div wrapping nav-tabs */
-            .page-header > div:first-child {
-                flex: 1; /* Take available space */
-                min-width: 0; /* Enable flex shrinking */
-                margin-right: 10px;
-            }
-
-            /* Tabs: Horizontal scroll, NO TEXT WRAP */
+            /* Tabs: Allow items to sit naturally, scroll ONLY if screen is truly tiny */
             .nav-tabs { 
                 gap: 15px; 
-                justify-content: flex-start;
                 overflow-x: auto; 
-                white-space: nowrap; /* 🔥 FIX: Prevent wrapping */
                 padding-bottom: 0;
-                -webkit-overflow-scrolling: touch;
             }
             
+            /* 🔥 FIX: No more forced wrapping or weird alignment on iPad */
             .nav-item { 
-                flex: 0 0 auto; /* Don't stretch */
-                text-align: left; 
-                padding: 8px 0; 
                 font-size: 14px;
-                white-space: nowrap; /* 🔥 FIX: Prevent wrapping inside item */
             }
 
-            /* Refresh Button */
-            .page-header > button {
-                flex-shrink: 0;
-            }
-
-            /* Toolbar: Wrap on mobile for space */
+            /* Toolbar: Wrap buttons if needed */
             .toolbar { flex-wrap: wrap; gap: 8px; }
-            .std-btn { flex: 1 1 40%; justify-content: center; } 
+            .std-btn { flex: 1 1 auto; justify-content: center; } /* Auto width buttons */
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
-            .desktop-only { display: none !important; }
-            .col-status { width: 35px; padding: 0 !important; }
-            .col-pn { width: auto; padding-left: 10px !important; }
-            .col-stock { width: 60px; font-size: 1em; }
-            .col-loc { width: 50px; font-size: 10px; }
-            .col-action { width: 50px; }
+            /* Show all columns but rely on horizontal scroll */
+            .desktop-only { display: table-cell !important; }
             
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }

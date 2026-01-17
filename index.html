@@ -15,6 +15,7 @@
         }
         body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
         
+        /* Layout */
         .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
@@ -240,7 +241,7 @@
     // ==========================================
     // 請確認此處的 URL 是最新部署的 URL
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxXAMA25rV-yBrkP1KEAfKVv1jF7cReYbK-gcmFpLm5ai_OZdfd9A6qgWmjiPPiqzsY/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzx7NlpXl7QzwNxP-Kjow5sl8jchzPU_NcyvhhAQWnuv4fCAzEdpQCGeXaEzhfjgw/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -250,16 +251,16 @@
     let currentLang = 'en';
 
     // --- Core ---
-async function fetchData() {
+    async function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
         setLoading(true);
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
             
-            // 檢查後端是否回傳 status: error
+            // Handle error from backend robustness check
             if (data.status === 'error') {
-                alert("後端讀取錯誤:\n" + data.message); // 這裡會告訴我們具體原因！
+                alert("Error from Server:\n" + data.message);
                 return;
             }
 
@@ -268,19 +269,13 @@ async function fetchData() {
             historyList = data.history || [];
             renderTable();
             renderDashboard();
-        } catch(e) { 
-            console.error(e); 
-            // 這是最常見的錯誤，通常是因為部署失敗或網址錯了
-            alert("連線失敗 (Network Error)\n請檢查：\n1. Google Sheet 分頁名稱是否正確 (History/Master/Inventory)\n2. 欄位數量是否足夠\n3. 是否已重新部署並更新網址"); 
-        } finally { 
-            setLoading(false); 
-        }
+        } catch(e) { console.error(e); showToast("Network Error", true); }
+        finally { setLoading(false); }
     }
 
     async function sendPost(payload) {
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
-        // 修正：如果後端回傳 error，這裡會捕捉到並拋出
         if(json.status === 'error') throw new Error(json.message);
         return json;
     }
@@ -329,7 +324,7 @@ async function fetchData() {
 
     function addTxRow() {
         const tr = document.createElement('tr');
-        // IMPORTANT: Added class selectors directly to inputs
+        // Added explicit classes 'tx-id', 'tx-qty', 'tx-loc' for easier selection
         tr.innerHTML = `
             <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
             <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
@@ -354,7 +349,7 @@ async function fetchData() {
         }
     }
 
-    // IMPORTANT: FIXED SUBMIT LOGIC
+    // ROBUST SUBMIT LOGIC
     async function submitTx() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
@@ -364,15 +359,14 @@ async function fetchData() {
         const rows = document.querySelectorAll('#txBody tr');
         
         rows.forEach(row => {
-            // Robust selection
             const idInput = row.querySelector('.tx-id');
             const qtyInput = row.querySelector('.tx-qty');
             const locInput = row.querySelector('.tx-loc');
             
             if(idInput && qtyInput) {
-                const id = idInput.value.trim();
+                const id = String(idInput.value).trim();
                 const qty = Number(qtyInput.value);
-                const loc = locInput ? locInput.value.trim() : "";
+                const loc = locInput ? String(locInput.value).trim() : "";
                 
                 if(id && qty > 0) {
                     items.push({ id: id, qty: qty, loc: loc });
@@ -381,7 +375,7 @@ async function fetchData() {
         });
 
         if(items.length === 0) {
-            showToast("No valid items to post", true);
+            showToast("No items to post", true);
             return;
         }
 
@@ -397,7 +391,7 @@ async function fetchData() {
             fetchData(); 
             showToast("Transaction Posted Successfully!");
         } catch(e) { 
-            alert("System Error: " + e.message); 
+            alert("Error from Server:\n" + e.message); 
         } finally { 
             setLoading(false); 
         }

@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WMS - Warehouse Management System</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WMS</title> <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23354a5f%22 rx=%2220%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2240%22 fill=%22white%22>WMS</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23354a5f%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2240%22 fill=%22white%22>WMS</text></svg>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         /* --- SAP Fiori Style Theme --- */
@@ -50,7 +53,7 @@
             overflow-x: auto; 
         }
 
-        /* Table - Enforce Minimum Width */
+        /* Table */
         table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -121,7 +124,7 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         /* ========================================= */
-        /* --- MOBILE RWD --- */
+        /* --- MOBILE RWD (Optimized for iPad) --- */
         /* ========================================= */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
@@ -250,7 +253,7 @@
         </div>
         <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
         <div class="dialog-footer">
-            <button class="std-btn btn-primary" onclick="closeModal('msgModal')">OK</button>
+            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
         </div>
     </div>
 </div>
@@ -335,28 +338,34 @@
             btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
             col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
             lbl_ref: "PO Number", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
-            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close",
+            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close", btn_ok: "OK",
             card_crit: "Critical Stock (0)", sub_crit: "Items Out of Stock",
             card_low: "Low Stock", sub_low: "Below Safety Level",
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
-            txt_display: "Display"
+            txt_display: "Display",
+            // 🔥 Added: Dynamic messages
+            msg_unknown_title: "Unknown Part Number",
+            msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving."
         },
         zh: {
             tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
             btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
             col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
             lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
-            btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉",
+            btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉", btn_ok: "確定",
             card_crit: "缺料警告 (0)", sub_crit: "庫存為 0",
             card_low: "低庫存", sub_low: "低於安全水位",
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
-            txt_display: "查看"
+            txt_display: "查看",
+            // 🔥 Added: Dynamic messages
+            msg_unknown_title: "未知料號",
+            msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。"
         }
     };
 
-    // 🔥 NEW: Custom Message Function
+    // Custom Message Function
     function showMsg(title, text) {
         document.getElementById('msgTitle').innerText = title;
         document.getElementById('msgContent').innerText = text;
@@ -586,11 +595,11 @@
         let invItem = inventoryList.find(i => i.id === id);
         let masterItem = materialMaster[id];
 
-        // --- VALIDATION: Custom Msg instead of Alert ---
         if (currentTxType === 'receive') {
             if (!masterItem) {
-                // 🔥 CHANGED: Use showMsg() instead of alert()
-                showMsg("Unknown Part Number", "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.\n\n⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。");
+                // 🔥 CHANGED: Use dynamic text from i18n
+                const lang = i18n[currentLang];
+                showMsg(lang.msg_unknown_title, lang.msg_unknown_body);
                 input.value = ""; 
                 return;
             }

@@ -15,49 +15,60 @@
         }
         body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
         
+        /* Layout */
         .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-        .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
-        .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
+        .page-header { background-color: var(--sap-surface-color); padding: 0.5rem 1rem; border-bottom: 1px solid var(--sap-border-color); }
+        .content-area { padding: 1rem; max-width: 100%; box-sizing: border-box; }
         
-        .nav-tabs { display: flex; gap: 20px; }
-        .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        /* Navigation (Tabs) - Improved for Mobile */
+        .nav-tabs { display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .nav-item { cursor: pointer; padding: 10px 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; font-size: 14px; }
         .nav-item:hover { color: var(--sap-primary); }
         .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
-        .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
-        .card-value { font-size: 36px; font-weight: normal; color: var(--sap-text-color); }
-        .card-sub { font-size: 12px; color: #888; margin-top: 5px; }
-        .card.alert { border-left: 5px solid var(--sap-critical); }
-        .card.warn { border-left: 5px solid var(--sap-warning); }
-        .card.safe { border-left: 5px solid var(--sap-success); }
+        /* Dashboard Cards */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
+        .card-title { font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; }
+        .card-value { font-size: 32px; font-weight: normal; color: var(--sap-text-color); }
+        .card-sub { font-size: 12px; color: #888; margin-top: 4px; }
+        .card.alert { border-left: 4px solid var(--sap-critical); }
+        .card.warn { border-left: 4px solid var(--sap-warning); }
+        .card.safe { border-left: 4px solid var(--sap-success); }
 
+        /* Tables & Components */
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
-        th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
-        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
+        th { padding: 10px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
+        /* Inputs & Buttons */
         .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
         .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
+        .std-btn { height: 36px; padding: 0 12px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
         .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
         .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } .btn-issue:hover { background-color: #fff5f5; }
         .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
         .btn-primary { background-color: var(--sap-primary); color: white; }
         .btn-transparent { background: transparent; color: var(--sap-primary); }
 
+        .toolbar { padding: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .spacer { flex-grow: 1; }
+
+        /* Status & Columns */
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
-        .col-pn { font-weight: bold; color: var(--sap-primary); } 
-        .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em;}
-        .col-loc { font-weight: bold; color: #555; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .col-pn { font-weight: bold; color: var(--sap-primary); width: 120px; } 
+        .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; width: 80px; }
+        .col-loc { font-weight: bold; color: #555; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; width: 80px; text-align: center; }
+        .col-action { width: 70px; text-align: center; }
 
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
         .std-dialog.large { width: 950px; }
@@ -66,28 +77,45 @@
         .dialog-content { padding: 20px; overflow-y: auto; background: var(--sap-surface-color); }
         .dialog-footer { padding: 10px 20px; border-top: 1px solid var(--sap-border-color); display: flex; justify-content: flex-end; gap: 10px; background: #fdfdfd; }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-full { grid-column: span 2; }
-        .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
-        
+        /* Transaction Table inside Modal */
         .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
         .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
         .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
         .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
-        .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
-        .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
-
+        
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
+        /* ========================================= */
+        /* --- MOBILE RWD (Strict Class Based) --- */
+        /* ========================================= */
         @media (max-width: 768px) {
-            .page-header { padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
-            .col-model, td:nth-child(3), .col-desc, td:nth-child(4), .col-unit, td:nth-child(7) { display: none; }
-            .col-pn { width: auto; } .col-stock { width: 70px; } .col-loc { width: 60px; }
+            /* 1. Header */
+            .page-header { padding: 10px; }
+            .nav-tabs { gap: 10px; justify-content: space-between; }
+            .nav-item { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; }
+            
+            /* 2. Toolbar - Stack Buttons */
+            .toolbar { gap: 8px; }
+            .std-btn { flex: 1 1 40%; justify-content: center; } /* 2 buttons per row */
+            .toolbar .spacer { display: none; }
+            .toolbar input { width: 100% !important; order: 99; margin-top: 5px; } /* Search bar at bottom */
+            .toolbar > div[style*="width:1px"] { display: none; } /* Hide divider */
+
+            /* 3. Table - HIDE columns by CLASS */
+            .desktop-only { display: none !important; }
+            
+            /* Adjust visible columns */
+            .col-pn { width: auto; }
+            .col-stock { width: 60px; font-size: 1em; }
+            .col-loc { width: 50px; font-size: 10px; }
+            .col-action { width: 50px; }
+            
+            /* 4. Modals */
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
-            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
         }
     </style>
 </head>
@@ -103,21 +131,22 @@
 <div class="page-header">
     <div>
         <div class="nav-tabs">
-            <div class="nav-item active" id="tabInv" onclick="switchView('inventory')" data-i18n="tab_inv">Inventory</div>
-            <div class="nav-item" id="tabDash" onclick="switchView('dashboard')" data-i18n="tab_dash">Dashboard</div>
+            <div class="nav-item active" id="tabDash" onclick="switchView('dashboard')" data-i18n="tab_dash">Dashboard</div>
+            <div class="nav-item" id="tabInv" onclick="switchView('inventory')" data-i18n="tab_inv">Inventory</div>
+            <div class="nav-item" id="tabMaster" onclick="switchView('master')" data-i18n="tab_master">Master Data</div>
         </div>
         <div style="color:#6a6d70; font-size:12px; margin-top:8px;">Plant 1000 / Storage Location 0001</div>
     </div>
-    <button class="std-btn btn-transparent" onclick="fetchData()">
-        <span style="font-size:16px;">↻</span> <span data-i18n="btn_refresh">Refresh</span>
+    <button class="std-btn btn-transparent" onclick="fetchData()" style="position: absolute; right: 1rem; top: 1rem;">
+        <span style="font-size:16px;">↻</span> <span class="desktop-only" data-i18n="btn_refresh">Refresh</span>
     </button>
 </div>
 
 <div class="content-area">
-    <div id="viewDashboard" style="display:none;">
+    <div id="viewDashboard">
         <div class="dashboard-grid">
             <div class="card alert">
-                <div class="card-title" data-i18n="card_crit">Critical Stock (0)</div>
+                <div class="card-title" data-i18n="card_crit">Critical Stock</div>
                 <div class="card-value" id="dashCrit" style="color:#bb0000">0</div>
                 <div class="card-sub" data-i18n="sub_crit">Items Out of Stock</div>
             </div>
@@ -138,19 +167,14 @@
         </div>
     </div>
 
-    <div id="viewInventory">
-        <div class="toolbar" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:10px 0;">
+    <div id="viewInventory" style="display:none;">
+        <div class="toolbar">
             <button class="std-btn btn-po" onclick="openTxModal('receive')"><span data-i18n="btn_po">Goods Receipt</span></button>
             <button class="std-btn btn-issue" onclick="openTxModal('issue')"><span data-i18n="btn_issue">Goods Issue</span></button>
             <div style="width:1px; height:24px; background:#ccc; margin:0 10px;"></div>
             <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
-            <div class="spacer" style="flex-grow:1;"></div>
-            <input type="text" id="searchInput" class="std-input" style="width:280px;" placeholder="Search..." onkeyup="renderTable()">
-        </div>
-
-        <div id="loading" style="display:none; text-align:center;">
-            <div class="loading-spinner"></div>
-            <div style="color:#6a6d70; font-size:12px;">Synchronizing...</div>
+            <div class="spacer"></div>
+            <input type="text" id="searchInv" class="std-input" style="width:250px;" placeholder="Search Inventory..." onkeyup="renderTable()">
         </div>
 
         <div class="table-container">
@@ -159,18 +183,48 @@
                     <tr>
                         <th style="width:40px;"></th>
                         <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                        <th class="col-model" data-i18n="col_model">Model</th>
-                        <th class="col-desc" data-i18n="col_desc">Description</th>
-                        <th style="width:80px;" data-i18n="col_loc">Location</th>
-                        <th class="col-stock" style="width:100px;" data-i18n="col_stock">Unrestricted</th>
-                        <th class="col-unit" style="width:60px;" data-i18n="col_unit">UoM</th>
-                        <th style="width:80px; text-align:center;"></th>
+                        <th class="desktop-only" data-i18n="col_model">Model</th>
+                        <th class="desktop-only" data-i18n="col_desc">Description</th>
+                        <th class="col-loc" data-i18n="col_loc">Loc</th>
+                        <th class="col-stock" data-i18n="col_stock">Stock</th>
+                        <th class="desktop-only" style="width:60px;" data-i18n="col_unit">Unit</th>
+                        <th class="col-action"></th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody"></tbody>
             </table>
         </div>
     </div>
+
+    <div id="viewMaster" style="display:none;">
+        <div class="toolbar">
+            <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
+            <div class="spacer"></div>
+            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
+                        <th class="desktop-only" data-i18n="col_model">Model</th>
+                        <th class="desktop-only" data-i18n="col_desc">Description</th>
+                        <th class="col-unit" data-i18n="col_unit">Base UoM</th>
+                        <th class="desktop-only" data-i18n="lbl_safe">Safety Stock</th>
+                        <th class="col-loc" data-i18n="col_loc">Def. Loc</th>
+                        <th class="col-action"></th>
+                    </tr>
+                </thead>
+                <tbody id="masterBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="loading" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:2000; text-align:center;">
+    <div class="loading-spinner"></div>
+    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
 </div>
 
 <div id="txModal" class="modal-overlay">
@@ -178,15 +232,15 @@
         <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
         <div class="dialog-content">
             <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-                <div><label class="form-label" id="txRefLabel" data-i18n="lbl_ref">Reference Document</label><input type="text" id="txRef" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User Name</label><input type="text" id="txUser" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_ref">Reference</label><input type="text" id="txRef" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
             </div>
             <table class="tx-table">
-                <thead><tr><th style="width:140px;" data-i18n="col_pn">Part Number</th><th style="min-width:150px;" data-i18n="col_desc">Description</th><th style="width:100px;" data-i18n="lbl_qty">Qty</th><th style="width:80px;" data-i18n="col_loc">Loc</th><th style="width:30px;"></th></tr></thead>
+                <thead><tr><th style="width:140px;" data-i18n="col_pn">Part Number</th><th style="min-width:150px;" data-i18n="col_desc">Description</th><th style="width:80px;" data-i18n="lbl_qty">Qty</th><th style="width:70px;" data-i18n="col_loc">Loc</th><th style="width:30px;"></th></tr></thead>
                 <tbody id="txBody"></tbody>
             </table>
-            <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ <span data-i18n="btn_add_line">Add Line Item</span></button>
+            <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ <span data-i18n="btn_add_line">Add Line</span></button>
         </div>
         <div class="dialog-footer">
             <button class="std-btn btn-transparent" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
@@ -203,8 +257,8 @@
                 <div class="form-full"><label class="form-label" data-i18n="col_pn">Part Number</label><input type="text" id="newId" class="std-input" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px;"></div></div>
                 <div class="form-full"><label class="form-label" data-i18n="col_model">Model</label><input type="text" id="newModel" class="std-input"></div>
                 <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
-                <div><label class="form-label" data-i18n="col_loc">Bin Location</label><input type="text" id="newLoc" class="std-input" placeholder="e.g. A-01"></div> 
-                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input" placeholder="PC"></div>
+                <div><label class="form-label" data-i18n="col_loc">Def. Loc</label><input type="text" id="newLoc" class="std-input"></div> 
+                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_safe">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
                 <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="newUser" class="std-input"></div>
             </div>
@@ -215,7 +269,7 @@
 
 <div id="detailsModal" class="modal-overlay">
     <div class="std-dialog">
-        <div class="dialog-header"><span data-i18n="modal_detail">Material Overview</span><span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span></div>
+        <div class="dialog-header"><span data-i18n="modal_detail">Details</span><span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span></div>
         <div class="dialog-content">
             <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px;">
                 <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
@@ -233,7 +287,7 @@
     </div>
 </div>
 
-<div id="toast" class="toast">Action Successful</div>
+<div id="toast" class="toast"></div>
 
 <script>
     // ==========================================
@@ -250,27 +304,27 @@
 
     const i18n = {
         en: {
-            tab_inv: "Inventory", tab_dash: "Dashboard", btn_refresh: "Refresh",
+            tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
             btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
-            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Location", col_stock: "Unrestricted", col_unit: "UoM",
-            lbl_ref: "PO / Ref. Doc.", lbl_user: "User Name", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
-            btn_add_line: "Add Line Item", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close",
+            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
+            lbl_ref: "PO / Ref", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
+            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close",
             card_crit: "Critical Stock (0)", sub_crit: "Items Out of Stock",
-            card_low: "Low Stock", sub_low: "Items below safety level",
+            card_low: "Low Stock", sub_low: "Below Safety Level",
             card_total: "Total Items", sub_total: "Active SKU Count",
-            card_hist: "Recent Movements", modal_detail: "Material Overview",
+            card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display"
         },
         zh: {
-            tab_inv: "庫存列表", tab_dash: "管理看板", btn_refresh: "刷新",
+            tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
             btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
-            col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存量", col_unit: "單位",
-            lbl_ref: "單號 / 用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
+            col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
+            lbl_ref: "單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
             btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉",
-            card_crit: "缺料警告 (0)", sub_crit: "庫存為 0 的項目",
+            card_crit: "缺料警告 (0)", sub_crit: "庫存為 0",
             card_low: "低庫存", sub_low: "低於安全水位",
-            card_total: "物料總數", sub_total: "系統內建立的 SKU",
-            card_hist: "最近異動紀錄", modal_detail: "物料詳細資訊",
+            card_total: "物料總數", sub_total: "系統內 SKU",
+            card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看"
         }
     };
@@ -286,8 +340,11 @@
             materialMaster = data.master; 
             inventoryList = data.inventory;
             historyList = data.history || [];
+            
+            // Render all views
             renderTable();
             renderDashboard();
+            renderMasterTable();
         } catch(e) { console.error(e); showToast("Network Error", true); } 
         finally { setLoading(false); }
     }
@@ -300,10 +357,25 @@
     }
 
     function switchView(viewName) {
-        document.getElementById('viewInventory').style.display = viewName === 'inventory' ? 'block' : 'none';
-        document.getElementById('viewDashboard').style.display = viewName === 'dashboard' ? 'block' : 'none';
-        document.getElementById('tabInv').classList.toggle('active', viewName === 'inventory');
-        document.getElementById('tabDash').classList.toggle('active', viewName === 'dashboard');
+        // Hide all
+        document.getElementById('viewDashboard').style.display = 'none';
+        document.getElementById('viewInventory').style.display = 'none';
+        document.getElementById('viewMaster').style.display = 'none';
+        
+        // Deactivate Tabs
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        // Show active
+        if (viewName === 'dashboard') {
+            document.getElementById('viewDashboard').style.display = 'block';
+            document.getElementById('tabDash').classList.add('active');
+        } else if (viewName === 'inventory') {
+            document.getElementById('viewInventory').style.display = 'block';
+            document.getElementById('tabInv').classList.add('active');
+        } else if (viewName === 'master') {
+            document.getElementById('viewMaster').style.display = 'block';
+            document.getElementById('tabMaster').classList.add('active');
+        }
     }
 
     function renderDashboard() {
@@ -316,7 +388,6 @@
         document.getElementById('dashLow').innerText = low;
         document.getElementById('dashTotal').innerText = total;
 
-        // Update i18n dynamic text for cards
         const lang = i18n[currentLang];
         document.querySelector('[data-i18n="card_crit"]').innerText = lang.card_crit.replace('(0)', `(${crit})`);
 
@@ -328,6 +399,95 @@
                 <div style="font-size:11px; color:#999;">${new Date(h.date).toLocaleDateString()} - ${h.action}</div>
             </div>
         `).join('');
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('inventoryBody');
+        const term = document.getElementById('searchInv').value.toLowerCase();
+        const lang = i18n[currentLang];
+        tbody.innerHTML = '';
+        
+        inventoryList.forEach((item, index) => {
+            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
+                let statusClass = 'status-ok';
+                if (item.stock <= 0) statusClass = 'status-crit';
+                else if (item.stock <= item.minStock) statusClass = 'status-low';
+
+                const tr = document.createElement('tr');
+                tr.onclick = () => openDetails(index);
+                tr.innerHTML = `
+                    <td style="text-align:center;"><span class="status-dot ${statusClass}"></span></td>
+                    <td class="col-pn">${item.id}</td>
+                    <td class="desktop-only">${item.model}</td>
+                    <td class="desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
+                    <td style="font-size:12px; text-align:center;"><span class="col-loc">${item.location||'-'}</span></td>
+                    <td class="col-stock">${item.stock}</td>
+                    <td class="desktop-only" style="color:#666; font-size:12px;">${item.unit}</td>
+                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+    }
+
+    function renderMasterTable() {
+        const tbody = document.getElementById('masterBody');
+        const term = document.getElementById('searchMaster').value.toLowerCase();
+        const lang = i18n[currentLang];
+        tbody.innerHTML = '';
+        
+        // Convert Master Object to Array
+        const masterArr = Object.keys(materialMaster).map(key => {
+            return { id: key, ...materialMaster[key] };
+        });
+
+        masterArr.forEach((item) => {
+            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
+                const tr = document.createElement('tr');
+                // Reuse details modal logic, but we need to find the item in inventory list or mock it
+                tr.onclick = () => {
+                    // Try find in inventory to show stock, else show 0
+                    let invItem = inventoryList.find(i => i.id === item.id);
+                    if(!invItem) invItem = { ...item, stock: 0 };
+                    // Find index is tricky, just pass object to a new openDetailsById
+                    openDetailsObj(invItem); 
+                };
+                
+                tr.innerHTML = `
+                    <td class="col-pn">${item.id}</td>
+                    <td class="desktop-only">${item.model}</td>
+                    <td class="desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
+                    <td class="col-unit">${item.unit}</td>
+                    <td class="desktop-only">${item.minStock}</td>
+                    <td class="col-loc">${item.location||'-'}</td>
+                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+    }
+
+    function openDetails(index) {
+        const item = inventoryList[index];
+        openDetailsObj(item);
+    }
+
+    function openDetailsObj(item) {
+        document.getElementById('detId').innerText = item.id;
+        document.getElementById('detModel').innerText = item.model;
+        document.getElementById('detDesc').innerText = item.description;
+        document.getElementById('detStock').innerText = item.stock;
+        document.getElementById('detLoc').innerText = item.location || "None";
+        
+        const hList = historyList.filter(h => h.id === item.id);
+        document.getElementById('detHistory').innerHTML = hList.length ? hList.map(h => `
+            <div style="border-bottom:1px dashed #eee; padding:4px 0; display:flex; justify-content:space-between;">
+                <span>${new Date(h.date).toLocaleDateString()}</span>
+                <span>${h.action} (${h.qty})</span>
+                <span style="color:#999;">${h.user}</span>
+            </div>
+        `).join('') : "No History";
+        openModal('detailsModal');
     }
 
     function openTxModal(type) {
@@ -437,68 +597,23 @@
         finally { setLoading(false); }
     }
 
-    function openDetails(index) {
-        const item = inventoryList[index];
-        document.getElementById('detId').innerText = item.id;
-        document.getElementById('detModel').innerText = item.model;
-        document.getElementById('detDesc').innerText = item.description;
-        document.getElementById('detStock').innerText = item.stock;
-        document.getElementById('detLoc').innerText = item.location || "None";
-        
-        const hList = historyList.filter(h => h.id === item.id);
-        document.getElementById('detHistory').innerHTML = hList.length ? hList.map(h => `
-            <div style="border-bottom:1px dashed #eee; padding:4px 0; display:flex; justify-content:space-between;">
-                <span>${new Date(h.date).toLocaleDateString()}</span>
-                <span>${h.action} (${h.qty})</span>
-                <span style="color:#999;">${h.user}</span>
-            </div>
-        `).join('') : "No History";
-        openModal('detailsModal');
-    }
-
-    function renderTable() {
-        const tbody = document.getElementById('inventoryBody');
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const lang = i18n[currentLang]; // Get current language text
-        tbody.innerHTML = '';
-        
-        inventoryList.forEach((item, index) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                let statusClass = 'status-ok';
-                if (item.stock <= 0) statusClass = 'status-crit';
-                else if (item.stock <= item.minStock) statusClass = 'status-low'; // Fixed: i.minStock -> item.minStock
-
-                const tr = document.createElement('tr');
-                tr.onclick = () => openDetails(index);
-                tr.innerHTML = `
-                    <td style="text-align:center;"><span class="status-dot ${statusClass}"></span></td>
-                    <td class="col-pn">${item.id}</td>
-                    <td class="col-model">${item.model}</td>
-                    <td class="col-desc" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td style="font-size:12px;"><span class="col-loc">${item.location||'-'}</span></td>
-                    <td class="col-stock">${item.stock}</td>
-                    <td class="col-unit" style="color:#666; font-size:12px;">${item.unit}</td>
-                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        });
-    }
-
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'zh' : 'en';
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
         });
-        renderTable(); // Re-render table to translate "Display" button
-        renderDashboard(); // Re-render dash to translate card titles
+        renderTable(); 
+        renderDashboard();
+        renderMasterTable();
     }
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
     function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); }
+    
+    // Init
     fetchData();
 </script>
 </body>

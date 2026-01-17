@@ -586,24 +586,66 @@
         }
     }
 
-    async function submitTx() {
-        const ref = document.getElementById('txRef').value;
-        const user = document.getElementById('txUser').value;
-        if(!ref || !user) { showToast("Reference & User Required", true); return; }
+async function submitTx() {
+    // --- 這裡改為跳出確認視窗 ---
+    const lang = i18n[currentLang];
+    
+    // 設定確認視窗的標題與內容
+    document.getElementById('msgTitle').innerText = lang.confirm_post_title || "Confirm";
+    document.getElementById('msgTitle').style.color = "var(--sap-primary)"; 
+    document.getElementById('msgContent').innerText = lang.confirm_post_body || "Confirm to post?";
+    
+    // 修改 OK 按鈕行為：點擊後才執行真正的過帳 executeSubmit
+    const okBtn = document.querySelector('#msgModal .btn-primary');
+    okBtn.onclick = function() {
+        closeModal('msgModal');
+        executeSubmit(); // 呼叫下方真正的執行函式
+    };
+    
+    openModal('msgModal');
+}
+
+// 新增這一個函式（這就是您截圖原本的內容，只是改了名字）
+async function executeSubmit() {
+    const ref = document.getElementById('txRef').value;
+    const user = document.getElementById('txUser').value;
+    if(!ref || !user) { showToast("Reference & User Required", true); return; }
+    
+    const items = [];
+    document.querySelectorAll('#txBody tr').forEach(row => {
+        const idInput = row.querySelector('.tx-id');
+        const qtyInput = row.querySelector('.tx-qty');
+        const locInput = row.querySelector('.tx-loc');
         
-        const items = [];
-        document.querySelectorAll('#txBody tr').forEach(row => {
-            const idInput = row.querySelector('.tx-id');
-            const qtyInput = row.querySelector('.tx-qty');
-            const locInput = row.querySelector('.tx-loc');
-            
-            if(idInput && qtyInput) {
-                const id = String(idInput.value).trim();
-                const qty = Number(qtyInput.value);
-                const loc = locInput ? String(locInput.value).trim() : "";
-                if(id && qty > 0) items.push({ id, qty, loc });
-            }
+        if(idInput && qtyInput) {
+            const id = String(idInput.value).trim();
+            const qty = Number(qtyInput.value);
+            const loc = locInput ? String(locInput.value).trim() : "";
+            if(id && qty > 0) items.push({ id, qty, loc });
+        }
+    });
+
+    if(items.length === 0) { showToast("No items to post", true); return; }
+
+    setLoading(true);
+    try {
+        await sendPost({ 
+            action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
+            [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
+            user: user, 
+            items: items 
         });
+        closeModal('txModal'); 
+        fetchData(); 
+        showToast("Transaction Posted!");
+    } catch(e) { 
+        showMsg("Error", e.message); 
+    } finally { 
+        setLoading(false); 
+        // 恢復 OK 按鈕原本的行為
+        document.querySelector('#msgModal .btn-primary').onclick = () => closeModal('msgModal');
+    }
+});
 
         if(items.length === 0) { showToast("No items to post", true); return; }
 

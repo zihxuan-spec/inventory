@@ -37,7 +37,7 @@
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
 
-        /* Tables & Components */
+        /* Components */
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -56,7 +56,6 @@
         .btn-primary { background-color: var(--sap-primary); color: white; }
         .btn-transparent { background: transparent; color: var(--sap-primary); }
 
-        /* Columns */
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
         .col-pn { font-weight: bold; color: var(--sap-primary); } 
@@ -242,7 +241,7 @@
 
 <script>
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycby_tPPULMCLjA37ZwrM22ZtJO8WEPrSb8oC2c4178ITFYzABt1l4Jy8GjEyJcVZcgVI/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzQHtxP4RSy3mXr33x6KKDcJ0qeLgpCs3ZCqEbEQfQ-1uBTipEjBb5OrBI-z9aRMt5s/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -322,8 +321,7 @@
             <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
             <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
             <td><input type="number" class="tx-input tx-qty"></td>
-            <td><input type="text" class="tx-input tx-loc" readonly tabindex="-1"></td>
-            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
+            <td><input type="text" class="tx-input tx-loc"></td> <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
         `;
         document.getElementById('txBody').appendChild(tr);
     }
@@ -351,7 +349,8 @@
         document.querySelectorAll('#txBody tr').forEach(row => {
             const id = row.querySelector('.tx-id').value.trim();
             const qty = Number(row.querySelector('.tx-qty').value);
-            if(id && qty > 0) items.push({ id, qty });
+            const loc = row.querySelector('.tx-loc').value.trim();
+            if(id && qty > 0) items.push({ id, qty, loc });
         });
         if(items.length === 0) return;
 

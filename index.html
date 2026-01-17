@@ -42,26 +42,19 @@
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* --- Column Width & Formatting Adjustments --- */
-        
+        /* --- Column Widths --- */
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
-        
         .col-pn { width: 110px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-
-        /* 🔥 CHANGED: Increased Model width from 140px to 240px to prevent wrapping */
         .col-model { width: 240px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
-        
-        /* Description keeps taking the rest of the space */
         .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
-
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
         .col-stock { width: 90px; font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; }
         .col-unit { width: 60px; }
         .col-action { width: 80px; text-align: center; }
         .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        /* Toolbar Layout */
+        /* Toolbar */
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
         .spacer { flex-grow: 1; }
 
@@ -467,13 +460,27 @@
         document.getElementById('detLoc').innerText = item.location || "None";
         
         const hList = historyList.filter(h => h.id === item.id);
-        document.getElementById('detHistory').innerHTML = hList.length ? hList.map(h => `
-            <div style="border-bottom:1px dashed #eee; padding:4px 0; display:flex; justify-content:space-between;">
-                <span>${new Date(h.date).toLocaleDateString()}</span>
-                <span>${h.action} (${h.qty})</span>
-                <span style="color:#999;">${h.user}</span>
+        const histHTML = hList.length ? hList.map(h => `
+            <div style="border-bottom:1px solid #eee; padding:8px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:600; font-size:13px; color:#333;">
+                        ${h.action} 
+                        <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">
+                            (${h.qty > 0 ? '+' : ''}${h.qty})
+                        </span>
+                    </span>
+                    <span style="font-size:11px; color:#888;">${new Date(h.date).toLocaleDateString()}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
+                        📄 ${h.ref || '-'}
+                    </span>
+                    <span>👤 ${h.user}</span>
+                </div>
             </div>
-        `).join('') : "No History";
+        `).join('') : '<div style="text-align:center; padding:10px; color:#999;">No History</div>';
+        
+        document.getElementById('detHistory').innerHTML = histHTML;
         openModal('detailsModal');
     }
 

@@ -15,19 +15,16 @@
         }
         body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
         
-        /* Layout */
         .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
         .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
         
-        /* Navigation (Tabs) */
         .nav-tabs { display: flex; gap: 20px; }
         .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; }
         .nav-item:hover { color: var(--sap-primary); }
         .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
 
-        /* Dashboard Cards */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
         .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
@@ -37,7 +34,6 @@
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
 
-        /* Components */
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -62,7 +58,6 @@
         .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em;}
         .col-loc { font-weight: bold; color: #555; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
         .std-dialog.large { width: 950px; }
@@ -167,7 +162,8 @@
                         <th class="col-pn">Part Number</th>
                         <th class="col-model">Model</th>
                         <th class="col-desc">Description</th>
-                        <th style="width:80px;">Location</th> <th class="col-stock" style="width:100px;">Unrestricted</th>
+                        <th style="width:80px;">Location</th>
+                        <th class="col-stock" style="width:100px;">Unrestricted</th>
                         <th class="col-unit" style="width:60px;">UoM</th>
                         <th style="width:80px; text-align:center;"></th>
                     </tr>
@@ -208,7 +204,8 @@
                 <div class="form-full"><label class="form-label">Part Number</label><input type="text" id="newId" class="std-input" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px;"></div></div>
                 <div class="form-full"><label class="form-label">Model</label><input type="text" id="newModel" class="std-input"></div>
                 <div class="form-full"><label class="form-label">Description</label><input type="text" id="newDesc" class="std-input"></div>
-                <div><label class="form-label">Bin Location</label><input type="text" id="newLoc" class="std-input" placeholder="e.g. A-01"></div> <div><label class="form-label">Base UoM</label><input type="text" id="newUnit" class="std-input" placeholder="PC"></div>
+                <div><label class="form-label">Bin Location</label><input type="text" id="newLoc" class="std-input" placeholder="e.g. A-01"></div> 
+                <div><label class="form-label">Base UoM</label><input type="text" id="newUnit" class="std-input" placeholder="PC"></div>
                 <div><label class="form-label">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
                 <div><label class="form-label">User</label><input type="text" id="newUser" class="std-input"></div>
             </div>
@@ -241,7 +238,9 @@
 
 <script>
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyvws3S-NPoUzHauNAXOnEp2vFEHrXFJS7koirfgjNTreFBBQNZdBPNmLpZJoMkFL-W/exec"; 
+    // 請確認此處的 URL 是最新部署的 URL
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbzVBuezNqX3MYhELqz1H2EEzR-BAI6M_6cWmk3twgyxmpwAMzfTjwDClsPbdgB9Oiwx/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -269,6 +268,7 @@
     async function sendPost(payload) {
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
+        // 修正：如果後端回傳 error，這裡會捕捉到並拋出
         if(json.status === 'error') throw new Error(json.message);
         return json;
     }
@@ -317,11 +317,13 @@
 
     function addTxRow() {
         const tr = document.createElement('tr');
+        // IMPORTANT: Added class selectors directly to inputs
         tr.innerHTML = `
             <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
             <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
             <td><input type="number" class="tx-input tx-qty"></td>
-            <td><input type="text" class="tx-input tx-loc"></td> <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
+            <td><input type="text" class="tx-input tx-loc"></td>
+            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
         `;
         document.getElementById('txBody').appendChild(tr);
     }
@@ -340,26 +342,53 @@
         }
     }
 
+    // IMPORTANT: FIXED SUBMIT LOGIC
     async function submitTx() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
         if(!ref || !user) { showToast("Reference & User Required", true); return; }
         
         const items = [];
-        document.querySelectorAll('#txBody tr').forEach(row => {
-            const id = row.querySelector('.tx-id').value.trim();
-            const qty = Number(row.querySelector('.tx-qty').value);
-            const loc = row.querySelector('.tx-loc').value.trim();
-            if(id && qty > 0) items.push({ id, qty, loc });
+        const rows = document.querySelectorAll('#txBody tr');
+        
+        rows.forEach(row => {
+            // Robust selection
+            const idInput = row.querySelector('.tx-id');
+            const qtyInput = row.querySelector('.tx-qty');
+            const locInput = row.querySelector('.tx-loc');
+            
+            if(idInput && qtyInput) {
+                const id = idInput.value.trim();
+                const qty = Number(qtyInput.value);
+                const loc = locInput ? locInput.value.trim() : "";
+                
+                if(id && qty > 0) {
+                    items.push({ id: id, qty: qty, loc: loc });
+                }
+            }
         });
-        if(items.length === 0) return;
+
+        if(items.length === 0) {
+            showToast("No valid items to post", true);
+            return;
+        }
 
         setLoading(true);
         try {
-            await sendPost({ action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', [currentTxType === 'receive' ? 'po' : 'purpose']: ref, user: user, items: items });
-            closeModal('txModal'); fetchData(); showToast("Posted!");
-        } catch(e) { showToast(e.message, true); }
-        finally { setLoading(false); }
+            await sendPost({ 
+                action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
+                [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
+                user: user, 
+                items: items 
+            });
+            closeModal('txModal'); 
+            fetchData(); 
+            showToast("Transaction Posted Successfully!");
+        } catch(e) { 
+            alert("System Error: " + e.message); 
+        } finally { 
+            setLoading(false); 
+        }
     }
 
     // --- Master Data ---
@@ -392,7 +421,7 @@
                 user: user
             });
             closeModal('createModal'); fetchData(); showToast("Created!");
-        } catch(e) { showToast(e.message, true); }
+        } catch(e) { alert(e.message); }
         finally { setLoading(false); }
     }
 

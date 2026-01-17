@@ -4,101 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WMS - Warehouse Management System</title>
-    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
-
     <style>
         /* --- SAP Fiori Style Theme --- */
         :root {
-            --sap-shell-color: #354a5f;
-            --sap-bg-color: #edf0f4;
-            --sap-surface-color: #ffffff;
-            --sap-text-color: #32363a;
-            --sap-border-color: #d9d9d9;
-            --sap-primary: #0a6ed1;
-            --sap-primary-hover: #0854a0;
-            --sap-success: #107e3e;
-            --sap-critical: #bb0000;
-            --sap-warning: #e9730c;
+            --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
+            --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
+            --sap-primary: #0a6ed1; --sap-primary-hover: #0854a0;
+            --sap-success: #107e3e; --sap-critical: #bb0000; --sap-warning: #e9730c;
             --sap-font-family: "72", "Arial", "Helvetica", sans-serif;
         }
-
-        body { 
-            margin: 0; padding: 0; 
-            font-family: var(--sap-font-family); 
-            background-color: var(--sap-bg-color); 
-            color: var(--sap-text-color); 
-            font-size: 0.875rem; 
-            line-height: 1.4;
-        }
+        body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
         
         /* Layout */
-        .shell-bar { 
-            background-color: var(--sap-shell-color); 
-            height: 44px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 1rem; 
-            color: white; 
-            box-shadow: 0 4px 5px rgba(0,0,0,0.05); 
-            position: sticky; top: 0; z-index: 100;
-        }
+        .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-        
-        .page-header { 
-            background-color: var(--sap-surface-color); 
-            padding: 1.5rem 2rem; 
-            border-bottom: 1px solid var(--sap-border-color); 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
+        .page-header { background-color: var(--sap-surface-color); padding: 1.5rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
         
-        /* Inputs */
-        .std-input { 
-            height: 36px;
-            padding: 0 10px; 
-            border: 1px solid #89919a; 
-            border-radius: 4px; 
-            font-size: 14px; 
-            width: 100%; box-sizing: border-box; 
-            background-color: white;
-            font-family: var(--sap-font-family);
-            transition: border-color 0.2s;
-        }
+        /* Components */
+        .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
         .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        /* Buttons */
-        .std-btn { 
-            height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; 
-            font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
-            transition: all 0.1s; border: 1px solid transparent; white-space: nowrap;
-        }
-        .btn-primary, .btn-po, .btn-issue { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
-        .btn-primary:hover { background-color: var(--sap-primary-hover); }
+        .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
+        .btn-primary, .btn-po, .btn-issue { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+        .btn-primary:hover, .btn-po:hover, .btn-issue:hover { background-color: var(--sap-primary-hover); border-color: var(--sap-primary-hover); }
         .btn-transparent, .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
-        .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } 
-        .btn-issue:hover { background-color: #fff5f5; }
+        .btn-transparent:hover, .btn-master:hover { background-color: rgba(10, 110, 209, 0.05); }
+        .btn-issue { background-color: var(--sap-bg-color); color: #c0392b; border-color: #c0392b; } .btn-issue:hover { background-color: #fff5f5; }
 
-        /* Table */
-        .table-container { 
-            background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; 
-            overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem;
-        }
+        /* Tables */
+        .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
+        /* History Table Specifics */
+        .history-table th { background: #fff; border-bottom: 1px solid #eee; font-size: 11px; padding: 8px 10px; }
+        .history-table td { padding: 8px 10px; font-size: 13px; color: #555; }
+        .history-table tr:hover { background-color: #f5f7fa; }
+        .hist-plus { color: var(--sap-success); font-weight: bold; }
+        .hist-minus { color: var(--sap-critical); font-weight: bold; }
+
+        /* Toolbar & Grid */
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .spacer { flex-grow: 1; }
-
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
-        .status-ok { background-color: var(--sap-success); }
-        .status-low { background-color: var(--sap-warning); }
-        .status-crit { background-color: var(--sap-critical); }
-        
+        .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
         .col-pn { font-weight: bold; color: var(--sap-primary); } 
         .col-stock { font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em;}
 
@@ -116,36 +71,32 @@
         .form-full { grid-column: span 2; }
         .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
         
-        /* Transaction Table */
+        /* Transaction Table Inputs */
         .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
         .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
         .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
         .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
+        .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
 
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
-        /* Mobile Responsive */
+        /* RWD */
         @media (max-width: 768px) {
             .page-header { padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
             .page-header > div { width: 100%; }
             .page-header button { width: 100%; margin-top: 5px; }
             .content-area { padding: 10px; }
             .toolbar { gap: 8px; }
-            .std-btn { flex: 1 1 40%; }
-            .btn-master { flex: 1 1 100%; }
+            .std-btn { flex: 1 1 40%; } .btn-master { flex: 1 1 100%; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
-            .spacer { display: none; }
-            .toolbar > div[style*="width:1px"] { display: none; }
+            .spacer { display: none; } .toolbar > div[style*="width:1px"] { display: none; }
             .col-model, td:nth-child(3), .col-desc, td:nth-child(4), .col-unit, td:nth-child(6) { display: none; }
-            .col-pn { width: auto; }
-            .col-stock { width: 70px; }
+            .col-pn { width: auto; } .col-stock { width: 70px; }
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
-            
-            /* Mobile Modal Adjustments for User Input */
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
         }
     </style>
@@ -181,7 +132,6 @@
         <button class="std-btn btn-master" onclick="openCreateMasterModal()">
             <span data-i18n="btn_create_master">Create Material</span>
         </button>
-
         <div class="spacer"></div>
         <input type="text" id="searchInput" class="std-input" style="width: 280px;" placeholder="Search..." onkeyup="renderTable()">
     </div>
@@ -200,7 +150,7 @@
                     <th data-i18n="col_model">Model</th>
                     <th data-i18n="col_desc">Description</th>
                     <th class="col-stock" style="width:100px;" data-i18n="col_stock">Unrestricted</th>
-                    <th class="col-unit" style="width:60px;" data-i18n="col_unit">UoM</th>
+                    <th style="width:60px;" data-i18n="col_unit">UoM</th>
                     <th style="width:80px; text-align:center;"></th>
                 </tr>
             </thead>
@@ -217,31 +167,13 @@
         </div>
         <div class="dialog-content">
             <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-                <div>
-                    <label class="form-label" id="txRefLabel">Reference Document</label>
-                    <input type="text" id="txRef" class="std-input">
-                </div>
-                <div>
-                    <label class="form-label" data-i18n="lbl_user">User Name</label>
-                    <input type="text" id="txUser" class="std-input" placeholder="Your Name">
-                </div>
-                <div>
-                    <label class="form-label">Posting Date</label>
-                    <input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9; color:#333;">
-                </div>
+                <div><label class="form-label" id="txRefLabel">Reference Document</label><input type="text" id="txRef" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_user">User Name</label><input type="text" id="txUser" class="std-input" placeholder="Your Name"></div>
+                <div><label class="form-label">Posting Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9; color:#333;"></div>
             </div>
-
             <div style="font-size:12px; font-weight:bold; margin-bottom:5px; color:#666; text-transform:uppercase;">Items</div>
             <table class="tx-table">
-                <thead>
-                    <tr>
-                        <th style="width:140px;">Part Number</th>
-                        <th style="min-width:150px;">Material Description</th>
-                        <th style="width:100px;">Quantity</th>
-                        <th style="width:80px;">Unit</th>
-                        <th style="width:30px;"></th>
-                    </tr>
-                </thead>
+                <thead><tr><th style="width:140px;">Part Number</th><th style="min-width:150px;">Description</th><th style="width:100px;">Qty</th><th style="width:80px;">Unit</th><th style="width:30px;"></th></tr></thead>
                 <tbody id="txBody"></tbody>
             </table>
             <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ Add Line Item</button>
@@ -255,43 +187,17 @@
 
 <div id="createModal" class="modal-overlay">
     <div class="std-dialog">
-        <div class="dialog-header">
-            <span data-i18n="modal_create_title">Create Material</span>
-            <span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span>
-        </div>
+        <div class="dialog-header"><span data-i18n="modal_create_title">Create Material</span><span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span></div>
         <div class="dialog-content">
             <div class="form-grid">
-                <div class="form-full">
-                    <label class="form-label" data-i18n="col_pn">Material Number (ID)</label>
-                    <input type="text" id="newId" class="std-input" placeholder="e.g. 70401609" onchange="checkMasterExists()">
-                    <div id="masterFeedback" style="font-size:11px; margin-top:2px; height:15px;"></div>
-                </div>
-                <div class="form-full">
-                    <label class="form-label" data-i18n="col_model">Material Type / Model</label>
-                    <input type="text" id="newModel" class="std-input">
-                </div>
-                <div class="form-full">
-                    <label class="form-label" data-i18n="col_desc">Material Description</label>
-                    <input type="text" id="newDesc" class="std-input">
-                </div>
-                <div>
-                    <label class="form-label" data-i18n="col_min_stock">Safety Stock</label>
-                    <input type="number" id="newMinStock" class="std-input" value="0">
-                </div>
-                <div>
-                    <label class="form-label" data-i18n="col_unit">Base UoM</label>
-                    <input type="text" id="newUnit" class="std-input" placeholder="PC">
-                </div>
+                <div class="form-full"><label class="form-label" data-i18n="col_pn">Material Number</label><input type="text" id="newId" class="std-input" placeholder="e.g. 70401609" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px; margin-top:2px; height:15px;"></div></div>
+                <div class="form-full"><label class="form-label" data-i18n="col_model">Model</label><input type="text" id="newModel" class="std-input"></div>
+                <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
+                <div><label class="form-label" data-i18n="col_min_stock">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
+                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input" placeholder="PC"></div>
             </div>
-            
-            <div style="margin-top:15px;">
-                <label class="form-label" data-i18n="lbl_user">User Name</label>
-                <input type="text" id="newUser" class="std-input" placeholder="Your Name">
-            </div>
-
-            <div style="margin-top:20px; font-size:12px; color:#555; background:#f2f2f2; padding:10px; border-radius:4px; border-left: 3px solid #0a6ed1;">
-                ℹ️ <span data-i18n="msg_master_note">Initial stock will be 0. Please use 'Goods Receipt' to post initial stock.</span>
-            </div>
+            <div style="margin-top:15px;"><label class="form-label" data-i18n="lbl_user">User Name</label><input type="text" id="newUser" class="std-input" placeholder="Your Name"></div>
+            <div style="margin-top:20px; font-size:12px; color:#555; background:#f2f2f2; padding:10px; border-radius:4px; border-left:3px solid #0a6ed1;">ℹ️ <span data-i18n="msg_master_note">Initial stock will be 0. Use 'Goods Receipt' to post stock.</span></div>
         </div>
         <div class="dialog-footer">
             <button class="std-btn btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button>
@@ -307,10 +213,13 @@
             <span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span>
         </div>
         <div class="dialog-content">
-            <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
-            <div id="detModel" style="color:#666; margin-bottom:20px; font-weight:600;"></div>
+            <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px;">
+                <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
+                <div id="detModel" style="color:#333; font-weight:bold; font-size:1.1em; margin-bottom:5px;"></div>
+                <div id="detDesc" style="color:#666; font-size:0.95em; line-height:1.4;"></div>
+            </div>
             
-            <div style="background:#f8f9fa; padding:15px; border-radius:4px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#f8f9fa; padding:15px; border-radius:4px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <div>
                     <div style="font-size:11px; color:#666; text-transform:uppercase;">Unrestricted Stock</div>
                     <div id="detStock" style="font-size:32px; font-weight:normal; color:#333;">0</div>
@@ -321,9 +230,15 @@
                 </div>
             </div>
             
-            <div style="margin-top:20px;">
-                <label class="form-label">Material Description</label>
-                <div id="detDesc" style="padding:10px; background:#fff; border:1px solid #ddd; border-radius:4px; color:#333;"></div>
+            <div style="font-size:12px; font-weight:bold; color:#6a6d70; margin-bottom:5px; text-transform:uppercase;">Movement History</div>
+            <div style="border:1px solid #eee; border-radius:4px; max-height:200px; overflow-y:auto;">
+                <table class="history-table" style="width:100%; border-collapse:collapse;">
+                    <thead style="position:sticky; top:0; z-index:1;">
+                        <tr><th>Date</th><th>Ref / User</th><th>Act</th><th style="text-align:right">Qty</th></tr>
+                    </thead>
+                    <tbody id="detHistoryBody">
+                        </tbody>
+                </table>
             </div>
         </div>
         <div class="dialog-footer">
@@ -336,11 +251,14 @@
 
 <script>
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwuC6NPNe3OZUNbvG4s88l69sb-Drr22JfThip313pLKxYMFv1XAMBNJmFk52rJvPzm/exec"; 
+    // 請填寫您的 Google Script URL
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbz66ZovjWUM47q4e_VXiulrBOzVzZL7x-9e2r1OjoftFOj5sqyRr53klh7XnNkjVp68/exec"; 
     // ==========================================
 
     let inventoryList = [];
     let materialMaster = {}; 
+    let historyList = []; // 新增 History 變數
     let currentTxType = 'receive'; 
     let currentLang = 'en';
 
@@ -376,6 +294,7 @@
             const data = await res.json();
             materialMaster = data.master; 
             inventoryList = data.inventory;
+            historyList = data.history || []; // 讀取歷史
             renderTable();
         } catch(e) { console.error(e); showToast("Network Error", true); }
         finally { setLoading(false); }
@@ -388,24 +307,60 @@
         return json;
     }
 
-    // --- Transaction Logic (PO & Issue) ---
+    // --- Details Modal Logic (With History) ---
+    function openDetails(index) {
+        const item = inventoryList[index];
+        document.getElementById('detId').innerText = item.id;
+        document.getElementById('detModel').innerText = item.model;
+        document.getElementById('detDesc').innerText = item.description; // 描述現在在上方
+        document.getElementById('detStock').innerText = item.stock;
+        document.getElementById('detUnit').innerText = item.unit;
+
+        // Render History Table
+        const tbody = document.getElementById('detHistoryBody');
+        tbody.innerHTML = "";
+        
+        // Filter history for this item
+        const itemHistory = historyList.filter(h => h.id === item.id);
+
+        if(itemHistory.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px; color:#999;'>No history found.</td></tr>";
+        } else {
+            itemHistory.forEach(h => {
+                const dateObj = new Date(h.date);
+                const dateStr = dateObj.toLocaleDateString();
+                const qtyClass = h.qty > 0 ? "hist-plus" : "hist-minus";
+                const row = `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td>
+                            <div style="font-weight:bold; color:#333;">${h.ref}</div>
+                            <div style="font-size:11px; color:#888;">${h.user}</div>
+                        </td>
+                        <td>${h.action}</td>
+                        <td style="text-align:right;" class="${qtyClass}">${h.qty > 0 ? '+' : ''}${h.qty}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        openModal('detailsModal');
+    }
+
+    // --- Transaction Logic ---
     function openTxModal(type) {
         currentTxType = type;
         const isReceive = type === 'receive';
-        
         document.getElementById('txTitle').innerText = isReceive ? i18n[currentLang].tx_po_title : i18n[currentLang].tx_issue_title;
         document.getElementById('txRefLabel').innerText = isReceive ? i18n[currentLang].lbl_po : i18n[currentLang].lbl_usage;
         document.getElementById('txRef').placeholder = isReceive ? "e.g. 4500000123" : "e.g. 1000-CC";
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('txRef').value = "";
-        document.getElementById('txUser').value = ""; // Clear user input
-        
+        document.getElementById('txUser').value = "";
         document.getElementById('txBody').innerHTML = "";
         addTxRow(); addTxRow(); addTxRow(); 
-        
-        const btn = document.getElementById('txSubmitBtn');
-        btn.innerText = "Post";
-
+        document.getElementById('txSubmitBtn').innerText = "Post";
         openModal('txModal');
     }
 
@@ -426,12 +381,8 @@
         const row = input.parentElement.parentElement;
         const info = row.querySelector('.tx-info');
         const unit = row.querySelector('.tx-unit');
-        
         let item = inventoryList.find(i => i.id === id);
-        if (!item && currentTxType === 'receive') {
-            item = materialMaster[id]; 
-        }
-
+        if (!item && currentTxType === 'receive') { item = materialMaster[id]; }
         if (item) {
             info.value = (item.description || item.desc || item.model || "");
             unit.value = item.unit;
@@ -440,19 +391,16 @@
                 row.querySelector('.tx-qty').placeholder = `Max: ${stock}`;
             }
         } else {
-            info.value = "";
-            unit.value = "";
+            info.value = ""; unit.value = "";
             if(currentTxType === 'issue') input.style.color = '#bb0000';
         }
     }
 
     async function submitTx() {
         const ref = document.getElementById('txRef').value;
-        const user = document.getElementById('txUser').value; // Get User
-
+        const user = document.getElementById('txUser').value;
         if(!ref) { showToast("Reference is required", true); return; }
-        if(!user) { showToast("User Name is required", true); return; } // Validate User
-
+        if(!user) { showToast("User Name is required", true); return; }
         const rows = document.querySelectorAll('#txBody tr');
         const items = [];
         for(let row of rows) {
@@ -461,14 +409,11 @@
             if(id && qty > 0) items.push({ id, qty });
         }
         if(items.length === 0) return;
-
         setLoading(true);
         try {
             await sendPost({
                 action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue',
-                [currentTxType === 'receive' ? 'po' : 'purpose']: ref,
-                user: user, // Send User
-                items: items
+                [currentTxType === 'receive' ? 'po' : 'purpose']: ref, user: user, items: items
             });
             closeModal('txModal');
             fetchData();
@@ -477,65 +422,41 @@
         finally { setLoading(false); }
     }
 
-    // --- Master Data Logic ---
+    // --- Master Data ---
     function openCreateMasterModal() {
-        document.getElementById('newId').value = "";
-        document.getElementById('newModel').value = "";
-        document.getElementById('newDesc').value = "";
-        document.getElementById('newUnit').value = "";
-        document.getElementById('newMinStock').value = 0;
-        document.getElementById('newUser').value = ""; // Reset User
+        document.getElementById('newId').value = ""; document.getElementById('newModel').value = "";
+        document.getElementById('newDesc').value = ""; document.getElementById('newUnit').value = "";
+        document.getElementById('newMinStock').value = 0; document.getElementById('newUser').value = "";
         document.getElementById('masterFeedback').innerText = "";
         openModal('createModal');
     }
-
     function checkMasterExists() {
         const id = document.getElementById('newId').value.trim();
         const fb = document.getElementById('masterFeedback');
         if(inventoryList.find(i => i.id === id) || materialMaster[id]) {
-            fb.innerText = "⚠️ Material already exists";
-            fb.style.color = "#bb0000";
+            fb.innerText = "⚠️ Material already exists"; fb.style.color = "#bb0000";
         } else {
-            fb.innerText = "✅ Available";
-            fb.style.color = "#107e3e";
+            fb.innerText = "✅ Available"; fb.style.color = "#107e3e";
         }
     }
-
     async function submitCreateMaster() {
         const id = document.getElementById('newId').value.trim();
-        const user = document.getElementById('newUser').value; // Get User
-        
+        const user = document.getElementById('newUser').value;
         if(!id) return;
-        if(!user) { showToast("User Name is required", true); return; } // Validate
-
+        if(!user) { showToast("User Name is required", true); return; }
         setLoading(true);
         try {
             await sendPost({
-                action: 'create_master',
-                id: id,
-                model: document.getElementById('newModel').value,
-                description: document.getElementById('newDesc').value,
-                unit: document.getElementById('newUnit').value,
-                minStock: document.getElementById('newMinStock').value,
-                user: user // Send User
+                action: 'create_master', id: id, model: document.getElementById('newModel').value,
+                description: document.getElementById('newDesc').value, unit: document.getElementById('newUnit').value,
+                minStock: document.getElementById('newMinStock').value, user: user
             });
-            closeModal('createModal');
-            fetchData();
-            showToast("Material Created");
+            closeModal('createModal'); fetchData(); showToast("Material Created");
         } catch(e) { showToast(e.message, true); }
         finally { setLoading(false); }
     }
 
-    function openDetails(index) {
-        const item = inventoryList[index];
-        document.getElementById('detId').innerText = item.id;
-        document.getElementById('detModel').innerText = item.model;
-        document.getElementById('detDesc').innerText = item.description;
-        document.getElementById('detStock').innerText = item.stock;
-        document.getElementById('detUnit').innerText = item.unit;
-        openModal('detailsModal');
-    }
-
+    // --- Shared ---
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInput').value.toLowerCase();
@@ -545,7 +466,6 @@
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
                 else if (item.stock <= (item.minStock||0)) statusClass = 'status-low';
-
                 const tr = document.createElement('tr');
                 tr.onclick = () => openDetails(index);
                 tr.innerHTML = `
@@ -561,15 +481,11 @@
             }
         });
     }
-
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'zh' : 'en';
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            el.innerText = i18n[currentLang][el.getAttribute('data-i18n')];
-        });
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]; });
         renderTable();
     }
-    
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
@@ -578,7 +494,6 @@
         t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; 
         t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); 
     }
-
     fetchData();
 </script>
 </body>

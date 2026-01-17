@@ -1,677 +1,677 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WMS</title>
-    
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/354a5f/ffffff.png?text=WMS&font=roboto">
-    <link rel="icon" href="https://placehold.co/192x192/354a5f/ffffff.png?text=WMS&font=roboto">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WMS</title>
+    
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/354a5f/ffffff.png?text=WMS&font=roboto">
+    <link rel="icon" href="https://placehold.co/192x192/354a5f/ffffff.png?text=WMS&font=roboto">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <style>
-        /* --- SAP Fiori Style Theme --- */
-        :root {
-            --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
-            --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
-            --sap-primary: #0a6ed1; --sap-success: #107e3e; --sap-critical: #bb0000; --sap-warning: #e9730c;
-            --sap-font-family: "72", "Arial", "Helvetica", sans-serif;
-        }
-        body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
-        
-        .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-        
-        .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
-        .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
-        
-        .nav-tabs { display: flex; gap: 20px; }
-        .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
-        .nav-item:hover { color: var(--sap-primary); }
-        .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        /* --- SAP Fiori Style Theme --- */
+        :root {
+            --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
+            --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
+            --sap-primary: #0a6ed1; --sap-success: #107e3e; --sap-critical: #bb0000; --sap-warning: #e9730c;
+            --sap-font-family: "72", "Arial", "Helvetica", sans-serif;
+        }
+        body { margin: 0; padding: 0; font-family: var(--sap-font-family); background-color: var(--sap-bg-color); color: var(--sap-text-color); font-size: 0.875rem; line-height: 1.4; }
+        
+        .shell-bar { background-color: var(--sap-shell-color); height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; color: white; box-shadow: 0 4px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .shell-logo { font-weight: bold; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+        
+        .page-header { background-color: var(--sap-surface-color); padding: 1rem 2rem; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; }
+        .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
+        
+        .nav-tabs { display: flex; gap: 20px; }
+        .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+        .nav-item:hover { color: var(--sap-primary); }
+        .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
-        .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
-        .card-value { font-size: 36px; font-weight: normal; color: var(--sap-text-color); }
-        .card-sub { font-size: 12px; color: #888; margin-top: 5px; }
-        .card.alert { border-left: 5px solid var(--sap-critical); }
-        .card.warn { border-left: 5px solid var(--sap-warning); }
-        .card.safe { border-left: 5px solid var(--sap-success); }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
+        .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
+        .card-value { font-size: 36px; font-weight: normal; color: var(--sap-text-color); }
+        .card-sub { font-size: 12px; color: #888; margin-top: 5px; }
+        .card.alert { border-left: 5px solid var(--sap-critical); }
+        .card.warn { border-left: 5px solid var(--sap-warning); }
+        .card.safe { border-left: 5px solid var(--sap-success); }
 
-        .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; min-width: 1000px; }
-        thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
-        th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
-        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
-        tr:hover { background-color: #ebf5fe; cursor: pointer; }
+        .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; min-width: 1000px; }
+        thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
+        th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
+        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
+        tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        .col-status { width: 35px; text-align: center; padding: 0 !important; }
-        .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
-        th.col-pn, td.col-pn { padding-left: 12px !important; }
-        .col-model { width: 220px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
-        .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
-        .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
-        .col-stock { width: 90px; font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; }
-        .col-unit { width: 60px; }
-        .col-action { width: 80px; text-align: center; }
-        .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .col-status { width: 35px; text-align: center; padding: 0 !important; }
+        .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
+        th.col-pn, td.col-pn { padding-left: 12px !important; }
+        .col-model { width: 220px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
+        .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
+        .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
+        .col-stock { width: 90px; font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; }
+        .col-unit { width: 60px; }
+        .col-action { width: 80px; text-align: center; }
+        .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
-        .spacer { flex-grow: 1; }
+        .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
+        .spacer { flex-grow: 1; }
 
-        .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
-        .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
-        .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
-        
-        .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
-        
-        .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
-        .btn-issue { background-color: var(--sap-critical); color: white; border-color: var(--sap-critical); } .btn-issue:hover { opacity: 0.9; }
-        .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
-        .btn-primary { background-color: var(--sap-primary); color: white; }
-        .btn-transparent { background: transparent; color: var(--sap-primary); }
-        .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
+        .std-input { height: 36px; padding: 0 10px; border: 1px solid #89919a; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: white; font-family: var(--sap-font-family); transition: border-color 0.2s; }
+        .std-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
+        .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
+        
+        .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
+        
+        .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
+        .btn-issue { background-color: var(--sap-critical); color: white; border-color: var(--sap-critical); } .btn-issue:hover { opacity: 0.9; }
+        .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
+        .btn-primary { background-color: var(--sap-primary); color: white; }
+        .btn-transparent { background: transparent; color: var(--sap-primary); }
+        .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
 
-        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; vertical-align: middle; }
-        .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; vertical-align: middle; }
+        .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
-        .std-dialog.large { width: 950px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .dialog-header { padding: 10px 20px; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; color: var(--sap-text-color); background: var(--sap-surface-color); }
-        .dialog-content { padding: 20px; overflow-y: auto; background: var(--sap-surface-color); }
-        .dialog-footer { padding: 10px 20px; border-top: 1px solid var(--sap-border-color); display: flex; justify-content: flex-end; gap: 10px; background: #fdfdfd; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .std-dialog { background: white; width: 500px; border-radius: 6px; display: flex; flex-direction: column; animation: fadeIn 0.2s; max-height: 90vh; box-shadow: 0 0 20px rgba(0,0,0,0.15); border: 1px solid var(--sap-border-color); }
+        .std-dialog.large { width: 950px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .dialog-header { padding: 10px 20px; border-bottom: 1px solid var(--sap-border-color); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; color: var(--sap-text-color); background: var(--sap-surface-color); }
+        .dialog-content { padding: 20px; overflow-y: auto; background: var(--sap-surface-color); }
+        .dialog-footer { padding: 10px 20px; border-top: 1px solid var(--sap-border-color); display: flex; justify-content: flex-end; gap: 10px; background: #fdfdfd; }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-full { grid-column: span 2; }
-        .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
-        .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
-        .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
-        .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
-        .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
-        .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
-        .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
-        
-        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-full { grid-column: span 2; }
+        .form-label { display: block; font-size: 12px; color: #6a6d70; margin-bottom: 4px; }
+        .tx-table { width: 100%; border: 1px solid var(--sap-border-color); border-radius: 4px; border-collapse: separate; border-spacing: 0; margin-bottom: 10px;}
+        .tx-table th { background: #f2f2f2; padding: 10px; font-size: 11px; border-bottom: 1px solid var(--sap-border-color); text-transform: uppercase; color: #666; font-weight: bold; }
+        .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--sap-border-color); background: #fff; vertical-align: top; }
+        .tx-input { width: 100%; padding: 6px 8px; border: 1px solid #89919a; border-radius: 4px; background: #fff; font-family: inherit; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s; }
+        .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
+        .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
+        
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
-        @media (max-width: 992px) { 
-            .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
-            .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
-            .nav-item { font-size: 14px; }
-            .toolbar { flex-wrap: wrap; gap: 8px; }
-            .std-btn { flex: 1 1 auto; justify-content: center; } 
-            .spacer { display: none; }
-            .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
-            .desktop-only { display: table-cell !important; }
-            .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
-            .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
-        }
-    </style>
+        @media (max-width: 992px) { 
+            .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
+            .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
+            .nav-item { font-size: 14px; }
+            .toolbar { flex-wrap: wrap; gap: 8px; }
+            .std-btn { flex: 1 1 auto; justify-content: center; } 
+            .spacer { display: none; }
+            .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
+            .desktop-only { display: table-cell !important; }
+            .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
+            .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="shell-bar">
-    <div class="shell-logo">
-        <span style="font-weight:bold; font-size:1.2em;">Sunlit AZ</span> WMS
-    </div>
-    <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
+    <div class="shell-logo">
+        <span style="font-weight:bold; font-size:1.2em;">SAP</span> Fiori WMS
+    </div>
+    <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
 </div>
 
 <div class="page-header">
-    <div>
-        <div class="nav-tabs">
-            <div class="nav-item active" id="tabDash" onclick="switchView('dashboard')" data-i18n="tab_dash">Dashboard</div>
-            <div class="nav-item" id="tabInv" onclick="switchView('inventory')" data-i18n="tab_inv">Inventory</div>
-            <div class="nav-item" id="tabMaster" onclick="switchView('master')" data-i18n="tab_master">Master Data</div>
-        </div>
-        <div style="color:#6a6d70; font-size:12px; margin-top:8px;">Sunlit AZ / Spare Part Management</div>
-    </div>
-    <button class="std-btn btn-transparent" onclick="fetchData()">
-        <span style="font-size:16px;">↻</span> <span data-i18n="btn_refresh">Refresh</span>
-    </button>
+    <div>
+        <div class="nav-tabs">
+            <div class="nav-item active" id="tabDash" onclick="switchView('dashboard')" data-i18n="tab_dash">Dashboard</div>
+            <div class="nav-item" id="tabInv" onclick="switchView('inventory')" data-i18n="tab_inv">Inventory</div>
+            <div class="nav-item" id="tabMaster" onclick="switchView('master')" data-i18n="tab_master">Master Data</div>
+        </div>
+        <div style="color:#6a6d70; font-size:12px; margin-top:8px;">Plant 1000 / Storage Location 0001</div>
+    </div>
+    <button class="std-btn btn-transparent" onclick="fetchData()">
+        <span style="font-size:16px;">↻</span> <span data-i18n="btn_refresh">Refresh</span>
+    </button>
 </div>
 
 <div class="content-area">
-    <div id="viewDashboard">
-        <div class="dashboard-grid">
-            <div class="card alert">
-                <div class="card-title" data-i18n="card_crit">Critical Stock</div>
-                <div class="card-value" id="dashCrit" style="color:#bb0000">0</div>
-                <div class="card-sub" data-i18n="sub_crit">Items Out of Stock</div>
-            </div>
-            <div class="card warn">
-                <div class="card-title" data-i18n="card_low">Low Stock</div>
-                <div class="card-value" id="dashLow" style="color:#e9730c">0</div>
-                <div class="card-sub" data-i18n="sub_low">Items below safety level</div>
-            </div>
-            <div class="card safe">
-                <div class="card-title" data-i18n="card_total">Total Items</div>
-                <div class="card-value" id="dashTotal">0</div>
-                <div class="card-sub" data-i18n="sub_total">Active SKU Count</div>
-            </div>
-            <div class="card">
-                <div class="card-title" data-i18n="card_hist">Recent Movements</div>
-                <div style="font-size:12px; color:#555; max-height:100px; overflow-y:auto;" id="dashHistory"></div>
-            </div>
-        </div>
-    </div>
+    <div id="viewDashboard">
+        <div class="dashboard-grid">
+            <div class="card alert">
+                <div class="card-title" data-i18n="card_crit">Critical Stock</div>
+                <div class="card-value" id="dashCrit" style="color:#bb0000">0</div>
+                <div class="card-sub" data-i18n="sub_crit">Items Out of Stock</div>
+            </div>
+            <div class="card warn">
+                <div class="card-title" data-i18n="card_low">Low Stock</div>
+                <div class="card-value" id="dashLow" style="color:#e9730c">0</div>
+                <div class="card-sub" data-i18n="sub_low">Items below safety level</div>
+            </div>
+            <div class="card safe">
+                <div class="card-title" data-i18n="card_total">Total Items</div>
+                <div class="card-value" id="dashTotal">0</div>
+                <div class="card-sub" data-i18n="sub_total">Active SKU Count</div>
+            </div>
+            <div class="card">
+                <div class="card-title" data-i18n="card_hist">Recent Movements</div>
+                <div style="font-size:12px; color:#555; max-height:100px; overflow-y:auto;" id="dashHistory"></div>
+            </div>
+        </div>
+    </div>
 
-    <div id="viewInventory" style="display:none;">
-        <div class="toolbar">
-            <button class="std-btn btn-po" onclick="openTxModal('receive')"><span data-i18n="btn_po">Goods Receipt</span></button>
-            <button class="std-btn btn-issue" onclick="openTxModal('issue')"><span data-i18n="btn_issue">Goods Issue</span></button>
-            <button class="std-btn btn-excel" onclick="exportToExcel('inventory')">📥 Excel</button>
-            <div class="spacer"></div>
-            <input type="text" id="searchInv" class="std-input" style="width:250px;" placeholder="Search Inventory..." onkeyup="renderTable()">
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-status"></th>
-                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
-                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
-                        <th class="col-loc" data-i18n="col_loc">Loc</th>
-                        <th class="col-stock" data-i18n="col_stock">Stock</th>
-                        <th class="col-unit desktop-only" data-i18n="col_unit">Unit</th>
-                        <th class="col-action"></th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryBody"></tbody>
-            </table>
-        </div>
-    </div>
+    <div id="viewInventory" style="display:none;">
+        <div class="toolbar">
+            <button class="std-btn btn-po" onclick="openTxModal('receive')"><span data-i18n="btn_po">Goods Receipt</span></button>
+            <button class="std-btn btn-issue" onclick="openTxModal('issue')"><span data-i18n="btn_issue">Goods Issue</span></button>
+            <button class="std-btn btn-excel" onclick="exportToExcel('inventory')">📥 Excel</button>
+            <div class="spacer"></div>
+            <input type="text" id="searchInv" class="std-input" style="width:250px;" placeholder="Search Inventory..." onkeyup="renderTable()">
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-status"></th>
+                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
+                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
+                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
+                        <th class="col-loc" data-i18n="col_loc">Loc</th>
+                        <th class="col-stock" data-i18n="col_stock">Stock</th>
+                        <th class="col-unit desktop-only" data-i18n="col_unit">Unit</th>
+                        <th class="col-action"></th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+        </div>
+    </div>
 
-    <div id="viewMaster" style="display:none;">
-        <div class="toolbar">
-            <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
-            <button class="std-btn btn-excel" onclick="exportToExcel('master')">📥 Excel</button>
-            <div class="spacer"></div>
-            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
-                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
-                        <th class="col-unit" data-i18n="col_unit">Base UoM</th>
-                        <th class="col-stock desktop-only" data-i18n="lbl_safe">Safety Stock</th>
-                        <th class="col-action"></th>
-                    </tr>
-                </thead>
-                <tbody id="masterBody"></tbody>
-            </table>
-        </div>
-    </div>
+    <div id="viewMaster" style="display:none;">
+        <div class="toolbar">
+            <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
+            <button class="std-btn btn-excel" onclick="exportToExcel('master')">📥 Excel</button>
+            <div class="spacer"></div>
+            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
+                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
+                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
+                        <th class="col-unit" data-i18n="col_unit">Base UoM</th>
+                        <th class="col-stock desktop-only" data-i18n="lbl_safe">Safety Stock</th>
+                        <th class="col-action"></th>
+                    </tr>
+                </thead>
+                <tbody id="masterBody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div id="loading" style="display:none; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:2000;">
-    <div class="loading-spinner"></div>
-    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
+    <div class="loading-spinner"></div>
+    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
 </div>
 
 <div id="msgModal" class="modal-overlay" style="z-index: 2000;">
-    <div class="std-dialog" style="width: 400px; max-width: 90%;">
-        <div class="dialog-header">
-            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
-        </div>
-        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
-        <div class="dialog-footer">
-            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
-        </div>
-    </div>
+    <div class="std-dialog" style="width: 400px; max-width: 90%;">
+        <div class="dialog-header">
+            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
+        </div>
+        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
+        </div>
+    </div>
 </div>
 
 <div id="txModal" class="modal-overlay">
-    <div class="std-dialog large">
-        <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
-        <div class="dialog-content">
-            <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-                <div><label class="form-label" data-i18n="lbl_ref">PO Number</label><input type="text" id="txRef" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
-            </div>
-            <table class="tx-table">
-                <thead><tr><th style="width:140px;" data-i18n="col_pn">Part Number</th><th style="min-width:150px;" data-i18n="col_desc">Description</th><th style="width:80px;" data-i18n="lbl_qty">Qty</th><th style="width:70px;" data-i18n="col_loc">Loc</th><th style="width:30px;"></th></tr></thead>
-                <tbody id="txBody"></tbody>
-            </table>
-            <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ <span data-i18n="btn_add_line">Add Line</span></button>
-        </div>
-        <div class="dialog-footer">
-            <button class="std-btn btn-transparent" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn btn-primary" id="txSubmitBtn" onclick="submitTx()" data-i18n="btn_post">Post</button>
-        </div>
-    </div>
+    <div class="std-dialog large">
+        <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
+        <div class="dialog-content">
+            <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
+                <div><label class="form-label" data-i18n="lbl_ref">PO Number</label><input type="text" id="txRef" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
+            </div>
+            <table class="tx-table">
+                <thead><tr><th style="width:140px;" data-i18n="col_pn">Part Number</th><th style="min-width:150px;" data-i18n="col_desc">Description</th><th style="width:80px;" data-i18n="lbl_qty">Qty</th><th style="width:70px;" data-i18n="col_loc">Loc</th><th style="width:30px;"></th></tr></thead>
+                <tbody id="txBody"></tbody>
+            </table>
+            <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ <span data-i18n="btn_add_line">Add Line</span></button>
+        </div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-transparent" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn btn-primary" id="txSubmitBtn" onclick="submitTx()" data-i18n="btn_post">Post</button>
+        </div>
+    </div>
 </div>
 
 <div id="createModal" class="modal-overlay">
-    <div class="std-dialog">
-        <div class="dialog-header"><span data-i18n="btn_create">Create Material</span><span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span></div>
-        <div class="dialog-content">
-            <div class="form-grid">
-                <div class="form-full"><label class="form-label" data-i18n="col_pn">Part Number</label><input type="text" id="newId" class="std-input" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px;"></div></div>
-                <div class="form-full"><label class="form-label" data-i18n="col_model">Model</label><input type="text" id="newModel" class="std-input"></div>
-                <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
-                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_safe">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="newUser" class="std-input"></div>
-            </div>
-        </div>
-        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button><button class="std-btn btn-primary" onclick="submitCreateMaster()" data-i18n="btn_save">Save</button></div>
-    </div>
+    <div class="std-dialog">
+        <div class="dialog-header"><span data-i18n="btn_create">Create Material</span><span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span></div>
+        <div class="dialog-content">
+            <div class="form-grid">
+                <div class="form-full"><label class="form-label" data-i18n="col_pn">Part Number</label><input type="text" id="newId" class="std-input" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px;"></div></div>
+                <div class="form-full"><label class="form-label" data-i18n="col_model">Model</label><input type="text" id="newModel" class="std-input"></div>
+                <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
+                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_safe">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
+                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="newUser" class="std-input"></div>
+            </div>
+        </div>
+        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button><button class="std-btn btn-primary" onclick="submitCreateMaster()" data-i18n="btn_save">Save</button></div>
+    </div>
 </div>
 
 <div id="detailsModal" class="modal-overlay">
-    <div class="std-dialog">
-        <div class="dialog-header"><span data-i18n="modal_detail">Details</span><span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span></div>
-        <div class="dialog-content">
-            <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px;">
-                <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
-                <div id="detModel" style="color:#333; font-weight:bold; margin-bottom:5px;"></div>
-                <div id="detDesc" style="color:#666; font-size:0.95em;"></div>
-            </div>
-            <div style="background:#f8f9fa; padding:15px; border-radius:4px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                <div><div style="font-size:11px; color:#666;" data-i18n="col_stock">STOCK</div><div id="detStock" style="font-size:32px; font-weight:normal;">0</div></div>
-                <div style="text-align:right;"><div style="font-size:11px; color:#666;" data-i18n="col_loc">LOCATION</div><div id="detLoc" style="font-size:18px; font-weight:bold; background:#e0e0e0; padding:2px 8px; border-radius:4px;">-</div></div>
-            </div>
-            <div style="font-size:12px; font-weight:bold; color:#6a6d70; margin-top:20px; margin-bottom:5px;" data-i18n="card_hist">HISTORY</div>
-            <div id="detHistory" style="border:1px solid #eee; border-radius:4px; max-height:200px; overflow-y:auto; font-size:12px; padding:10px;"></div>
-        </div>
-        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('detailsModal')" data-i18n="btn_close">Close</button></div>
-    </div>
+    <div class="std-dialog">
+        <div class="dialog-header"><span data-i18n="modal_detail">Details</span><span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span></div>
+        <div class="dialog-content">
+            <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px;">
+                <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
+                <div id="detModel" style="color:#333; font-weight:bold; margin-bottom:5px;"></div>
+                <div id="detDesc" style="color:#666; font-size:0.95em;"></div>
+            </div>
+            <div style="background:#f8f9fa; padding:15px; border-radius:4px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:11px; color:#666;" data-i18n="col_stock">STOCK</div><div id="detStock" style="font-size:32px; font-weight:normal;">0</div></div>
+                <div style="text-align:right;"><div style="font-size:11px; color:#666;" data-i18n="col_loc">LOCATION</div><div id="detLoc" style="font-size:18px; font-weight:bold; background:#e0e0e0; padding:2px 8px; border-radius:4px;">-</div></div>
+            </div>
+            <div style="font-size:12px; font-weight:bold; color:#6a6d70; margin-top:20px; margin-bottom:5px;" data-i18n="card_hist">HISTORY</div>
+            <div id="detHistory" style="border:1px solid #eee; border-radius:4px; max-height:200px; overflow-y:auto; font-size:12px; padding:10px;"></div>
+        </div>
+        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('detailsModal')" data-i18n="btn_close">Close</button></div>
+    </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script>
-    // ==========================================
-    // 請填入您的最新 API 網址 (Do not forget!)
-    // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxLWIXQJARA7CM9ghii3cL3rv0tE441w4YKcZuM6NBfjkq7DROgebHi24kyw7WFY0ic/exec"; 
-    // ==========================================
+    // ==========================================
+    // 請填入您的最新 API 網址 (Do not forget!)
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbxLWIXQJARA7CM9ghii3cL3rv0tE441w4YKcZuM6NBfjkq7DROgebHi24kyw7WFY0ic/exec"; 
+    // ==========================================
 
-    let inventoryList = [];
-    let materialMaster = {};
-    let historyList = [];
-    let currentTxType = 'receive'; 
-    let currentLang = 'en';
+    let inventoryList = [];
+    let materialMaster = {};
+    let historyList = [];
+    let currentTxType = 'receive'; 
+    let currentLang = 'en';
 
-    const i18n = {
-        en: {
-            tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
-            btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
-            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
-            lbl_ref: "PO Number", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
-            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close", btn_ok: "OK",
-            card_crit: "Critical Stock", sub_crit: "Items Out of Stock",
-            card_low: "Low Stock", sub_low: "Below Safety Level",
-            card_total: "Total Items", sub_total: "Active SKU Count",
-            card_hist: "Recent Movements", modal_detail: "Details",
-            txt_display: "Display",
-            msg_unknown_title: "Unknown Part Number",
-            msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving."
-        },
-        zh: {
-            tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
-            btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
-            col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
-            lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
-            btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉", btn_ok: "確定",
-            card_crit: "缺料警告", sub_crit: "庫存為 0",
-            card_low: "低庫存", sub_low: "低於安全水位",
-            card_total: "物料總數", sub_total: "系統內 SKU",
-            card_hist: "最近異動", modal_detail: "詳細資訊",
-            txt_display: "查看",
-            msg_unknown_title: "未知料號",
-            msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。"
-        }
-    };
+    const i18n = {
+        en: {
+            tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
+            btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
+            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
+            lbl_ref: "PO Number", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
+            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close", btn_ok: "OK",
+            card_crit: "Critical Stock (0)", sub_crit: "Items Out of Stock",
+            card_low: "Low Stock", sub_low: "Below Safety Level",
+            card_total: "Total Items", sub_total: "Active SKU Count",
+            card_hist: "Recent Movements", modal_detail: "Details",
+            txt_display: "Display",
+            msg_unknown_title: "Unknown Part Number",
+            msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving."
+        },
+        zh: {
+            tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
+            btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
+            col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
+            lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
+            btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉", btn_ok: "確定",
+            card_crit: "缺料警告 (0)", sub_crit: "庫存為 0",
+            card_low: "低庫存", sub_low: "低於安全水位",
+            card_total: "物料總數", sub_total: "系統內 SKU",
+            card_hist: "最近異動", modal_detail: "詳細資訊",
+            txt_display: "查看",
+            msg_unknown_title: "未知料號",
+            msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。"
+        }
+    };
 
-    function showMsg(title, text) {
-        document.getElementById('msgTitle').innerText = title;
-        document.getElementById('msgContent').innerText = text;
-        openModal('msgModal');
-    }
+    function showMsg(title, text) {
+        document.getElementById('msgTitle').innerText = title;
+        document.getElementById('msgContent').innerText = text;
+        openModal('msgModal');
+    }
 
-    async function fetchData() {
-        if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
-        setLoading(true);
-        try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
+    async function fetchData() {
+        if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
+        setLoading(true);
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
 
-            materialMaster = data.master; 
-            inventoryList = data.inventory;
-            historyList = data.history || [];
-            
-            renderTable();
-            renderDashboard();
-            renderMasterTable();
-        } catch(e) { console.error(e); showToast("Network Error", true); } 
-        finally { setLoading(false); }
-    }
+            materialMaster = data.master; 
+            inventoryList = data.inventory;
+            historyList = data.history || [];
+            
+            renderTable();
+            renderDashboard();
+            renderMasterTable();
+        } catch(e) { console.error(e); showToast("Network Error", true); } 
+        finally { setLoading(false); }
+    }
 
-    function exportToExcel(type) {
-        let data = [];
-        let filename = "";
+    function exportToExcel(type) {
+        let data = [];
+        let filename = "";
 
-        if (type === 'inventory') {
-            filename = "Inventory_List.xlsx";
-            data = inventoryList.map(i => ({
-                "Part Number": i.id, "Model": i.model, "Description": i.description,
-                "Location": i.location, "Stock": i.stock, "Unit": i.unit, "Min Stock": i.minStock
-            }));
-        } else if (type === 'master') {
-            filename = "Master_Data.xlsx";
-            data = Object.keys(materialMaster).map(key => ({
-                "Part Number": key, "Model": materialMaster[key].model, "Description": materialMaster[key].description,
-                "Unit": materialMaster[key].unit, "Safety Stock": materialMaster[key].minStock
-            }));
-        }
+        if (type === 'inventory') {
+            filename = "Inventory_List.xlsx";
+            data = inventoryList.map(i => ({
+                "Part Number": i.id, "Model": i.model, "Description": i.description,
+                "Location": i.location, "Stock": i.stock, "Unit": i.unit, "Min Stock": i.minStock
+            }));
+        } else if (type === 'master') {
+            filename = "Master_Data.xlsx";
+            data = Object.keys(materialMaster).map(key => ({
+                "Part Number": key, "Model": materialMaster[key].model, "Description": materialMaster[key].description,
+                "Unit": materialMaster[key].unit, "Safety Stock": materialMaster[key].minStock
+            }));
+        }
 
-        if(data.length === 0) { showToast("No data to export", true); return; }
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-        XLSX.writeFile(wb, filename);
-    }
+        if(data.length === 0) { showToast("No data to export", true); return; }
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, filename);
+    }
 
-    async function sendPost(payload) {
-        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const json = await res.json();
-        if(json.status === 'error') throw new Error(json.message);
-        return json;
-    }
+    async function sendPost(payload) {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if(json.status === 'error') throw new Error(json.message);
+        return json;
+    }
 
-    function switchView(viewName) {
-        document.getElementById('viewDashboard').style.display = 'none';
-        document.getElementById('viewInventory').style.display = 'none';
-        document.getElementById('viewMaster').style.display = 'none';
-        
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    function switchView(viewName) {
+        document.getElementById('viewDashboard').style.display = 'none';
+        document.getElementById('viewInventory').style.display = 'none';
+        document.getElementById('viewMaster').style.display = 'none';
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-        if (viewName === 'dashboard') {
-            document.getElementById('viewDashboard').style.display = 'block';
-            document.getElementById('tabDash').classList.add('active');
-        } else if (viewName === 'inventory') {
-            document.getElementById('viewInventory').style.display = 'block';
-            document.getElementById('tabInv').classList.add('active');
-        } else if (viewName === 'master') {
-            document.getElementById('viewMaster').style.display = 'block';
-            document.getElementById('tabMaster').classList.add('active');
-        }
-    }
+        if (viewName === 'dashboard') {
+            document.getElementById('viewDashboard').style.display = 'block';
+            document.getElementById('tabDash').classList.add('active');
+        } else if (viewName === 'inventory') {
+            document.getElementById('viewInventory').style.display = 'block';
+            document.getElementById('tabInv').classList.add('active');
+        } else if (viewName === 'master') {
+            document.getElementById('viewMaster').style.display = 'block';
+            document.getElementById('tabMaster').classList.add('active');
+        }
+    }
 
-    function renderDashboard() {
-        let crit = 0, low = 0, total = inventoryList.length;
-        inventoryList.forEach(item => {
-            if(item.stock <= 0) crit++;
-            else if(item.stock <= item.minStock) low++;
-        });
-        document.getElementById('dashCrit').innerText = crit;
-        document.getElementById('dashLow').innerText = low;
-        document.getElementById('dashTotal').innerText = total;
+    function renderDashboard() {
+        let crit = 0, low = 0, total = inventoryList.length;
+        inventoryList.forEach(item => {
+            if(item.stock <= 0) crit++;
+            else if(item.stock <= item.minStock) low++;
+        });
+        document.getElementById('dashCrit').innerText = crit;
+        document.getElementById('dashLow').innerText = low;
+        document.getElementById('dashTotal').innerText = total;
 
-        const lang = i18n[currentLang];
-        document.querySelector('[data-i18n="card_crit"]').innerText = lang.card_crit.replace('(0)', `(${crit})`);
+        const lang = i18n[currentLang];
+        document.querySelector('[data-i18n="card_crit"]').innerText = lang.card_crit.replace('(0)', `(${crit})`);
 
-        const histDiv = document.getElementById('dashHistory');
-        histDiv.innerHTML = historyList.slice(0, 10).map(h => `
-            <div style="border-bottom:1px solid #eee; padding:5px 0;">
-                <span style="font-weight:bold;">${h.id}</span> 
-                <span style="float:right; color:${h.qty>0?'green':'red'}">${h.qty>0?'+':''}${h.qty}</span>
-                <div style="font-size:11px; color:#999;">${new Date(h.date).toLocaleDateString()} - ${h.action}</div>
-            </div>
-        `).join('');
-    }
+        const histDiv = document.getElementById('dashHistory');
+        histDiv.innerHTML = historyList.slice(0, 10).map(h => `
+            <div style="border-bottom:1px solid #eee; padding:5px 0;">
+                <span style="font-weight:bold;">${h.id}</span> 
+                <span style="float:right; color:${h.qty>0?'green':'red'}">${h.qty>0?'+':''}${h.qty}</span>
+                <div style="font-size:11px; color:#999;">${new Date(h.date).toLocaleDateString()} - ${h.action}</div>
+            </div>
+        `).join('');
+    }
 
-    function renderTable() {
-        const tbody = document.getElementById('inventoryBody');
-        const term = document.getElementById('searchInv').value.toLowerCase();
-        const lang = i18n[currentLang];
-        tbody.innerHTML = '';
-        
-        inventoryList.forEach((item, index) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                let statusClass = 'status-ok';
-                if (item.stock <= 0) statusClass = 'status-crit';
-                else if (item.stock <= item.minStock) statusClass = 'status-low';
+    function renderTable() {
+        const tbody = document.getElementById('inventoryBody');
+        const term = document.getElementById('searchInv').value.toLowerCase();
+        const lang = i18n[currentLang];
+        tbody.innerHTML = '';
+        
+        inventoryList.forEach((item, index) => {
+            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
+                let statusClass = 'status-ok';
+                if (item.stock <= 0) statusClass = 'status-crit';
+                else if (item.stock <= item.minStock) statusClass = 'status-low';
 
-                const tr = document.createElement('tr');
-                tr.onclick = () => openDetailsObj(item);
-                tr.innerHTML = `
-                    <td class="col-status"><span class="status-dot ${statusClass}"></span></td>
-                    <td class="col-pn">${item.id}</td>
-                    <td class="col-model desktop-only">${item.model}</td>
-                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td style="font-size:12px; text-align:center;"><span class="col-loc"><span>${item.location||'-'}</span></span></td>
-                    <td class="col-stock">${item.stock}</td>
-                    <td class="col-unit desktop-only" style="color:#666; font-size:12px;">${item.unit}</td>
-                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        });
-    }
+                const tr = document.createElement('tr');
+                tr.onclick = () => openDetailsObj(item);
+                tr.innerHTML = `
+                    <td class="col-status"><span class="status-dot ${statusClass}"></span></td>
+                    <td class="col-pn">${item.id}</td>
+                    <td class="col-model desktop-only">${item.model}</td>
+                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
+                    <td style="font-size:12px; text-align:center;"><span class="col-loc"><span>${item.location||'-'}</span></span></td>
+                    <td class="col-stock">${item.stock}</td>
+                    <td class="col-unit desktop-only" style="color:#666; font-size:12px;">${item.unit}</td>
+                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+    }
 
-    function renderMasterTable() {
-        const tbody = document.getElementById('masterBody');
-        const term = document.getElementById('searchMaster').value.toLowerCase();
-        const lang = i18n[currentLang];
-        tbody.innerHTML = '';
-        
-        const masterArr = Object.keys(materialMaster).map(key => {
-            return { id: key, ...materialMaster[key] };
-        });
+    function renderMasterTable() {
+        const tbody = document.getElementById('masterBody');
+        const term = document.getElementById('searchMaster').value.toLowerCase();
+        const lang = i18n[currentLang];
+        tbody.innerHTML = '';
+        
+        const masterArr = Object.keys(materialMaster).map(key => {
+            return { id: key, ...materialMaster[key] };
+        });
 
-        masterArr.forEach((item) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                const tr = document.createElement('tr');
-                tr.onclick = () => {
-                    let invItem = inventoryList.find(i => i.id === item.id);
-                    if(!invItem) invItem = { ...item, stock: 0 };
-                    openDetailsObj(invItem); 
-                };
-                
-                tr.innerHTML = `
-                    <td class="col-pn">${item.id}</td>
-                    <td class="col-model desktop-only">${item.model}</td>
-                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td class="col-unit">${item.unit}</td>
-                    <td class="col-stock desktop-only">${item.minStock}</td>
-                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        });
-    }
+        masterArr.forEach((item) => {
+            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
+                const tr = document.createElement('tr');
+                tr.onclick = () => {
+                    let invItem = inventoryList.find(i => i.id === item.id);
+                    if(!invItem) invItem = { ...item, stock: 0 };
+                    openDetailsObj(invItem); 
+                };
+                
+                tr.innerHTML = `
+                    <td class="col-pn">${item.id}</td>
+                    <td class="col-model desktop-only">${item.model}</td>
+                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
+                    <td class="col-unit">${item.unit}</td>
+                    <td class="col-stock desktop-only">${item.minStock}</td>
+                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        });
+    }
 
-    function openDetailsObj(item) {
-        document.getElementById('detId').innerText = item.id;
-        document.getElementById('detModel').innerText = item.model;
-        document.getElementById('detDesc').innerText = item.description;
-        document.getElementById('detStock').innerText = item.stock;
-        document.getElementById('detLoc').innerText = item.location || "None";
-        
-        const hList = historyList.filter(h => h.id === item.id);
-        const histHTML = hList.length ? hList.map(h => `
-            <div style="border-bottom:1px solid #eee; padding:8px 0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span style="font-weight:600; font-size:13px; color:#333;">
-                        ${h.action} 
-                        <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">
-                            (${h.qty > 0 ? '+' : ''}${h.qty})
-                        </span>
-                    </span>
-                    <span style="font-size:11px; color:#888;">${new Date(h.date).toLocaleDateString()}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
-                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
-                        📄 ${h.ref || '-'}
-                    </span>
-                    <span>👤 ${h.user}</span>
-                </div>
-            </div>
-        `).join('') : '<div style="text-align:center; padding:10px; color:#999;">No History</div>';
-        
-        document.getElementById('detHistory').innerHTML = histHTML;
-        openModal('detailsModal');
-    }
+    function openDetailsObj(item) {
+        document.getElementById('detId').innerText = item.id;
+        document.getElementById('detModel').innerText = item.model;
+        document.getElementById('detDesc').innerText = item.description;
+        document.getElementById('detStock').innerText = item.stock;
+        document.getElementById('detLoc').innerText = item.location || "None";
+        
+        const hList = historyList.filter(h => h.id === item.id);
+        const histHTML = hList.length ? hList.map(h => `
+            <div style="border-bottom:1px solid #eee; padding:8px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:600; font-size:13px; color:#333;">
+                        ${h.action} 
+                        <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">
+                            (${h.qty > 0 ? '+' : ''}${h.qty})
+                        </span>
+                    </span>
+                    <span style="font-size:11px; color:#888;">${new Date(h.date).toLocaleDateString()}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
+                        📄 ${h.ref || '-'}
+                    </span>
+                    <span>👤 ${h.user}</span>
+                </div>
+            </div>
+        `).join('') : '<div style="text-align:center; padding:10px; color:#999;">No History</div>';
+        
+        document.getElementById('detHistory').innerHTML = histHTML;
+        openModal('detailsModal');
+    }
 
-    function openTxModal(type) {
-        currentTxType = type;
-        const isReceive = type === 'receive';
-        const lang = i18n[currentLang];
-        document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
-        document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('txRef').value = ""; document.getElementById('txUser').value = "";
-        document.getElementById('txBody').innerHTML = "";
-        addTxRow(); addTxRow(); 
-        openModal('txModal');
-    }
+    function openTxModal(type) {
+        currentTxType = type;
+        const isReceive = type === 'receive';
+        const lang = i18n[currentLang];
+        document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
+        document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('txRef').value = ""; document.getElementById('txUser').value = "";
+        document.getElementById('txBody').innerHTML = "";
+        addTxRow(); addTxRow(); 
+        openModal('txModal');
+    }
 
-    function addTxRow() {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
-            <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
-            <td><input type="number" class="tx-input tx-qty"></td>
-            <td><input type="text" class="tx-input tx-loc"></td>
-            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
-        `;
-        document.getElementById('txBody').appendChild(tr);
-    }
+    function addTxRow() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
+            <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
+            <td><input type="number" class="tx-input tx-qty"></td>
+            <td><input type="text" class="tx-input tx-loc"></td>
+            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
+        `;
+        document.getElementById('txBody').appendChild(tr);
+    }
 
-    function resolvePart(input) {
-        const id = input.value.trim();
-        const row = input.parentElement.parentElement;
-        
-        row.querySelector('.tx-info').value = "";
-        row.querySelector('.tx-loc').value = "";
+    function resolvePart(input) {
+        const id = input.value.trim();
+        const row = input.parentElement.parentElement;
+        
+        row.querySelector('.tx-info').value = "";
+        row.querySelector('.tx-loc').value = "";
 
-        if (!id) return;
+        if (!id) return;
 
-        let invItem = inventoryList.find(i => i.id === id);
-        let masterItem = materialMaster[id];
+        let invItem = inventoryList.find(i => i.id === id);
+        let masterItem = materialMaster[id];
 
-        if (currentTxType === 'receive') {
-            if (!masterItem) {
-                // 🔥 Fixed: Correctly using variable from i18n
-                const lang = i18n[currentLang];
-                showMsg(lang.msg_unknown_title, lang.msg_unknown_body);
-                input.value = ""; 
-                return;
-            }
-            row.querySelector('.tx-info').value = masterItem.description || masterItem.model;
-            if (invItem) {
-                row.querySelector('.tx-loc').value = invItem.location || "";
-            }
-        } else {
-            if (invItem) {
-                row.querySelector('.tx-info').value = invItem.description || invItem.model;
-                row.querySelector('.tx-loc').value = invItem.location || "";
-            }
-        }
-    }
+        if (currentTxType === 'receive') {
+            if (!masterItem) {
+                // 🔥 Fixed: Correctly using variable from i18n
+                const lang = i18n[currentLang];
+                showMsg(lang.msg_unknown_title, lang.msg_unknown_body);
+                input.value = ""; 
+                return;
+            }
+            row.querySelector('.tx-info').value = masterItem.description || masterItem.model;
+            if (invItem) {
+                row.querySelector('.tx-loc').value = invItem.location || "";
+            }
+        } else {
+            if (invItem) {
+                row.querySelector('.tx-info').value = invItem.description || invItem.model;
+                row.querySelector('.tx-loc').value = invItem.location || "";
+            }
+        }
+    }
 
-    async function submitTx() {
-        const ref = document.getElementById('txRef').value;
-        const user = document.getElementById('txUser').value;
-        if(!ref || !user) { showToast("Reference & User Required", true); return; }
-        
-        const items = [];
-        document.querySelectorAll('#txBody tr').forEach(row => {
-            const idInput = row.querySelector('.tx-id');
-            const qtyInput = row.querySelector('.tx-qty');
-            const locInput = row.querySelector('.tx-loc');
-            
-            if(idInput && qtyInput) {
-                const id = String(idInput.value).trim();
-                const qty = Number(qtyInput.value);
-                const loc = locInput ? String(locInput.value).trim() : "";
-                if(id && qty > 0) items.push({ id, qty, loc });
-            }
-        });
+    async function submitTx() {
+        const ref = document.getElementById('txRef').value;
+        const user = document.getElementById('txUser').value;
+        if(!ref || !user) { showToast("Reference & User Required", true); return; }
+        
+        const items = [];
+        document.querySelectorAll('#txBody tr').forEach(row => {
+            const idInput = row.querySelector('.tx-id');
+            const qtyInput = row.querySelector('.tx-qty');
+            const locInput = row.querySelector('.tx-loc');
+            
+            if(idInput && qtyInput) {
+                const id = String(idInput.value).trim();
+                const qty = Number(qtyInput.value);
+                const loc = locInput ? String(locInput.value).trim() : "";
+                if(id && qty > 0) items.push({ id, qty, loc });
+            }
+        });
 
-        if(items.length === 0) { showToast("No items to post", true); return; }
+        if(items.length === 0) { showToast("No items to post", true); return; }
 
-        setLoading(true);
-        try {
-            await sendPost({ 
-                action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
-                [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
-                user: user, 
-                items: items 
-            });
-            closeModal('txModal'); 
-            fetchData(); 
-            showToast("Transaction Posted!");
-        } catch(e) { showMsg("Error", e.message); } 
-        finally { setLoading(false); }
-    }
+        setLoading(true);
+        try {
+            await sendPost({ 
+                action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
+                [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
+                user: user, 
+                items: items 
+            });
+            closeModal('txModal'); 
+            fetchData(); 
+            showToast("Transaction Posted!");
+        } catch(e) { showMsg("Error", e.message); } 
+        finally { setLoading(false); }
+    }
 
-    function openCreateMasterModal() {
-        ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
-        document.getElementById('newMinStock').value = 0;
-        openModal('createModal');
-    }
-    
-    function checkMasterExists() {
-        const id = document.getElementById('newId').value.trim();
-        const fb = document.getElementById('masterFeedback');
-        if(inventoryList.find(i => i.id === id) || materialMaster[id]) { fb.innerText = "⚠️ Exists"; fb.style.color = "red"; }
-        else { fb.innerText = "✅ Available"; fb.style.color = "green"; }
-    }
+    function openCreateMasterModal() {
+        ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
+        document.getElementById('newMinStock').value = 0;
+        openModal('createModal');
+    }
+    
+    function checkMasterExists() {
+        const id = document.getElementById('newId').value.trim();
+        const fb = document.getElementById('masterFeedback');
+        if(inventoryList.find(i => i.id === id) || materialMaster[id]) { fb.innerText = "⚠️ Exists"; fb.style.color = "red"; }
+        else { fb.innerText = "✅ Available"; fb.style.color = "green"; }
+    }
 
-    async function submitCreateMaster() {
-        const id = document.getElementById('newId').value.trim();
-        const user = document.getElementById('newUser').value;
-        if(!id || !user) { showToast("ID & User Required", true); return; }
-        setLoading(true);
-        try {
-            await sendPost({
-                action: 'create_master', id: id, 
-                model: document.getElementById('newModel').value,
-                description: document.getElementById('newDesc').value,
-                unit: document.getElementById('newUnit').value,
-                minStock: document.getElementById('newMinStock').value,
-                user: user
-            });
-            closeModal('createModal'); fetchData(); showToast("Created!");
-        } catch(e) { showMsg("Error", e.message); }
-        finally { setLoading(false); }
-    }
+    async function submitCreateMaster() {
+        const id = document.getElementById('newId').value.trim();
+        const user = document.getElementById('newUser').value;
+        if(!id || !user) { showToast("ID & User Required", true); return; }
+        setLoading(true);
+        try {
+            await sendPost({
+                action: 'create_master', id: id, 
+                model: document.getElementById('newModel').value,
+                description: document.getElementById('newDesc').value,
+                unit: document.getElementById('newUnit').value,
+                minStock: document.getElementById('newMinStock').value,
+                user: user
+            });
+            closeModal('createModal'); fetchData(); showToast("Created!");
+        } catch(e) { showMsg("Error", e.message); }
+        finally { setLoading(false); }
+    }
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'en' ? 'zh' : 'en';
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
-        });
-        renderTable(); 
-        renderDashboard();
-        renderMasterTable();
-    }
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'zh' : 'en';
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
+        });
+        renderTable(); 
+        renderDashboard();
+        renderMasterTable();
+    }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
-    function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); }
-    
-    // Init
-    fetchData();
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
+    function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); }
+    
+    // Init
+    fetchData();
 </script>
 </body>
 </html>

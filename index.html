@@ -24,7 +24,7 @@
         
         .content-area { padding: 1rem 2rem; max-width: 100%; box-sizing: border-box; }
         
-        /* Tabs - Flexible & Smart */
+        /* Tabs */
         .nav-tabs { display: flex; gap: 20px; }
         .nav-item { cursor: pointer; padding-bottom: 5px; color: #6a6d70; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
         .nav-item:hover { color: var(--sap-primary); }
@@ -39,7 +39,7 @@
         .card.warn { border-left: 5px solid var(--sap-warning); }
         .card.safe { border-left: 5px solid var(--sap-success); }
 
-        /* Tables Container - Handle Scroll */
+        /* Tables Container */
         .table-container { 
             background: var(--sap-surface-color); 
             border: 1px solid var(--sap-border-color); 
@@ -64,14 +64,12 @@
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* --- Column Widths --- */
+        /* Column Widths */
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-        
         .col-model { width: 220px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
         .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
-
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
         .col-stock { width: 90px; font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; }
         .col-unit { width: 60px; }
@@ -120,36 +118,20 @@
         
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         /* ========================================= */
-        /* --- MOBILE RWD (Optimized for iPad) --- */
+        /* --- MOBILE RWD --- */
         /* ========================================= */
         @media (max-width: 992px) { 
-            /* Header Layout */
-            .page-header { 
-                padding: 10px 15px; 
-                flex-direction: row; 
-                align-items: center; 
-            }
-            
-            .nav-tabs { 
-                gap: 15px; 
-                overflow-x: auto; 
-                padding-bottom: 0;
-            }
-            
-            .nav-item { 
-                font-size: 14px;
-            }
-
+            .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
+            .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
+            .nav-item { font-size: 14px; }
             .toolbar { flex-wrap: wrap; gap: 8px; }
             .std-btn { flex: 1 1 auto; justify-content: center; } 
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
-            
             .desktop-only { display: table-cell !important; }
-            
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
@@ -261,6 +243,18 @@
     <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
 </div>
 
+<div id="msgModal" class="modal-overlay" style="z-index: 2000;">
+    <div class="std-dialog" style="width: 400px; max-width: 90%;">
+        <div class="dialog-header">
+            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
+        </div>
+        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-primary" onclick="closeModal('msgModal')">OK</button>
+        </div>
+    </div>
+</div>
+
 <div id="txModal" class="modal-overlay">
     <div class="std-dialog large">
         <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
@@ -362,13 +356,20 @@
         }
     };
 
+    // 🔥 NEW: Custom Message Function
+    function showMsg(title, text) {
+        document.getElementById('msgTitle').innerText = title;
+        document.getElementById('msgContent').innerText = text;
+        openModal('msgModal');
+    }
+
     async function fetchData() {
-        if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
+        if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
         setLoading(true);
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-            if (data.status === 'error') { alert("Backend Error:\n" + data.message); return; }
+            if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
 
             materialMaster = data.master; 
             inventoryList = data.inventory;
@@ -577,34 +578,27 @@
         const id = input.value.trim();
         const row = input.parentElement.parentElement;
         
-        // Reset fields
         row.querySelector('.tx-info').value = "";
         row.querySelector('.tx-loc').value = "";
 
         if (!id) return;
 
-        // Try find in inventory
         let invItem = inventoryList.find(i => i.id === id);
-        // Try find in master
         let masterItem = materialMaster[id];
 
-        // --- VALIDATION: Check Master Data on Receive ---
+        // --- VALIDATION: Custom Msg instead of Alert ---
         if (currentTxType === 'receive') {
             if (!masterItem) {
-                alert("⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.\n\n⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。");
-                input.value = ""; // Clear input
+                // 🔥 CHANGED: Use showMsg() instead of alert()
+                showMsg("Unknown Part Number", "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.\n\n⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。");
+                input.value = ""; 
                 return;
             }
-            // Found: Fill info
             row.querySelector('.tx-info').value = masterItem.description || masterItem.model;
-            
-            // Suggest old location if available
             if (invItem) {
                 row.querySelector('.tx-loc').value = invItem.location || "";
             }
-        } 
-        // --- Issue Logic ---
-        else {
+        } else {
             if (invItem) {
                 row.querySelector('.tx-info').value = invItem.description || invItem.model;
                 row.querySelector('.tx-loc').value = invItem.location || "";
@@ -644,7 +638,7 @@
             closeModal('txModal'); 
             fetchData(); 
             showToast("Transaction Posted!");
-        } catch(e) { alert("Error:\n" + e.message); } 
+        } catch(e) { showMsg("Error", e.message); } 
         finally { setLoading(false); }
     }
 
@@ -676,7 +670,7 @@
                 user: user
             });
             closeModal('createModal'); fetchData(); showToast("Created!");
-        } catch(e) { alert(e.message); }
+        } catch(e) { showMsg("Error", e.message); }
         finally { setLoading(false); }
     }
 

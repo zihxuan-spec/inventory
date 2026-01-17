@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WMS - Warehouse Management System</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         /* --- SAP Fiori Style Theme --- */
         :root {
@@ -42,7 +43,7 @@
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* --- Column Widths --- */
+        /* Column Config */
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 110px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
@@ -70,6 +71,8 @@
         .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
         .btn-primary { background-color: var(--sap-primary); color: white; }
         .btn-transparent { background: transparent; color: var(--sap-primary); }
+        /* Green Excel Button Style */
+        .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
 
         .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; vertical-align: middle; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
@@ -171,6 +174,7 @@
         <div class="toolbar">
             <button class="std-btn btn-po" onclick="openTxModal('receive')"><span data-i18n="btn_po">Goods Receipt</span></button>
             <button class="std-btn btn-issue" onclick="openTxModal('issue')"><span data-i18n="btn_issue">Goods Issue</span></button>
+            <button class="std-btn btn-excel" onclick="exportToExcel('inventory')">📥 Excel</button>
             <div class="spacer"></div>
             <input type="text" id="searchInv" class="std-input" style="width:250px;" placeholder="Search Inventory..." onkeyup="renderTable()">
         </div>
@@ -196,6 +200,7 @@
     <div id="viewMaster" style="display:none;">
         <div class="toolbar">
             <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
+            <button class="std-btn btn-excel" onclick="exportToExcel('master')">📥 Excel</button>
             <div class="spacer"></div>
             <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
         </div>
@@ -227,7 +232,7 @@
         <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
         <div class="dialog-content">
             <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-                <div><label class="form-label" data-i18n="lbl_ref">Reference</label><input type="text" id="txRef" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_ref">PO Number</label><input type="text" id="txRef" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
             </div>
@@ -301,7 +306,7 @@
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
             btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
             col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
-            lbl_ref: "PO / Ref", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
+            lbl_ref: "PO Number", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
             btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close",
             card_crit: "Critical Stock (0)", sub_crit: "Items Out of Stock",
             card_low: "Low Stock", sub_low: "Below Safety Level",
@@ -313,7 +318,7 @@
             tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
             btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
             col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
-            lbl_ref: "單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
+            lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
             btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉",
             card_crit: "缺料警告 (0)", sub_crit: "庫存為 0",
             card_low: "低庫存", sub_low: "低於安全水位",
@@ -340,6 +345,44 @@
             renderMasterTable();
         } catch(e) { console.error(e); showToast("Network Error", true); } 
         finally { setLoading(false); }
+    }
+
+    // 🔥 NEW: Excel Export Function
+    function exportToExcel(type) {
+        let data = [];
+        let filename = "";
+
+        if (type === 'inventory') {
+            filename = "Inventory_List.xlsx";
+            // Filter current list (simple export of all current inventory)
+            data = inventoryList.map(i => ({
+                "Part Number": i.id,
+                "Model": i.model,
+                "Description": i.description,
+                "Location": i.location,
+                "Stock": i.stock,
+                "Unit": i.unit,
+                "Min Stock": i.minStock
+            }));
+        } else if (type === 'master') {
+            filename = "Master_Data.xlsx";
+            // Convert Master object to array
+            data = Object.keys(materialMaster).map(key => ({
+                "Part Number": key,
+                "Model": materialMaster[key].model,
+                "Description": materialMaster[key].description,
+                "Unit": materialMaster[key].unit,
+                "Safety Stock": materialMaster[key].minStock
+            }));
+        }
+
+        if(data.length === 0) { showToast("No data to export", true); return; }
+
+        // Create Sheet
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, filename);
     }
 
     async function sendPost(payload) {

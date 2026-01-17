@@ -39,20 +39,24 @@
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; }
-        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sap-text-color); }
+        
+        /* 🔥 CHANGED: vertical-align middle for better look with wrapped text */
+        td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* --- Column Width & Fixes --- */
+        /* --- Column Width & Formatting Adjustments --- */
         
-        /* 1. Status Column: Force visibility with fixed width */
-        .col-status { width: 25px; text-align: center; padding: 0 !important; }
+        /* 1. Status: Increased width to 35px to ensure dot is visible */
+        .col-status { width: 35px; text-align: center; padding: 0 !important; }
         
-        /* 2. Part Number: Left align */
+        /* 2. Part Number: Increased padding (12px) so it's not glued to the left edge in Master Data */
         .col-pn { width: 110px; font-weight: bold; color: var(--sap-primary); }
-        th.col-pn, td.col-pn { padding-left: 5px !important; }
+        th.col-pn, td.col-pn { padding-left: 12px !important; }
 
-        .col-model { width: 140px; }
-        .col-desc { width: auto; } /* Widest column */
+        /* 3. Model & Description: Allow text wrap (no more '...') */
+        .col-model { width: 140px; white-space: normal; word-wrap: break-word; line-height: 1.3; }
+        .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
+
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
         .col-stock { width: 90px; font-weight: bold; text-align: right; font-family: monospace; font-size: 1.1em; }
         .col-unit { width: 60px; }
@@ -71,16 +75,12 @@
         .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
         
         .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
-        
-        /* 🔥 Red Background for Goods Issue */
-        .btn-issue { background-color: var(--sap-critical); color: white; border-color: var(--sap-critical); } 
-        .btn-issue:hover { opacity: 0.9; }
-
+        .btn-issue { background-color: var(--sap-critical); color: white; border-color: var(--sap-critical); } .btn-issue:hover { opacity: 0.9; }
         .btn-master { background-color: transparent; color: var(--sap-primary); border: 1px solid var(--sap-primary); }
         .btn-primary { background-color: var(--sap-primary); color: white; }
         .btn-transparent { background: transparent; color: var(--sap-primary); }
 
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; vertical-align: middle; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; vertical-align: middle; }
         .status-ok { background-color: var(--sap-success); } .status-low { background-color: var(--sap-warning); } .status-crit { background-color: var(--sap-critical); }
 
         /* Modals */
@@ -116,7 +116,7 @@
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
             .desktop-only { display: none !important; }
-            .col-status { width: 25px; padding: 0 !important; }
+            .col-status { width: 35px; padding: 0 !important; }
             .col-pn { width: auto; padding-left: 10px !important; }
             .col-stock { width: 60px; font-size: 1em; }
             .col-loc { width: 50px; font-size: 10px; }

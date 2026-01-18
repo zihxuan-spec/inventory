@@ -634,13 +634,20 @@
         openModal('txModal');
     }
 
+    // 🔥 這裡就是剛剛修改的重點
     function addTxRow() {
         const tr = document.createElement('tr');
+        
+        // 🔥 新增判斷：如果是「領料 (issue)」，儲位欄位要鎖住不給填
+        const isIssue = currentTxType === 'issue';
+        const locAttr = isIssue ? 'readonly tabindex="-1"' : ''; 
+        const locStyle = isIssue ? 'background-color: #f5f5f5; color: #666;' : '';
+
         tr.innerHTML = `
             <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
             <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
             <td><input type="number" class="tx-input tx-qty"></td>
-            <td><input type="text" class="tx-input tx-loc"></td>
+            <td><input type="text" class="tx-input tx-loc" ${locAttr} style="${locStyle}"></td>
             <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
         `;
         document.getElementById('txBody').appendChild(tr);

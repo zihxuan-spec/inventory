@@ -76,7 +76,6 @@
         .btn-transparent { background: transparent; color: var(--sap-primary); }
         .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
 
-        /* 🔥 刪除按鈕樣式 */
         .btn-delete { color: #bb0000; font-weight: bold; cursor: pointer; padding: 4px 8px; border-radius: 4px; border: 1px solid transparent; margin-left: 5px; font-size: 12px; }
         .btn-delete:hover { background-color: #ffe6e6; border-color: #bb0000; }
 
@@ -317,9 +316,9 @@
 
 <script>
     // ==========================================
-    // 請填入您的最新 API 網址 (記得要用「新增部署」後的網址)
+    // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxtlyEb92HVQUHv1PtwuQVqb7oAIDFmrA1EcP-a3KA23q8TkttAnArBoqwJ3QsNtchZ5w/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzVo8qUGaZ9BNDwFWOpYTFKJdEa9t2PfjRrHV-FAstngRMD15oUu1qLCtvMLSvUkV3Log/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -381,7 +380,6 @@
         openModal('msgModal');
     }
 
-    // --- 🔥 登入與持久化邏輯 ---
     async function doLogin() {
         const user = document.getElementById('loginUser').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
@@ -392,7 +390,7 @@
             const res = await sendPost({ action: 'login', username: user, password: pass });
             if(res.status === 'success') {
                 const displayName = res.message.name;
-                localStorage.setItem('wms_user', displayName); // 保存登入狀態
+                localStorage.setItem('wms_user', displayName);
                 applyLoginState(displayName);
             } else {
                 showMsg("Login Failed", res.message);
@@ -417,7 +415,6 @@
         location.reload();
     }
 
-    // 檢查是否已登入
     function checkAutoLogin() {
         const savedUser = localStorage.getItem('wms_user');
         if (savedUser) {
@@ -429,13 +426,15 @@
         if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
         setLoading(true);
         try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
+            // 🔥 使用 POST 取代 GET，避開瀏覽器 CORS 問題
+            const data = await sendPost({ action: 'get_data' });
+            
             if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
 
-            materialMaster = data.master; 
-            inventoryList = data.inventory;
-            historyList = data.history || [];
+            // 🔥 修正讀取路徑: 從 data.message 讀取
+            materialMaster = data.message.master; 
+            inventoryList = data.message.inventory;
+            historyList = data.message.history || [];
             
             renderTable();
             renderDashboard();

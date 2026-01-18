@@ -122,6 +122,20 @@
 </head>
 <body>
 
+<div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--sap-bg-color); z-index:9999; display:flex; justify-content:center; align-items:center;">
+    <div class="std-dialog" style="width:320px; padding:20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <div style="text-align:center; margin-bottom:20px;">
+            <h2 style="color:var(--sap-shell-color); margin:0;">Sunlit AZ WMS</h2>
+            <p style="font-size:12px; color:#666; margin-top:5px;">Please sign in to continue</p>
+        </div>
+        <div style="display:grid; gap:15px;">
+            <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;">
+            <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;">
+            <button class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()">Sign In</button>
+        </div>
+    </div>
+</div>
+
 <div class="shell-bar">
     <div class="shell-logo">
         <span style="font-weight:bold; font-size:1.2em;">Sunlit AZ</span> WMS
@@ -243,7 +257,7 @@
         <div class="dialog-content">
             <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
                 <div><label class="form-label" data-i18n="lbl_ref">PO Number/Reference</label><input type="text" id="txRef" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input" disabled></div>
                 <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
             </div>
             <table class="tx-table">
@@ -302,7 +316,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxO2kj62fvD2Pz09lOCiF540dYFZwIv8jeNyVn41nZKWGaQYIGJitVaHjCh-B9J4q-GCA/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbz3r2ZPyA-YNd0_qjoFlnU2WLL7SPhzPVKqMpNpkWIvAQ6OwmUXAfcbpbAPRPFMDnzn/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -310,6 +324,7 @@
     let historyList = [];
     let currentTxType = 'receive'; 
     let currentLang = 'en';
+    let currentUserDisplayName = ""; // 🔥 儲存登入者姓名
 
     const i18n = {
         en: {
@@ -325,12 +340,10 @@
             txt_display: "Display",
             msg_unknown_title: "Unknown Part Number",
             msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.",
-            // 🔥 新增的確認訊息
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
             deleted: "Deleted!",
-            // 🔥 新增的必填錯誤訊息
             msg_input_required: "Input Required",
             msg_input_empty: "Please fill in PO/Reference and User field."
         },
@@ -347,12 +360,10 @@
             txt_display: "查看",
             msg_unknown_title: "未知料號",
             msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。",
-            // 🔥 新增的確認訊息
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
             deleted: "已刪除！",
-            // 🔥 新增的必填錯誤訊息
             msg_input_required: "欄位必填",
             msg_input_empty: "請填寫單號/用途與操作人員欄位。"
         }
@@ -360,14 +371,37 @@
 
     function showMsg(title, text) {
         document.getElementById('msgTitle').innerText = title;
-        document.getElementById('msgTitle').style.color = "var(--sap-critical)"; // 預設紅色
+        document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
         document.getElementById('msgContent').innerText = text;
         
-        // 確保 OK 按鈕只是關閉視窗
         const okBtn = document.querySelector('#msgModal .btn-primary');
         okBtn.onclick = function() { closeModal('msgModal'); };
         
         openModal('msgModal');
+    }
+
+    // --- 🔥 登入函式 ---
+    async function doLogin() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+        if(!user || !pass) return;
+
+        setLoading(true);
+        try {
+            const res = await sendPost({ action: 'login', username: user, password: pass });
+            if(res.status === 'success') {
+                currentUserDisplayName = res.message.name;
+                document.getElementById('loginOverlay').style.display = 'none';
+                showToast("Welcome, " + currentUserDisplayName);
+                fetchData(); // 登入成功才抓資料
+            } else {
+                showMsg("Login Failed", res.message);
+            }
+        } catch(e) {
+            showMsg("Error", "Connection failed");
+        } finally {
+            setLoading(false);
+        }
     }
 
     async function fetchData() {
@@ -417,7 +451,7 @@
     async function sendPost(payload) {
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
-        if(json.status === 'error') throw new Error(json.message);
+        // if(json.status === 'error') throw new Error(json.message); // Let caller handle error msg
         return json;
     }
 
@@ -505,7 +539,6 @@
         masterArr.forEach((item) => {
             if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
                 const tr = document.createElement('tr');
-                // 點擊行也是查看詳情
                 tr.onclick = () => {
                     let invItem = inventoryList.find(i => i.id === item.id);
                     if(!invItem) invItem = { ...item, stock: 0 };
@@ -522,10 +555,8 @@
                 `;
                 tbody.appendChild(tr);
 
-                // 組合 Action 欄位的按鈕
                 const actionTd = document.getElementById(`action-${item.id}`);
                 
-                // Display 按鈕
                 const displayBtn = document.createElement('span');
                 displayBtn.innerText = lang.txt_display;
                 displayBtn.style.color = '#0a6ed1';
@@ -535,19 +566,17 @@
                 displayBtn.onclick = (e) => { e.stopPropagation(); tr.onclick(); };
                 actionTd.appendChild(displayBtn);
 
-                // 🔥 Delete 按鈕 (修改後的邏輯)
                 const delBtn = document.createElement('span');
                 delBtn.className = 'btn-delete';
                 delBtn.innerText = '✕';
                 delBtn.onclick = (e) => {
                     e.stopPropagation();
 
-                    // 1. 檢查是否有庫存
+                    // Check Stock
                     const invItem = inventoryList.find(i => i.id === item.id);
                     const currentStock = invItem ? invItem.stock : 0;
 
                     if (currentStock > 0) {
-                        // ⛔ 有庫存：跳出 SAP 風格的錯誤視窗
                         const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
                         const msg = currentLang === 'zh' 
                             ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` 
@@ -557,7 +586,6 @@
                         return;
                     }
 
-                    // 2. 無庫存：跳出 SAP 風格的確認視窗 (動態注入 Cancel 鍵)
                     const footer = document.querySelector('#msgModal .dialog-footer');
                     const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
 
@@ -570,19 +598,16 @@
                     document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
                     document.getElementById('msgContent').innerText = msg;
 
-                    // 動態插入「取消」與「確認」按鈕
                     footer.innerHTML = `
                         <button class="std-btn btn-transparent" id="msgCancel">${btnCancel}</button>
                         <button class="std-btn btn-primary" id="msgConfirm">${btnConfirm}</button>
                     `;
 
-                    // 綁定取消事件 (還原 Footer)
                     document.getElementById('msgCancel').onclick = () => {
                         closeModal('msgModal');
                         setTimeout(() => footer.innerHTML = originalFooter, 300);
                     };
 
-                    // 綁定刪除事件
                     document.getElementById('msgConfirm').onclick = () => {
                         closeModal('msgModal');
                         deleteMaster(item.id);
@@ -634,17 +659,20 @@
         const lang = i18n[currentLang];
         document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('txRef').value = ""; document.getElementById('txUser').value = "";
+        
+        // 🔥 自動帶入姓名，並鎖定為唯讀
+        document.getElementById('txUser').value = currentUserDisplayName;
+        document.getElementById('txUser').readOnly = true;
+        document.getElementById('txUser').style.backgroundColor = "#f5f5f5"; // Visual cue
+
+        document.getElementById('txRef').value = "";
         document.getElementById('txBody').innerHTML = "";
         addTxRow(); addTxRow(); 
         openModal('txModal');
     }
 
-    // 🔥 這裡就是剛剛修改的重點
     function addTxRow() {
         const tr = document.createElement('tr');
-        
-        // 🔥 新增判斷：如果是「領料 (issue)」，儲位欄位要鎖住不給填
         const isIssue = currentTxType === 'issue';
         const locAttr = isIssue ? 'readonly tabindex="-1"' : ''; 
         const locStyle = isIssue ? 'background-color: #f5f5f5; color: #666;' : '';
@@ -662,7 +690,6 @@
     function resolvePart(input) {
         const id = input.value.trim();
         const row = input.parentElement.parentElement;
-        
         row.querySelector('.tx-info').value = "";
         row.querySelector('.tx-loc').value = "";
 
@@ -690,30 +717,23 @@
         }
     }
 
-    // 🔥 修改：點擊 Post 觸發確認視窗 (加入必填驗證)
     function submitTx() {
         const lang = i18n[currentLang];
-
-        // 1. 必填欄位檢查
         const ref = document.getElementById('txRef').value.trim();
         const user = document.getElementById('txUser').value.trim();
 
         if (!ref || !user) {
-            // 跳出 SAP 風格錯誤視窗
             showMsg(lang.msg_input_required, lang.msg_input_empty);
-            return; // 停止執行
+            return;
         }
 
-        // 2. 檢查是否有輸入項目
         const rowCount = document.querySelectorAll('#txBody tr').length;
         if(rowCount === 0) return;
 
-        // 3. 設定確認視窗
         document.getElementById('msgTitle').innerText = lang.confirm_post_title;
-        document.getElementById('msgTitle').style.color = "var(--sap-primary)"; // 藍色標題
+        document.getElementById('msgTitle').style.color = "var(--sap-primary)"; 
         document.getElementById('msgContent').innerText = lang.confirm_post_body;
         
-        // 綁定 OK 按鈕執行 executeSubmit
         const okBtn = document.querySelector('#msgModal .btn-primary');
         okBtn.onclick = function() {
             closeModal('msgModal');
@@ -723,7 +743,6 @@
         openModal('msgModal');
     }
 
-    // 🔥 新增：實際過帳邏輯 (已移除重複的檢查)
     async function executeSubmit() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
@@ -759,12 +778,10 @@
         finally { setLoading(false); }
     }
 
-    // 🔥 新增：刪除主檔邏輯
     async function deleteMaster(id) {
         setLoading(true);
         try {
-            // 因為刪除通常沒有輸入框，這裡暫時使用 Admin 或當前 User
-            const user = document.getElementById('txUser').value || "Admin"; 
+            const user = currentUserDisplayName || "Admin"; // 使用登入姓名
             await sendPost({ 
                 action: 'delete_master', 
                 id: id, 
@@ -782,6 +799,7 @@
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
+        document.getElementById('newUser').value = currentUserDisplayName; // 自動帶入
         openModal('createModal');
     }
     
@@ -827,8 +845,8 @@
     function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
     function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); }
     
-    // Init
-    fetchData();
+    // 🔥 Remove auto-fetch, wait for login
+    // fetchData(); 
 </script>
 </body>
 </html>

@@ -68,7 +68,7 @@
         .std-input:disabled, .std-input:read-only { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
         .std-btn { height: 36px; padding: 0 16px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: var(--sap-font-family); display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.1s; border: 1px solid transparent; white-space: nowrap; }
-        .std-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .std-btn:disabled { opacity: 0.6; cursor: not-allowed; } /* 🔥 新增：按鈕禁用樣式 */
 
         .btn-po { background-color: var(--sap-primary); color: white; border-color: var(--sap-primary); }
         .btn-issue { background-color: var(--sap-critical); color: white; border-color: var(--sap-critical); } .btn-issue:hover { opacity: 0.9; }
@@ -101,6 +101,7 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
+        /* 🔥 修復 Loading 顯示問題 (z-index 提高到 10001) */
         #loading { 
             display: none; 
             position: fixed; 
@@ -149,6 +150,11 @@
             <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()">Sign In</button>
         </div>
     </div>
+</div>
+
+<div id="loading">
+    <div class="loading-spinner"></div>
+    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
 </div>
 
 <div class="shell-bar">
@@ -252,23 +258,6 @@
     </div>
 </div>
 
-<div id="loading" style="display:none; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:2000;">
-    <div class="loading-spinner"></div>
-    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
-</div>
-
-<div id="msgModal" class="modal-overlay" style="z-index: 2000;">
-    <div class="std-dialog" style="width: 400px; max-width: 90%;">
-        <div class="dialog-header">
-            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
-        </div>
-        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
-        <div class="dialog-footer">
-            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
-        </div>
-    </div>
-</div>
-
 <div id="txModal" class="modal-overlay">
     <div class="std-dialog large">
         <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
@@ -325,6 +314,18 @@
             <div id="detHistory" style="border:1px solid #eee; border-radius:4px; max-height:200px; overflow-y:auto; font-size:12px; padding:10px;"></div>
         </div>
         <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('detailsModal')" data-i18n="btn_close">Close</button></div>
+    </div>
+</div>
+
+<div id="msgModal" class="modal-overlay" style="z-index: 2000;">
+    <div class="std-dialog" style="width: 400px; max-width: 90%;">
+        <div class="dialog-header">
+            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
+        </div>
+        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
+        </div>
     </div>
 </div>
 
@@ -799,76 +800,54 @@
         }
     }
 
-    // 🔥 submitTx 重大修改：新增必填檢查邏輯
+    // 🔥 submitTx 重大修改：新增庫存檢查邏輯
     function submitTx() {
         const lang = i18n[currentLang];
         const ref = document.getElementById('txRef').value.trim();
         const user = document.getElementById('txUser').value.trim();
 
-        // 1. 檢查參考單號 (Header Ref Check)
-        if (!ref) {
-            showMsg(lang.msg_input_required, lang.lbl_ref + " " + (currentLang === 'en' ? "is required" : "未填寫"));
-            return;
-        }
-
-        if (!user) {
+        if (!ref || !user) {
             showMsg(lang.msg_input_required, lang.msg_input_empty);
             return;
         }
 
-        const rows = document.querySelectorAll('#txBody tr');
-        if(rows.length === 0) return;
-
         const items = [];
-        
-        // 2. 迴圈檢查每一列 (Row Loop Check)
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
+        // 收集資料
+        document.querySelectorAll('#txBody tr').forEach(row => {
             const idInput = row.querySelector('.tx-id');
             const qtyInput = row.querySelector('.tx-qty');
-            const locInput = row.querySelector('.tx-loc'); // 取得行內儲位欄位
-
-            const id = idInput ? idInput.value.trim() : "";
-            const qtyStr = qtyInput ? qtyInput.value.trim() : "";
-            const loc = locInput ? locInput.value.trim() : "";
-
-            // A. 檢查料號 (Part Number Check)
-            if (!id) {
-                showMsg(lang.msg_input_required, `${lang.col_pn} (Row ${i + 1}) ${currentLang === 'en' ? "is empty" : "未填寫"}`);
-                return;
-            }
-
-            // B. 檢查數量 (Qty Check)
-            if (!qtyStr) {
-                showMsg(lang.msg_input_required, `${lang.lbl_qty} (Row ${i + 1}) ${currentLang === 'en' ? "is empty" : "未填寫"}`);
-                return;
-            }
+            const locInput = row.querySelector('.tx-loc'); // 🔥 修正：之前這裡漏了讀取 locInput
             
-            const qty = Number(qtyStr);
-            if (isNaN(qty) || qty <= 0) {
-                showMsg(lang.msg_input_required, `${lang.lbl_qty} (Row ${i + 1}) ${currentLang === 'en' ? "must be > 0" : "必須大於 0"}`);
-                return;
+            if(idInput && qtyInput && idInput.value) {
+                const id = String(idInput.value).trim();
+                const qty = Number(qtyInput.value);
+                const loc = locInput ? String(locInput.value).trim() : "";
+                
+                if(id && qty > 0) items.push({ id, qty, loc });
             }
+        });
 
-            // C. 庫存不足檢查 (Issue Stock Check)
-            if (currentTxType === 'issue') {
-                const invItem = inventoryList.find(item => item.id === id);
+        if(items.length === 0) return;
+
+        // 🔥 檢查庫存是否足夠
+        if (currentTxType === 'issue') {
+            for (let item of items) {
+                const invItem = inventoryList.find(i => i.id === item.id);
                 const currentStock = invItem ? invItem.stock : 0;
                 
-                if (qty > currentStock) {
+                if (item.qty > currentStock) {
+                    // 庫存不足，跳出錯誤並停止
                     const title = currentLang === 'zh' ? "庫存不足" : "Insufficient Stock";
                     const msg = currentLang === 'zh' 
-                        ? `料號 ${id} 庫存不足！\n現有: ${currentStock}, 需求: ${qty}`
-                        : `Part ${id} insufficient stock!\nAvailable: ${currentStock}, Request: ${qty}`;
+                        ? `料號 ${item.id} 庫存不足！\n現有: ${currentStock}, 需求: ${item.qty}`
+                        : `Part ${item.id} insufficient stock!\nAvailable: ${currentStock}, Request: ${item.qty}`;
                     showMsg(title, msg);
-                    return; 
+                    return; // ⛔ 停止執行
                 }
             }
-
-            items.push({ id, qty, loc });
         }
 
-        // 通過所有檢查，顯示確認視窗
+        // 通過檢查，顯示確認視窗
         document.getElementById('msgTitle').innerText = lang.confirm_post_title;
         document.getElementById('msgTitle').style.color = "var(--sap-primary)"; 
         document.getElementById('msgContent').innerText = lang.confirm_post_body;
@@ -876,33 +855,29 @@
         const okBtn = document.querySelector('#msgModal .btn-primary');
         okBtn.onclick = function() {
             closeModal('msgModal');
-            executeSubmit(items); // 直接傳遞 items，不用重新讀取
+            executeSubmit();
         };
         
         openModal('msgModal');
     }
 
-    // executeSubmit 接收 items 參數
-    async function executeSubmit(items) {
-        // 如果 submitTx 沒有傳 items 進來（相容性），則重新讀取（但這裡 submitTx 會傳）
+    async function executeSubmit() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
         
-        if (!items) {
-             items = [];
-             document.querySelectorAll('#txBody tr').forEach(row => {
-                const idInput = row.querySelector('.tx-id');
-                const qtyInput = row.querySelector('.tx-qty');
-                const locInput = row.querySelector('.tx-loc');
-                
-                if(idInput && qtyInput && idInput.value) {
-                    const id = String(idInput.value).trim();
-                    const qty = Number(qtyInput.value);
-                    const loc = locInput ? String(locInput.value).trim() : "";
-                    if(id && qty > 0) items.push({ id, qty, loc });
-                }
-            });
-        }
+        const items = [];
+        document.querySelectorAll('#txBody tr').forEach(row => {
+            const idInput = row.querySelector('.tx-id');
+            const qtyInput = row.querySelector('.tx-qty');
+            const locInput = row.querySelector('.tx-loc');
+            
+            if(idInput && qtyInput) {
+                const id = String(idInput.value).trim();
+                const qty = Number(qtyInput.value);
+                const loc = locInput ? String(locInput.value).trim() : "";
+                if(id && qty > 0) items.push({ id, qty, loc });
+            }
+        });
 
         if(items.length === 0) { showToast("No items to post", true); return; }
 

@@ -334,37 +334,52 @@
             }
         };
 
-        // --- Auth Logic ---
-        async function doLogin() {
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            const feedback = document.getElementById('loginFeedback');
-            feedback.innerText = "";
-
-            if(!user || !pass) {
-                feedback.innerText = "Please enter username and password";
-                return;
-            }
-
-            setLoading(true);
-            try {
-                const res = await sendPost({ action: 'login', username: user, password: pass });
-                if(res.status === 'success') {
-                    const displayName = res.message.name;
-                    localStorage.setItem('wms_user', displayName);
-                    applyLoginState(displayName);
-                } else {
-                    feedback.innerText = res.message || "Invalid Credentials";
-                    document.querySelector('#loginOverlay .std-dialog').animate([
-                        { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
-                    ], { duration: 300 });
-                }
-            } catch(e) {
-                feedback.innerText = "Connection Error. Please check Internet.";
-            } finally {
-                setLoading(false);
-            }
+// --- 🔥 除錯版登入函式 (Debug Version) ---
+    async function doLogin() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+        const feedback = document.getElementById('loginFeedback');
+        
+        // 1. 清空並檢查輸入
+        feedback.innerText = "Connecting..."; // 提示正在連線
+        if(!user || !pass) {
+            feedback.innerText = "Please enter username and password";
+            return;
         }
+
+        setLoading(true);
+        try {
+            // 2. 發送請求
+            console.log("Attempting login with URL:", API_URL);
+            const res = await sendPost({ action: 'login', username: user, password: pass });
+            
+            console.log("Login response:", res); // 在 F12 Console 顯示回傳結果
+
+            if(res.status === 'success') {
+                const displayName = res.message.name;
+                localStorage.setItem('wms_user', displayName);
+                applyLoginState(displayName);
+            } else {
+                // 3. 登入失敗 (帳密錯誤)
+                feedback.innerText = res.message || "Invalid Credentials";
+                // 嘗試執行動畫，如果瀏覽器不支援則忽略
+                try {
+                    document.querySelector('#loginOverlay .std-dialog').animate([
+                        { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, 
+                        { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
+                    ], { duration: 300 });
+                } catch(err) { console.log("Animation not supported"); }
+            }
+        } catch(e) {
+            // 4. 連線或程式錯誤
+            console.error("Login Error:", e);
+            // 🚨 強制跳出視窗，確保您看得到錯誤原因
+            alert("System Error: " + e.message + "\nCheck API URL or Internet.");
+            feedback.innerText = "Connection Error.";
+        } finally {
+            setLoading(false);
+        }
+    }
 
         function clearLoginError() { document.getElementById('loginFeedback').innerText = ""; }
 

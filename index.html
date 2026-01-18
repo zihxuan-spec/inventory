@@ -57,7 +57,7 @@
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
         .col-stock { width: 90px; text-align: right; }
         .col-unit { width: 60px; }
-        .col-action { width: 120px; text-align: center; white-space: nowrap;} /* 稍微加寬以容納刪除鍵 */
+        .col-action { width: 120px; text-align: center; white-space: nowrap;}
         .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
@@ -76,7 +76,7 @@
         .btn-transparent { background: transparent; color: var(--sap-primary); }
         .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
 
-        /* 🔥 新增：刪除按鈕樣式 */
+        /* 🔥 刪除按鈕樣式 */
         .btn-delete { color: #bb0000; font-weight: bold; cursor: pointer; padding: 4px 8px; border-radius: 4px; border: 1px solid transparent; margin-left: 5px; font-size: 12px; }
         .btn-delete:hover { background-color: #ffe6e6; border-color: #bb0000; }
 
@@ -529,15 +529,61 @@
                 displayBtn.onclick = (e) => { e.stopPropagation(); tr.onclick(); };
                 actionTd.appendChild(displayBtn);
 
-                // 🔥 Delete 按鈕
+                // 🔥 Delete 按鈕 (修改後的邏輯)
                 const delBtn = document.createElement('span');
                 delBtn.className = 'btn-delete';
-                delBtn.innerText = '✕'; // 或是 'Delete'
+                delBtn.innerText = '✕';
                 delBtn.onclick = (e) => {
                     e.stopPropagation();
-                    if(confirm(lang.confirm_delete)) {
-                        deleteMaster(item.id);
+
+                    // 1. 檢查是否有庫存
+                    const invItem = inventoryList.find(i => i.id === item.id);
+                    const currentStock = invItem ? invItem.stock : 0;
+
+                    if (currentStock > 0) {
+                        // ⛔ 有庫存：跳出 SAP 風格的錯誤視窗
+                        const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
+                        const msg = currentLang === 'zh' 
+                            ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` 
+                            : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
+                        
+                        showMsg(title, msg);
+                        return;
                     }
+
+                    // 2. 無庫存：跳出 SAP 風格的確認視窗 (動態注入 Cancel 鍵)
+                    const footer = document.querySelector('#msgModal .dialog-footer');
+                    const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
+
+                    const title = currentLang === 'zh' ? "刪除確認" : "Delete Confirmation";
+                    const msg = currentLang === 'zh' ? "確定要刪除此物料主檔嗎？(此動作無法復原)" : "Delete this master data permanently?";
+                    const btnCancel = currentLang === 'zh' ? "取消" : "Cancel";
+                    const btnConfirm = currentLang === 'zh' ? "刪除" : "Delete";
+
+                    document.getElementById('msgTitle').innerText = title;
+                    document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
+                    document.getElementById('msgContent').innerText = msg;
+
+                    // 動態插入「取消」與「確認」按鈕
+                    footer.innerHTML = `
+                        <button class="std-btn btn-transparent" id="msgCancel">${btnCancel}</button>
+                        <button class="std-btn btn-primary" id="msgConfirm">${btnConfirm}</button>
+                    `;
+
+                    // 綁定取消事件 (還原 Footer)
+                    document.getElementById('msgCancel').onclick = () => {
+                        closeModal('msgModal');
+                        setTimeout(() => footer.innerHTML = originalFooter, 300);
+                    };
+
+                    // 綁定刪除事件
+                    document.getElementById('msgConfirm').onclick = () => {
+                        closeModal('msgModal');
+                        deleteMaster(item.id);
+                        setTimeout(() => footer.innerHTML = originalFooter, 300);
+                    };
+
+                    openModal('msgModal');
                 };
                 actionTd.appendChild(delBtn);
             }

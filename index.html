@@ -329,7 +329,10 @@
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
-            deleted: "Deleted!"
+            deleted: "Deleted!",
+            // 🔥 新增的必填錯誤訊息
+            msg_input_required: "Input Required",
+            msg_input_empty: "Please fill in PO/Reference and User field."
         },
         zh: {
             tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
@@ -348,7 +351,10 @@
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
-            deleted: "已刪除！"
+            deleted: "已刪除！",
+            // 🔥 新增的必填錯誤訊息
+            msg_input_required: "欄位必填",
+            msg_input_empty: "請填寫單號與操作人員欄位。"
         }
     };
 
@@ -684,13 +690,25 @@
         }
     }
 
-    // 🔥 修改：點擊 Post 觸發確認視窗
+    // 🔥 修改：點擊 Post 觸發確認視窗 (加入必填驗證)
     function submitTx() {
         const lang = i18n[currentLang];
+
+        // 1. 必填欄位檢查
+        const ref = document.getElementById('txRef').value.trim();
+        const user = document.getElementById('txUser').value.trim();
+
+        if (!ref || !user) {
+            // 跳出 SAP 風格錯誤視窗
+            showMsg(lang.msg_input_required, lang.msg_input_empty);
+            return; // 停止執行
+        }
+
+        // 2. 檢查是否有輸入項目
         const rowCount = document.querySelectorAll('#txBody tr').length;
         if(rowCount === 0) return;
 
-        // 設定確認視窗
+        // 3. 設定確認視窗
         document.getElementById('msgTitle').innerText = lang.confirm_post_title;
         document.getElementById('msgTitle').style.color = "var(--sap-primary)"; // 藍色標題
         document.getElementById('msgContent').innerText = lang.confirm_post_body;
@@ -705,11 +723,10 @@
         openModal('msgModal');
     }
 
-    // 🔥 新增：實際過帳邏輯
+    // 🔥 新增：實際過帳邏輯 (已移除重複的檢查)
     async function executeSubmit() {
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
-        if(!ref || !user) { showToast("Reference & User Required", true); return; }
         
         const items = [];
         document.querySelectorAll('#txBody tr').forEach(row => {

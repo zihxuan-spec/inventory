@@ -52,7 +52,7 @@
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 120px; font-weight: bold; color: var(--sap-primary); }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-        .col-model { width: 350px; white-space: normal; word-wrap: break-word; line-height: 1.3; } /* 🔥 Model 欄位加寬 */
+        .col-model { width: 350px; white-space: normal; word-wrap: break-word; line-height: 1.3; } /* Model 欄位加寬 */
         .col-desc { width: auto; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; }
         .col-stock { width: 90px; text-align: right; }
@@ -103,6 +103,9 @@
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+        .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
+        .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
@@ -197,14 +200,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="col-status"></th>
-                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
-                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
-                        <th class="col-loc" data-i18n="col_loc">Loc</th>
-                        <th class="col-stock" data-i18n="col_stock">Stock</th>
-                        <th class="col-unit desktop-only" data-i18n="col_unit">Unit</th>
-                        <th class="col-action"></th>
+                        <th data-i18n="th_id">ID</th>
+                        <th data-i18n="th_model" class="col-model">Model</th>
+                        <th data-i18n="th_stock">Stock</th>
+                        <th data-i18n="th_unit">Unit</th>
+                        <th data-i18n="th_loc">Location</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody"></tbody>
@@ -212,702 +212,405 @@
         </div>
     </div>
 
-    <div id="viewMaster" style="display:none;">
-        <div class="toolbar">
-            <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
-            <button class="std-btn btn-excel" onclick="exportToExcel('master')">📥 Excel</button>
-            <div class="spacer"></div>
-            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-pn" data-i18n="col_pn">Part Number</th>
-                        <th class="col-model desktop-only" data-i18n="col_model">Model</th>
-                        <th class="col-desc desktop-only" data-i18n="col_desc">Description</th>
-                        <th class="col-unit" data-i18n="col_unit">Base UoM</th>
-                        <th class="col-stock desktop-only" data-i18n="lbl_safe">Safety Stock</th>
-                        <th class="col-action"></th>
-                    </tr>
-                </thead>
-                <tbody id="masterBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="loading" style="display:none; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:2000;">
-    <div class="loading-spinner"></div>
-    <div style="background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:4px; margin-top:10px;">Loading...</div>
-</div>
-
-<div id="msgModal" class="modal-overlay" style="z-index: 2000;">
-    <div class="std-dialog" style="width: 400px; max-width: 90%;">
-        <div class="dialog-header">
-            <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
-        </div>
-        <div class="dialog-content" id="msgContent" style="padding: 20px; font-size: 14px; white-space: pre-wrap; color: #333;"></div>
-        <div class="dialog-footer">
-            <button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>
-        </div>
-    </div>
-</div>
-
-<div id="txModal" class="modal-overlay">
-    <div class="std-dialog large">
-        <div class="dialog-header"><span id="txTitle">Post Goods Movement</span><span style="cursor:pointer;" onclick="closeModal('txModal')">✕</span></div>
-        <div class="dialog-content">
-            <div class="dialog-header-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #eee;">
-                <div><label class="form-label" data-i18n="lbl_ref">PO Number/Reference</label><input type="text" id="txRef" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="txUser" class="std-input" disabled></div>
-                <div><label class="form-label" data-i18n="lbl_date">Date</label><input type="text" id="txDate" class="std-input" disabled style="background:#f9f9f9;"></div>
+    <div id="txModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="txTitle">Transaction</h3>
+                <span style="cursor:pointer; font-size:24px;" onclick="closeModal('txModal')">&times;</span>
             </div>
-            <table class="tx-table">
-                <thead><tr><th style="width:140px;" data-i18n="col_pn">Part Number</th><th style="min-width:150px;" data-i18n="col_desc">Description</th><th style="width:80px;" data-i18n="lbl_qty">Qty</th><th style="width:70px;" data-i18n="col_loc">Loc</th><th style="width:30px;"></th></tr></thead>
-                <tbody id="txBody"></tbody>
-            </table>
-            <button class="std-btn btn-transparent" style="width:100%; border:1px dashed #0a6ed1; color:#0a6ed1;" onclick="addTxRow()">+ <span data-i18n="btn_add_line">Add Line</span></button>
-        </div>
-        <div class="dialog-footer">
-            <button class="std-btn btn-transparent" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn btn-primary" id="txSubmitBtn" onclick="submitTx()" data-i18n="btn_post">Post</button>
-        </div>
-    </div>
-</div>
-
-<div id="createModal" class="modal-overlay">
-    <div class="std-dialog">
-        <div class="dialog-header"><span data-i18n="btn_create">Create Material</span><span style="cursor:pointer;" onclick="closeModal('createModal')">✕</span></div>
-        <div class="dialog-content">
-            <div class="form-grid">
-                <div class="form-full"><label class="form-label" data-i18n="col_pn">Part Number</label><input type="text" id="newId" class="std-input" onchange="checkMasterExists()"><div id="masterFeedback" style="font-size:11px;"></div></div>
-                <div class="form-full"><label class="form-label" data-i18n="col_model">Model</label><input type="text" id="newModel" class="std-input"></div>
-                <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
-                <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input"></div>
-                <div><label class="form-label" data-i18n="lbl_safe">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
-                <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="newUser" class="std-input"></div>
-            </div>
-        </div>
-        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('createModal')" data-i18n="btn_cancel">Cancel</button><button class="std-btn btn-primary" onclick="submitCreateMaster()" data-i18n="btn_save">Save</button></div>
-    </div>
-</div>
-
-<div id="detailsModal" class="modal-overlay">
-    <div class="std-dialog">
-        <div class="dialog-header"><span data-i18n="modal_detail">Details</span><span style="cursor:pointer;" onclick="closeModal('detailsModal')">✕</span></div>
-        <div class="dialog-content">
-            <div style="border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px;">
-                <h2 id="detId" style="margin:0 0 5px 0; color:var(--sap-shell-color); font-family:monospace;"></h2>
-                <div id="detModel" style="color:#333; font-weight:bold; margin-bottom:5px;"></div>
-                <div id="detDesc" style="color:#666; font-size:0.95em;"></div>
-            </div>
-            <div style="background:#f8f9fa; padding:15px; border-radius:4px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                <div><div style="font-size:11px; color:#666;" data-i18n="col_stock">STOCK</div><div id="detStock" style="font-size:32px; font-weight:normal;">0</div></div>
-                <div style="text-align:right;"><div style="font-size:11px; color:#666;" data-i18n="col_loc">LOCATION</div><div id="detLoc" style="font-size:18px; font-weight:bold; background:#e0e0e0; padding:2px 8px; border-radius:4px;">-</div></div>
-            </div>
-            <div style="font-size:12px; font-weight:bold; color:#6a6d70; margin-top:20px; margin-bottom:5px;" data-i18n="card_hist">HISTORY</div>
-            <div id="detHistory" style="border:1px solid #eee; border-radius:4px; max-height:200px; overflow-y:auto; font-size:12px; padding:10px;"></div>
-        </div>
-        <div class="dialog-footer"><button class="std-btn btn-transparent" onclick="closeModal('detailsModal')" data-i18n="btn_close">Close</button></div>
-    </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-    // ==========================================
-    // 請填入您的最新 API 網址 (Do not forget!)
-    // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwj57eCE8dveffooXWT1vnrA-2Zf2irtRrkOGjJHp-ZaoRRul-c-qX2a5eJ5hetP1Pa4Q/exec"; 
-    // ==========================================
-
-    let inventoryList = [];
-    let materialMaster = {};
-    let historyList = [];
-    let currentTxType = 'receive'; 
-    let currentLang = 'en';
-    let currentUserDisplayName = ""; 
-
-    const i18n = {
-        en: {
-            tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
-            btn_po: "Goods Receipt", btn_issue: "Goods Issue", btn_create: "Create Material",
-            col_pn: "Part Number", col_model: "Model", col_desc: "Description", col_loc: "Loc", col_stock: "Stock", col_unit: "Unit",
-            lbl_ref: "PO Number/Reference", lbl_user: "User", lbl_date: "Date", lbl_qty: "Qty", lbl_safe: "Safety Stock",
-            btn_add_line: "Add Line", btn_cancel: "Cancel", btn_post: "Post", btn_save: "Save", btn_close: "Close", btn_ok: "OK",
-            card_crit: "Critical Stock", sub_crit: "Items Out of Stock",
-            card_low: "Low Stock", sub_low: "Below Safety Level",
-            card_total: "Total Items", sub_total: "Active SKU Count",
-            card_hist: "Recent Movements", modal_detail: "Details",
-            txt_display: "Display",
-            msg_unknown_title: "Unknown Part Number",
-            msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.",
-            confirm_post_title: "Post Confirmation", 
-            confirm_post_body: "Are you sure you want to post these transactions?",
-            confirm_delete: "Delete this master data?",
-            deleted: "Deleted!",
-            msg_input_required: "Input Required",
-            msg_input_empty: "Please fill in PO/Reference and User field.",
-            // 🔥 新增：庫存不足錯誤訊息
-            error_title: "Insufficient Stock",
-            error_msg: "Cannot issue more than available stock.",
-        },
-        zh: {
-            tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
-            btn_po: "收貨入庫", btn_issue: "發貨領料", btn_create: "建立物料",
-            col_pn: "料號", col_model: "型號", col_desc: "品名描述", col_loc: "儲位", col_stock: "庫存", col_unit: "單位",
-            lbl_ref: "採購單號/用途", lbl_user: "操作人員", lbl_date: "日期", lbl_qty: "數量", lbl_safe: "安全庫存",
-            btn_add_line: "新增項目", btn_cancel: "取消", btn_post: "過帳", btn_save: "儲存", btn_close: "關閉", btn_ok: "確定",
-            card_crit: "缺料警告", sub_crit: "庫存為 0",
-            card_low: "低庫存", sub_low: "低於安全水位",
-            card_total: "物料總數", sub_total: "系統內 SKU",
-            card_hist: "最近異動", modal_detail: "詳細資訊",
-            txt_display: "查看",
-            msg_unknown_title: "未知料號",
-            msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。",
-            confirm_post_title: "過帳確認", 
-            confirm_post_body: "您確定要提交這些異動資料嗎？",
-            confirm_delete: "確定要刪除此物料主檔嗎？",
-            deleted: "已刪除！",
-            msg_input_required: "欄位必填",
-            msg_input_empty: "請填寫單號/用途與操作人員欄位。",
-            // 🔥 新增：庫存不足錯誤訊息
-            error_title: "庫存不足",
-            error_msg: "領料數量不可大於現有庫存。",
-        }
-    };
-
-    function showMsg(title, text) {
-        document.getElementById('msgTitle').innerText = title;
-        document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-        document.getElementById('msgContent').innerText = text;
-        const okBtn = document.querySelector('#msgModal .btn-primary');
-        okBtn.onclick = function() { closeModal('msgModal'); };
-        openModal('msgModal');
-    }
-
-    async function doLogin() {
-        const user = document.getElementById('loginUser').value.trim();
-        const pass = document.getElementById('loginPass').value.trim();
-        const feedback = document.getElementById('loginFeedback');
-        
-        feedback.innerText = "";
-
-        if(!user || !pass) {
-            feedback.innerText = "Please enter username and password";
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const res = await sendPost({ action: 'login', username: user, password: pass });
-            if(res.status === 'success') {
-                const displayName = res.message.name;
-                localStorage.setItem('wms_user', displayName);
-                applyLoginState(displayName);
-            } else {
-                feedback.innerText = res.message || "Invalid Credentials";
-                document.querySelector('#loginOverlay .std-dialog').animate([
-                    { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
-                ], { duration: 300 });
-            }
-        } catch(e) {
-            feedback.innerText = "Connection Error. Please check Internet.";
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    function clearLoginError() { document.getElementById('loginFeedback').innerText = ""; }
-
-    function applyLoginState(name) {
-        currentUserDisplayName = name;
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('logoutBtn').style.display = 'block';
-        showToast("Welcome, " + currentUserDisplayName);
-        fetchData(); 
-    }
-
-    function doLogout() { localStorage.removeItem('wms_user'); location.reload(); }
-
-    function checkAutoLogin() {
-        const savedUser = localStorage.getItem('wms_user');
-        if (savedUser) applyLoginState(savedUser);
-    }
-
-    async function fetchData() {
-        if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
-        setLoading(true);
-        try {
-            const data = await sendPost({ action: 'get_data' });
-            if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
-
-            materialMaster = data.message.master; 
-            inventoryList = data.message.inventory;
-            historyList = data.message.history || [];
-            
-            renderTable();
-            renderDashboard();
-            renderMasterTable();
-        } catch(e) { console.error(e); showToast("Network Error", true); } 
-        finally { setLoading(false); }
-    }
-
-    function exportToExcel(type) {
-        let data = [];
-        let filename = "";
-
-        if (type === 'inventory') {
-            filename = "Inventory_List.xlsx";
-            data = inventoryList.map(i => ({
-                "Part Number": i.id, "Model": i.model, "Description": i.description,
-                "Location": i.location, "Stock": i.stock, "Unit": i.unit, "Min Stock": i.minStock
-            }));
-        } else if (type === 'master') {
-            filename = "Master_Data.xlsx";
-            data = Object.keys(materialMaster).map(key => ({
-                "Part Number": key, "Model": materialMaster[key].model, "Description": materialMaster[key].description,
-                "Unit": materialMaster[key].unit, "Safety Stock": materialMaster[key].minStock
-            }));
-        }
-
-        if(data.length === 0) { showToast("No data to export", true); return; }
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-        XLSX.writeFile(wb, filename);
-    }
-
-    async function sendPost(payload) {
-        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const json = await res.json();
-        return json;
-    }
-
-    function switchView(viewName) {
-        document.getElementById('viewDashboard').style.display = 'none';
-        document.getElementById('viewInventory').style.display = 'none';
-        document.getElementById('viewMaster').style.display = 'none';
-        
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-        if (viewName === 'dashboard') {
-            document.getElementById('viewDashboard').style.display = 'block';
-            document.getElementById('tabDash').classList.add('active');
-        } else if (viewName === 'inventory') {
-            document.getElementById('viewInventory').style.display = 'block';
-            document.getElementById('tabInv').classList.add('active');
-        } else if (viewName === 'master') {
-            document.getElementById('viewMaster').style.display = 'block';
-            document.getElementById('tabMaster').classList.add('active');
-        }
-    }
-
-    function renderDashboard() {
-        let crit = 0, low = 0, total = inventoryList.length;
-        inventoryList.forEach(item => {
-            if(item.stock <= 0) crit++;
-            else if(item.stock <= item.minStock) low++;
-        });
-        document.getElementById('dashCrit').innerText = crit;
-        document.getElementById('dashLow').innerText = low;
-        document.getElementById('dashTotal').innerText = total;
-
-        const lang = i18n[currentLang];
-        document.querySelector('[data-i18n="card_crit"]').innerText = lang.card_crit.replace('(0)', `(${crit})`);
-
-        const histDiv = document.getElementById('dashHistory');
-        histDiv.innerHTML = historyList.slice(0, 10).map(h => `
-            <div style="border-bottom:1px solid #eee; padding:5px 0;">
-                <span style="font-weight:bold;">${h.id}</span> 
-                <span style="float:right; color:${h.qty>0?'green':'red'}">${h.qty>0?'+':''}${h.qty}</span>
-                <div style="font-size:11px; color:#999;">${new Date(h.date).toLocaleDateString()} - ${h.action}</div>
-            </div>
-        `).join('');
-    }
-
-    function renderTable() {
-        const tbody = document.getElementById('inventoryBody');
-        const term = document.getElementById('searchInv').value.toLowerCase();
-        const lang = i18n[currentLang];
-        tbody.innerHTML = '';
-        
-        inventoryList.forEach((item, index) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                let statusClass = 'status-ok';
-                if (item.stock <= 0) statusClass = 'status-crit';
-                else if (item.stock <= item.minStock) statusClass = 'status-low';
-
-                const tr = document.createElement('tr');
-                tr.onclick = () => openDetailsObj(item);
-                tr.innerHTML = `
-                    <td class="col-status"><span class="status-dot ${statusClass}"></span></td>
-                    <td class="col-pn">${item.id}</td>
-                    <td class="col-model desktop-only">${item.model}</td>
-                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td class="col-loc"><span>${item.location||'-'}</span></td>
-                    <td class="col-stock">${item.stock}</td>
-                    <td class="col-unit desktop-only" style="color:#666; font-size:12px;">${item.unit}</td>
-                    <td style="text-align:center;"><span style="color:#0a6ed1; font-weight:bold; font-size:12px;">${lang.txt_display}</span></td>
-                `;
-                tbody.appendChild(tr);
-            }
-        });
-    }
-
-    function renderMasterTable() {
-        const tbody = document.getElementById('masterBody');
-        const term = document.getElementById('searchMaster').value.toLowerCase();
-        const lang = i18n[currentLang];
-        tbody.innerHTML = '';
-        
-        const masterArr = Object.keys(materialMaster).map(key => {
-            return { id: key, ...materialMaster[key] };
-        });
-
-        masterArr.forEach((item) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                const tr = document.createElement('tr');
-                tr.onclick = () => {
-                    let invItem = inventoryList.find(i => i.id === item.id);
-                    if(!invItem) invItem = { ...item, stock: 0 };
-                    openDetailsObj(invItem); 
-                };
-                
-                tr.innerHTML = `
-                    <td class="col-pn">${item.id}</td>
-                    <td class="col-model desktop-only">${item.model}</td>
-                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td class="col-unit">${item.unit}</td>
-                    <td class="col-stock desktop-only">${item.minStock}</td>
-                    <td class="col-action" id="action-${item.id}"></td>
-                `;
-                tbody.appendChild(tr);
-
-                const actionTd = document.getElementById(`action-${item.id}`);
-                
-                const displayBtn = document.createElement('span');
-                displayBtn.innerText = lang.txt_display;
-                displayBtn.style.color = '#0a6ed1';
-                displayBtn.style.fontWeight = 'bold';
-                displayBtn.style.fontSize = '12px';
-                displayBtn.style.cursor = 'pointer';
-                displayBtn.onclick = (e) => { e.stopPropagation(); tr.onclick(); };
-                actionTd.appendChild(displayBtn);
-
-                const delBtn = document.createElement('span');
-                delBtn.className = 'btn-delete';
-                delBtn.innerText = '✕';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-
-                    const invItem = inventoryList.find(i => i.id === item.id);
-                    const currentStock = invItem ? invItem.stock : 0;
-
-                    if (currentStock > 0) {
-                        const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
-                        const msg = currentLang === 'zh' 
-                            ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` 
-                            : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
-                        
-                        showMsg(title, msg);
-                        return;
-                    }
-
-                    const footer = document.querySelector('#msgModal .dialog-footer');
-                    const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
-
-                    const title = currentLang === 'zh' ? "刪除確認" : "Delete Confirmation";
-                    const msg = currentLang === 'zh' ? "確定要刪除此物料主檔嗎？(此動作無法復原)" : "Delete this master data permanently?";
-                    const btnCancel = currentLang === 'zh' ? "取消" : "Cancel";
-                    const btnConfirm = currentLang === 'zh' ? "刪除" : "Delete";
-
-                    document.getElementById('msgTitle').innerText = title;
-                    document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-                    document.getElementById('msgContent').innerText = msg;
-
-                    footer.innerHTML = `
-                        <button class="std-btn btn-transparent" id="msgCancel">${btnCancel}</button>
-                        <button class="std-btn btn-primary" id="msgConfirm">${btnConfirm}</button>
-                    `;
-
-                    document.getElementById('msgCancel').onclick = () => {
-                        closeModal('msgModal');
-                        setTimeout(() => footer.innerHTML = originalFooter, 300);
-                    };
-
-                    document.getElementById('msgConfirm').onclick = () => {
-                        closeModal('msgModal');
-                        deleteMaster(item.id);
-                        setTimeout(() => footer.innerHTML = originalFooter, 300);
-                    };
-
-                    openModal('msgModal');
-                };
-                actionTd.appendChild(delBtn);
-            }
-        });
-    }
-
-    function openDetailsObj(item) {
-        document.getElementById('detId').innerText = item.id;
-        document.getElementById('detModel').innerText = item.model;
-        document.getElementById('detDesc').innerText = item.description;
-        document.getElementById('detStock').innerText = item.stock;
-        document.getElementById('detLoc').innerText = item.location || "None";
-        
-        const hList = historyList.filter(h => h.id === item.id);
-        const histHTML = hList.length ? hList.map(h => `
-            <div style="border-bottom:1px solid #eee; padding:8px 0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span style="font-weight:600; font-size:13px; color:#333;">
-                        ${h.action} 
-                        <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">
-                            (${h.qty > 0 ? '+' : ''}${h.qty})
-                        </span>
-                    </span>
-                    <span style="font-size:11px; color:#888;">${new Date(h.date).toLocaleDateString()}</span>
+            <div class="modal-body">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <div>
+                        <label data-i18n="lbl_ref">Ref (PO/Purpose)</label>
+                        <input type="text" id="txRef" class="std-input">
+                    </div>
+                    <div>
+                        <label data-i18n="lbl_date">Date</label>
+                        <input type="date" id="txDate" class="std-input">
+                    </div>
+                    <div>
+                        <label data-i18n="lbl_user">User</label>
+                        <input type="text" id="txUser" class="std-input" readonly>
+                    </div>
+                    <div>
+                        <label data-i18n="lbl_loc">Update Location</label>
+                        <input type="text" id="txLoc" class="std-input" placeholder="Optional">
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
-                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
-                        📄 ${h.ref || '-'}
-                    </span>
-                    <span>👤 ${h.user}</span>
+                <div id="txBody"></div>
+                <button class="std-btn" style="width:100%; justify-content:center; margin-top:10px;" onclick="addTxRow()">➕ Add Item</button>
+            </div>
+            <div class="modal-footer">
+                <button class="std-btn" onclick="closeModal('txModal')" data-i18n="btn_cancel">Cancel</button>
+                <button class="std-btn btn-primary" onclick="submitTx()" data-i18n="btn_submit">Post Transaction</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="masterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="btn_master">Master Data</h3>
+                <span style="cursor:pointer; font-size:24px;" onclick="closeModal('masterModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <button class="std-btn btn-primary" onclick="openModal('createModal')" style="margin-bottom:10px;">➕ Create New Master</button>
+                <input type="text" id="searchMaster" class="std-input" style="width:100%; margin-bottom:10px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
+                <div style="overflow-x:auto;">
+                    <table style="min-width: 100%;">
+                        <thead>
+                            <tr>
+                                <th data-i18n="th_id">ID</th>
+                                <th data-i18n="th_model">Model</th>
+                                <th data-i18n="th_min">Min</th>
+                                <th data-i18n="th_action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterTableBody"></tbody>
+                    </table>
                 </div>
             </div>
-        `).join('') : '<div style="text-align:center; padding:10px; color:#999;">No History</div>';
-        
-        document.getElementById('detHistory').innerHTML = histHTML;
-        openModal('detailsModal');
-    }
+        </div>
+    </div>
 
-    function openTxModal(type) {
-        currentTxType = type;
-        const isReceive = type === 'receive';
-        const lang = i18n[currentLang];
-        document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
-        document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-        
-        // 🔥 自動帶入姓名，並鎖定為唯讀
-        document.getElementById('txUser').value = currentUserDisplayName;
-        document.getElementById('txUser').readOnly = true;
-        document.getElementById('txUser').style.backgroundColor = "#f5f5f5"; 
+    <div id="createModal" class="modal" style="z-index: 1100;">
+        <div class="modal-content" style="max-height: 80vh;">
+            <div class="modal-header"><h3>Create Master</h3></div>
+            <div class="modal-body">
+                <div style="display:grid; gap:10px;">
+                    <input type="text" id="newId" class="std-input" placeholder="ID">
+                    <input type="text" id="newModel" class="std-input" placeholder="Model Name">
+                    <input type="text" id="newDesc" class="std-input" placeholder="Description">
+                    <input type="text" id="newUnit" class="std-input" placeholder="Unit (e.g. EA, SET)">
+                    <input type="number" id="newMinStock" class="std-input" placeholder="Min Stock Level">
+                    <input type="text" id="newUser" class="std-input" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="std-btn" onclick="closeModal('createModal')">Cancel</button>
+                <button class="std-btn btn-primary" onclick="submitCreateMaster()">Save</button>
+            </div>
+        </div>
+    </div>
 
-        document.getElementById('txRef').value = "";
-        document.getElementById('txBody').innerHTML = "";
-        addTxRow(); addTxRow(); 
-        openModal('txModal');
-    }
+    <script>
+        // ⚠️ 請填入您的 Google Apps Script 部署網址 (務必使用新版網址)
+        const API_URL = "https://script.google.com/macros/s/AKfycbwj57eCE8dveffooXWT1vnrA-2Zf2irtRrkOGjJHp-ZaoRRul-c-qX2a5eJ5hetP1Pa4Q/exec"; 
 
-    function addTxRow() {
-        const tr = document.createElement('tr');
-        const isIssue = currentTxType === 'issue';
-        const locAttr = isIssue ? 'readonly tabindex="-1"' : ''; 
-        const locStyle = isIssue ? 'background-color: #f5f5f5; color: #666;' : '';
+        let inventory = [];
+        let master = [];
+        let currentLang = 'en';
+        let currentTxType = 'receive';
+        let currentUserDisplayName = "";
 
-        tr.innerHTML = `
-            <td><input type="text" class="tx-input tx-id" onchange="resolvePart(this)"></td>
-            <td><input type="text" class="tx-input tx-info" readonly tabindex="-1"></td>
-            <td><input type="number" class="tx-input tx-qty"></td>
-            <td><input type="text" class="tx-input tx-loc" ${locAttr} style="${locStyle}"></td>
-            <td style="text-align:center; cursor:pointer; color:#ccc;" onclick="this.parentElement.remove()">✕</td>
-        `;
-        document.getElementById('txBody').appendChild(tr);
-    }
+        const i18n = {
+            en: {
+                stat_items: "Active Items", stat_low: "Low Stock", btn_po: "Goods Receipt", btn_issue: "Goods Issue",
+                btn_master: "Master Data", btn_export: "Export", btn_refresh: "Refresh",
+                th_id: "ID", th_model: "Model", th_stock: "Stock", th_unit: "Unit", th_loc: "Location", th_min: "Min", th_action: "Action",
+                lbl_ref: "Reference (PO/Job)", lbl_date: "Post Date", lbl_user: "User", lbl_loc: "Update Location", lbl_qty: "Qty",
+                btn_cancel: "Cancel", btn_submit: "Post Transaction",
+                msg_input_required: "Input Required",
+                msg_missing_ref: "Field 'Reference' is empty.",
+                msg_missing_loc: "Field 'Update Location' is empty.",
+                error_title: "Insufficient Stock",
+                error_msg: "Cannot issue more than available stock.",
+                col_pn: "Part Number",
+                deleted: "Deleted!"
+            },
+            zh: {
+                stat_items: "品項總數", stat_low: "低庫存警示", btn_po: "收貨入庫", btn_issue: "領料出庫",
+                btn_master: "主檔管理", btn_export: "導出 Excel", btn_refresh: "刷新",
+                th_id: "編號", th_model: "規格型號", th_stock: "庫存量", th_unit: "單位", th_loc: "儲位", th_min: "安全庫存", th_action: "操作",
+                lbl_ref: "參考單號", lbl_date: "過帳日期", lbl_user: "操作人員", lbl_loc: "更新儲位", lbl_qty: "數量",
+                btn_cancel: "取消", btn_submit: "確認過帳",
+                msg_input_required: "欄位必填",
+                msg_missing_ref: "欄位 [參考單號] 尚未填寫。",
+                msg_missing_loc: "欄位 [更新儲位] 尚未填寫。",
+                error_title: "庫存不足",
+                error_msg: "領料數量不可大於現有庫存。",
+                col_pn: "料號",
+                deleted: "已刪除！"
+            }
+        };
 
-    function resolvePart(input) {
-        const id = input.value.trim();
-        const row = input.parentElement.parentElement;
-        row.querySelector('.tx-info').value = "";
-        row.querySelector('.tx-loc').value = "";
+        // --- Auth Logic ---
+        async function doLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const feedback = document.getElementById('loginFeedback');
+            feedback.innerText = "";
 
-        if (!id) return;
-
-        let invItem = inventoryList.find(i => i.id === id);
-        let masterItem = materialMaster[id];
-
-        if (currentTxType === 'receive') {
-            if (!masterItem) {
-                const lang = i18n[currentLang];
-                showMsg(lang.msg_unknown_title, lang.msg_unknown_body);
-                input.value = ""; 
+            if(!user || !pass) {
+                feedback.innerText = "Please enter username and password";
                 return;
             }
-            row.querySelector('.tx-info').value = masterItem.description || masterItem.model;
-            if (invItem) {
-                row.querySelector('.tx-loc').value = invItem.location || "";
-            }
-        } else {
-            if (invItem) {
-                row.querySelector('.tx-info').value = invItem.description || invItem.model;
-                row.querySelector('.tx-loc').value = invItem.location || "";
-            }
-        }
-    }
 
-    // 🔥 submitTx 重大修改：新增庫存檢查邏輯
-    function submitTx() {
-        const lang = i18n[currentLang];
-        const ref = document.getElementById('txRef').value.trim();
-        const user = document.getElementById('txUser').value.trim();
-
-        if (!ref || !user) {
-            showMsg(lang.msg_input_required, lang.msg_input_empty);
-            return;
-        }
-
-        const items = [];
-        // 收集資料
-        document.querySelectorAll('#txBody tr').forEach(row => {
-            const idInput = row.querySelector('.tx-id');
-            const qtyInput = row.querySelector('.tx-qty');
-            if(idInput && qtyInput && idInput.value) {
-                items.push({ 
-                    id: idInput.value.trim(), 
-                    qty: Number(qtyInput.value) 
-                });
-            }
-        });
-
-        if(items.length === 0) return;
-
-        // 🔥 檢查庫存是否足夠
-        if (currentTxType === 'issue') {
-            for (let item of items) {
-                const invItem = inventoryList.find(i => i.id === item.id);
-                const currentStock = invItem ? invItem.stock : 0;
-                
-                if (item.qty > currentStock) {
-                    // 庫存不足，跳出錯誤並停止
-                    const title = currentLang === 'zh' ? "庫存不足" : "Insufficient Stock";
-                    const msg = currentLang === 'zh' 
-                        ? `料號 ${item.id} 庫存不足！\n現有: ${currentStock}, 需求: ${item.qty}`
-                        : `Part ${item.id} insufficient stock!\nAvailable: ${currentStock}, Request: ${item.qty}`;
-                    showMsg(title, msg);
-                    return; // ⛔ 停止執行
+            setLoading(true);
+            try {
+                const res = await sendPost({ action: 'login', username: user, password: pass });
+                if(res.status === 'success') {
+                    const displayName = res.message.name;
+                    localStorage.setItem('wms_user', displayName);
+                    applyLoginState(displayName);
+                } else {
+                    feedback.innerText = res.message || "Invalid Credentials";
+                    document.querySelector('#loginOverlay .std-dialog').animate([
+                        { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
+                    ], { duration: 300 });
                 }
+            } catch(e) {
+                feedback.innerText = "Connection Error. Please check Internet.";
+            } finally {
+                setLoading(false);
             }
         }
 
-        // 通過檢查，顯示確認視窗
-        document.getElementById('msgTitle').innerText = lang.confirm_post_title;
-        document.getElementById('msgTitle').style.color = "var(--sap-primary)"; 
-        document.getElementById('msgContent').innerText = lang.confirm_post_body;
-        
-        const okBtn = document.querySelector('#msgModal .btn-primary');
-        okBtn.onclick = function() {
-            closeModal('msgModal');
-            executeSubmit();
-        };
-        
-        openModal('msgModal');
-    }
+        function clearLoginError() { document.getElementById('loginFeedback').innerText = ""; }
 
-    async function executeSubmit() {
-        const ref = document.getElementById('txRef').value;
-        const user = document.getElementById('txUser').value;
-        
-        const items = [];
-        document.querySelectorAll('#txBody tr').forEach(row => {
-            const idInput = row.querySelector('.tx-id');
-            const qtyInput = row.querySelector('.tx-qty');
-            const locInput = row.querySelector('.tx-loc');
+        function applyLoginState(name) {
+            currentUserDisplayName = name;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'block';
+            showToast("Welcome, " + currentUserDisplayName);
+            fetchData(); 
+        }
+
+        function doLogout() { localStorage.removeItem('wms_user'); location.reload(); }
+
+        function checkAutoLogin() {
+            const savedUser = localStorage.getItem('wms_user');
+            if (savedUser) applyLoginState(savedUser);
+        }
+
+        async function sendPost(data) {
+            const realResponse = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+            return await realResponse.json();
+        }
+
+        async function fetchData() {
+            if(API_URL.includes("YOUR_GOOGLE")) { alert("Setup API URL first!"); return; }
+            setLoading(true);
+            try {
+                const res = await sendPost({ action: 'get_data' });
+                if(res.status === 'success') {
+                    inventory = res.message.inventory;
+                    // Fix: Ensure master is always an object array or convert if backend sends map
+                    // Backend sends { inventory: [], master: {}, history: [] }
+                    // We need master as array for table, and map for lookups
+                    const masterMap = res.message.master;
+                    master = Object.keys(masterMap).map(k => ({ id: k, ...masterMap[k] }));
+                    
+                    renderTable();
+                    renderDashboard();
+                    renderMasterTable();
+                } else {
+                    alert(res.message);
+                }
+            } catch(e) { console.error(e); alert("Network Error"); }
+            finally { setLoading(false); }
+        }
+
+        function renderDashboard() {
+            document.getElementById('statItems').innerText = inventory.length;
+            const low = inventory.filter(i => i.stock <= i.minStock).length;
+            document.getElementById('statLow').innerText = low;
+        }
+
+        function renderTable() {
+            const term = document.getElementById('searchInv').value.toLowerCase();
+            const body = document.getElementById('inventoryBody');
+            body.innerHTML = inventory.filter(i => (i.id+i.model).toLowerCase().includes(term)).map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td><b>${item.model}</b><br><small>${item.description}</small></td>
+                    <td class="${item.stock <= item.minStock ? 'stock-low' : ''}">${item.stock}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.location || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderMasterTable() {
+            const term = document.getElementById('searchMaster').value.toLowerCase();
+            const body = document.getElementById('masterTableBody');
+            body.innerHTML = master.filter(m => (m.id+m.model).toLowerCase().includes(term)).map(m => `
+                <tr>
+                    <td>${m.id}</td>
+                    <td>${m.model}</td>
+                    <td>${m.minStock}</td>
+                    <td><button class="btn-delete" onclick="deleteMaster('${m.id}')">✕</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteMaster(id) {
+            // Check stock first
+            const invItem = inventory.find(i => i.id === id);
+            const stock = invItem ? invItem.stock : 0;
+            const lang = i18n[currentLang];
+
+            if (stock > 0) {
+                alert(currentLang === 'en' ? `Cannot delete ${id}. Stock is ${stock}.` : `無法刪除 ${id}，尚有庫存 ${stock}。`);
+                return;
+            }
+
+            if(!confirm(currentLang === 'en' ? `Delete Master ID: ${id}?` : `確定刪除料號: ${id}?`)) return;
             
-            if(idInput && qtyInput) {
-                const id = String(idInput.value).trim();
-                const qty = Number(qtyInput.value);
-                const loc = locInput ? String(locInput.value).trim() : "";
-                if(id && qty > 0) items.push({ id, qty, loc });
-            }
-        });
-
-        if(items.length === 0) { showToast("No items to post", true); return; }
-
-        setLoading(true);
-        try {
-            await sendPost({ 
-                action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
-                [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
-                user: user, 
-                items: items 
-            });
-            closeModal('txModal'); 
-            fetchData(); 
-            showToast("Transaction Posted!");
-        } catch(e) { showMsg("Error", e.message); } 
-        finally { setLoading(false); }
-    }
-
-    async function deleteMaster(id) {
-        setLoading(true);
-        try {
-            const user = currentUserDisplayName || "Admin"; 
-            await sendPost({ 
-                action: 'delete_master', 
-                id: id, 
-                user: user 
-            });
-            fetchData(); 
-            showToast(i18n[currentLang].deleted);
-        } catch(e) { 
-            showMsg("Error", e.message); 
-        } finally { 
-            setLoading(false); 
+            setLoading(true);
+            try {
+                await sendPost({ action: 'delete_master', id: id, user: currentUserDisplayName });
+                fetchData();
+                showToast(lang.deleted);
+            } catch(e) { alert(e.message); }
+            finally { setLoading(false); }
         }
-    }
 
-    function openCreateMasterModal() {
-        ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
-        document.getElementById('newMinStock').value = 0;
-        document.getElementById('newUser').value = currentUserDisplayName; // 自動帶入
-        openModal('createModal');
-    }
-    
-    function checkMasterExists() {
-        const id = document.getElementById('newId').value.trim();
-        const fb = document.getElementById('masterFeedback');
-        if(inventoryList.find(i => i.id === id) || materialMaster[id]) { fb.innerText = "⚠️ Exists"; fb.style.color = "red"; }
-        else { fb.innerText = "✅ Available"; fb.style.color = "green"; }
-    }
+        function openTxModal(type) {
+            currentTxType = type;
+            const isReceive = type === 'receive';
+            const lang = i18n[currentLang];
+            document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
+            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+            
+            // Auto fill user
+            document.getElementById('txUser').value = currentUserDisplayName;
+            document.getElementById('txUser').readOnly = true;
 
-    async function submitCreateMaster() {
-        const id = document.getElementById('newId').value.trim();
-        const user = document.getElementById('newUser').value;
-        if(!id || !user) { showToast("ID & User Required", true); return; }
-        setLoading(true);
-        try {
-            await sendPost({
-                action: 'create_master', id: id, 
-                model: document.getElementById('newModel').value,
-                description: document.getElementById('newDesc').value,
-                unit: document.getElementById('newUnit').value,
-                minStock: document.getElementById('newMinStock').value,
-                user: user
+            document.getElementById('txRef').value = "";
+            
+            // Toggle Location Visibility based on type
+            const locInput = document.getElementById('txLoc');
+            locInput.style.display = isReceive ? 'block' : 'none';
+            locInput.previousElementSibling.style.display = isReceive ? 'block' : 'none'; // Hide label too
+            if (isReceive) locInput.value = ""; 
+
+            document.getElementById('txBody').innerHTML = "";
+            addTxRow(); 
+            openModal('txModal');
+        }
+
+        function addTxRow() {
+            const div = document.createElement('div');
+            div.className = 'tx-row';
+            div.innerHTML = `
+                <span class="tx-remove" onclick="this.parentElement.remove()">✕</span>
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+                    <select class="std-input tx-id-select">
+                        <option value="">-- Select Item --</option>
+                        ${master.map(m => `<option value="${m.id}">${m.id} | ${m.model}</option>`).join('')}
+                    </select>
+                    <input type="number" class="std-input tx-qty" placeholder="Qty">
+                </div>
+            `;
+            document.getElementById('txBody').appendChild(div);
+        }
+
+        // 🔥 Updated Submit Function with Validation
+        async function submitTx() {
+            const lang = i18n[currentLang];
+            
+            // 1. Check Reference
+            const refVal = document.getElementById('txRef').value.trim();
+            if(!refVal) {
+                alert(lang.msg_missing_ref);
+                return;
+            }
+
+            // 2. Check Header Location (Only for Receive)
+            const locVal = document.getElementById('txLoc').value.trim();
+            // If you want Location mandatory for Receive:
+            if(currentTxType === 'receive' && !locVal) {
+                alert(lang.msg_missing_loc);
+                return;
+            }
+
+            const items = [];
+            const rows = document.querySelectorAll('.tx-row');
+            if(rows.length === 0) return;
+
+            let hasError = false;
+
+            // 3. Check Rows
+            for(let i=0; i<rows.length; i++) {
+                const id = rows[i].querySelector('.tx-id-select').value;
+                const qty = rows[i].querySelector('.tx-qty').value;
+
+                if(!id) {
+                    alert(lang.msg_input_required + ": " + lang.col_pn);
+                    hasError = true; break;
+                }
+                if(!qty || Number(qty) <= 0) {
+                    alert(lang.msg_input_required + ": " + lang.lbl_qty);
+                    hasError = true; break;
+                }
+
+                // 4. Check Stock for Issue
+                if (currentTxType === 'issue') {
+                    const invItem = inventory.find(x => x.id === id);
+                    const currentStock = invItem ? invItem.stock : 0;
+                    if (Number(qty) > currentStock) {
+                        alert(`${lang.error_title}: ${id}\n${lang.error_msg}`);
+                        hasError = true; break;
+                    }
+                }
+
+                items.push({ id, qty: Number(qty) });
+            }
+
+            if(hasError) return;
+
+            setLoading(true);
+            try {
+                const action = currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue';
+                const payload = {
+                    action: action,
+                    po: refVal,
+                    location: locVal,
+                    user: currentUserDisplayName,
+                    items: items
+                };
+                const res = await sendPost(payload);
+                if(res.status === 'success') {
+                    closeModal('txModal'); fetchData(); showToast("Success!");
+                } else { alert(res.message); }
+            } catch(e) { alert("Error: " + e.message); }
+            finally { setLoading(false); }
+        }
+
+        async function submitCreateMaster() {
+            const id = document.getElementById('newId').value.trim();
+            if(!id) return;
+            setLoading(true);
+            try {
+                await sendPost({
+                    action: 'create_master', id: id, 
+                    model: document.getElementById('newModel').value,
+                    description: document.getElementById('newDesc').value,
+                    unit: document.getElementById('newUnit').value,
+                    minStock: document.getElementById('newMinStock').value,
+                    user: currentUserDisplayName
+                });
+                closeModal('createModal'); fetchData(); showToast("Created!");
+            } catch(e) { alert(e.message); }
+            finally { setLoading(false); }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
             });
-            closeModal('createModal'); fetchData(); showToast("Created!");
-        } catch(e) { showMsg("Error", e.message); }
-        finally { setLoading(false); }
-    }
+            renderTable(); renderDashboard(); renderMasterTable();
+        }
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'en' ? 'zh' : 'en';
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
-        });
-        renderTable(); 
-        renderDashboard();
-        renderMasterTable();
-    }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; }
+        function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2000); }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function setLoading(b) { document.getElementById('loading').style.display = b?'block':'none'; document.querySelector('.table-container').style.opacity = b?0.5:1; }
-    function showToast(msg, err) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = err ? "#bb0000" : "#32363a"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 3000); }
-    
-    // 🔥 Start Check
-    checkAutoLogin();
-</script>
+        checkAutoLogin();
+    </script>
 </body>
 </html>

@@ -76,6 +76,7 @@
         .btn-transparent { background: transparent; color: var(--sap-primary); }
         .btn-excel { background-color: #107e3e; color: white; border-color: #107e3e; } .btn-excel:hover { opacity: 0.9; }
 
+        /* 🔥 刪除按鈕樣式 */
         .btn-delete { color: #bb0000; font-weight: bold; cursor: pointer; padding: 4px 8px; border-radius: 4px; border: 1px solid transparent; margin-left: 5px; font-size: 12px; }
         .btn-delete:hover { background-color: #ffe6e6; border-color: #bb0000; }
 
@@ -128,8 +129,11 @@
             <p style="font-size:12px; color:#666; margin-top:5px;">Please sign in to continue</p>
         </div>
         <div style="display:grid; gap:15px;">
-            <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;">
-            <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;">
+            <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;" oninput="clearLoginError()">
+            <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;" oninput="clearLoginError()">
+            
+            <div id="loginFeedback" style="color:#bb0000; font-size:13px; text-align:center; min-height:18px; font-weight:bold;"></div>
+            
             <button class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()">Sign In</button>
         </div>
     </div>
@@ -318,7 +322,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzVo8qUGaZ9BNDwFWOpYTFKJdEa9t2PfjRrHV-FAstngRMD15oUu1qLCtvMLSvUkV3Log/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzAKZIJz24-jcc9P4f9Whn3f4GApW6XhcTWwfjUjBBMAMce4S6pnE3A-hBThrGuDRc5/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -380,26 +384,48 @@
         openModal('msgModal');
     }
 
+    // --- 🔥 登入與持久化邏輯 (修改版) ---
     async function doLogin() {
         const user = document.getElementById('loginUser').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
-        if(!user || !pass) return;
+        const feedback = document.getElementById('loginFeedback');
+        
+        // 清空錯誤訊息
+        feedback.innerText = "";
+
+        if(!user || !pass) {
+            feedback.innerText = "Please enter username and password";
+            return;
+        }
 
         setLoading(true);
         try {
             const res = await sendPost({ action: 'login', username: user, password: pass });
             if(res.status === 'success') {
                 const displayName = res.message.name;
-                localStorage.setItem('wms_user', displayName);
+                localStorage.setItem('wms_user', displayName); // 保存登入狀態
                 applyLoginState(displayName);
             } else {
-                showMsg("Login Failed", res.message);
+                // 🔥 修改：直接顯示在登入框，而不是跳視窗
+                feedback.innerText = res.message || "Invalid Credentials";
+                // 如果需要晃動效果提示錯誤，可以加這行 (選用)
+                document.querySelector('#loginOverlay .std-dialog').animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 300 });
             }
         } catch(e) {
-            showMsg("Error", "Connection failed. Please check API URL.");
+            feedback.innerText = "Connection Error. Please check Internet.";
         } finally {
             setLoading(false);
         }
+    }
+
+    // 🔥 新增：當使用者重新輸入時，清除錯誤訊息
+    function clearLoginError() {
+        document.getElementById('loginFeedback').innerText = "";
     }
 
     function applyLoginState(name) {
@@ -415,6 +441,7 @@
         location.reload();
     }
 
+    // 檢查是否已登入
     function checkAutoLogin() {
         const savedUser = localStorage.getItem('wms_user');
         if (savedUser) {
@@ -869,3 +896,5 @@
 </script>
 </body>
 </html>
+
+}

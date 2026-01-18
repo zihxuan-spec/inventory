@@ -44,7 +44,7 @@
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
         
-        /* 🔥 iPad 修正: 預設使用自動寬度，不要鎖死 1000px，讓它適應平板 */
+        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
         
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -57,7 +57,7 @@
         
         th.col-pn, td.col-pn { padding-left: 12px !important; }
         
-        /* 🔥 iPad 修正: 設定最小與最大寬度，讓瀏覽器自動分配空間，避免擠壓 */
+        /* 🔥 iPad 修正: 彈性寬度 */
         .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         
@@ -139,15 +139,13 @@
             
             /* 🔥 手機排版修正：隱藏桌機欄位，隱藏 Action 欄位 (整行可點) */
             .desktop-only { display: none !important; } 
-            .col-action { display: none !important; } /* 隱藏操作欄，手機點擊行即可 */
+            .col-action { display: none !important; } 
 
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             
-            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             
-            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
             
             /* 調整各欄位寬度 */
@@ -155,7 +153,7 @@
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
+            .col-pn { width: auto !important; } 
 
             /* 🔥 手機排版美化：堆疊資訊樣式 */
             .mobile-info { 
@@ -390,6 +388,10 @@
     let currentTxType = 'receive'; 
     let currentLang = 'en';
     let currentUserDisplayName = ""; 
+    
+    // 🔥 新增：自動登出計時器
+    let logoutTimer;
+    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 分鐘 (毫秒)
 
     const i18n = {
         en: {
@@ -448,6 +450,22 @@
         okBtn.onclick = function() { closeModal('msgModal'); };
         openModal('msgModal');
     }
+
+    // --- 🔥 自動登出邏輯 ---
+    function resetLogoutTimer() {
+        if (!localStorage.getItem('wms_user')) return; // 未登入不計時
+        
+        clearTimeout(logoutTimer);
+        logoutTimer = setTimeout(() => {
+            alert("閒置過久，系統自動登出 (Auto Logout)");
+            doLogout();
+        }, AUTO_LOGOUT_TIME);
+    }
+
+    // 監聽操作以重置計時器
+    ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => 
+        document.addEventListener(evt, resetLogoutTimer)
+    );
 
     // --- 🔥 登入函式 (修正版：按鈕顯示 Connecting...) ---
     async function doLogin() {
@@ -519,9 +537,13 @@
         document.getElementById('logoutBtn').style.display = 'block';
         showToast("Welcome, " + currentUserDisplayName);
         fetchData(); 
+        resetLogoutTimer(); // 🔥 登入後開始計時
     }
 
-    function doLogout() { localStorage.removeItem('wms_user'); location.reload(); }
+    function doLogout() { 
+        localStorage.removeItem('wms_user'); 
+        location.reload(); 
+    }
 
     function checkAutoLogin() {
         const savedUser = localStorage.getItem('wms_user');
@@ -665,7 +687,7 @@
         });
     }
 
-    // 🔥 修正：renderMasterTable 手機顯示優化 (同步 Inventory 邏輯)
+    // 🔥 修正：renderMasterTable 手機顯示優化
     function renderMasterTable() {
         const tbody = document.getElementById('masterBody');
         const term = document.getElementById('searchMaster').value.toLowerCase();

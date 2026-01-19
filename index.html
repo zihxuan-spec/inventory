@@ -53,17 +53,17 @@
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
-        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; font-size: 12px; }
+        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
         
         th.col-pn, td.col-pn { padding-left: 12px !important; }
         
         /* 🔥 iPad 修正: 彈性寬度 */
-        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; font-size: 12px; } 
+        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         
-        .col-loc { width: 80px; text-align: center; color: #555; white-space: nowrap; font-size: 12px; }
-        .col-stock { width: 80px; text-align: center; white-space: nowrap; font-size: 12px; }
-        .col-unit { width: 60px; text-align: center; white-space: nowrap; font-size: 12px; }
+        .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; white-space: nowrap; }
+        .col-stock { width: 80px; text-align: right; white-space: nowrap; }
+        .col-unit { width: 60px; text-align: center; white-space: nowrap; }
         .col-action { width: 100px; text-align: center; white-space: nowrap;}
         .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
@@ -144,8 +144,10 @@
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             
+            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             
+            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
             
             /* 調整各欄位寬度 */
@@ -153,7 +155,7 @@
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } 
+            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
 
             /* 🔥 手機排版美化：堆疊資訊樣式 */
             .mobile-info { 
@@ -389,7 +391,7 @@
     let currentLang = 'en';
     let currentUserDisplayName = ""; 
     
-    // 🔥 新增：自動登出計時器
+    // 🔥 自動登出設定
     let logoutTimer;
     const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 分鐘 (毫秒)
 
@@ -451,14 +453,30 @@
         openModal('msgModal');
     }
 
-    // --- 🔥 自動登出邏輯 ---
+    // --- 🔥 自動登出邏輯 (使用 msgModal) ---
     function resetLogoutTimer() {
-        if (!localStorage.getItem('wms_user')) return; // 未登入不計時
+        if (!localStorage.getItem('wms_user')) return; 
         
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(() => {
-            alert("閒置過久，系統自動登出 (Auto Logout)");
-            doLogout();
+            // 清除登入狀態
+            localStorage.removeItem('wms_user');
+            
+            // 顯示模態視窗
+            const title = currentLang === 'zh' ? "自動登出" : "Auto Logout";
+            const msg = currentLang === 'zh' ? "閒置過久，系統已自動登出。" : "Session timed out due to inactivity.";
+            
+            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
+            document.getElementById('msgContent').innerText = msg;
+            
+            // 設定按鈕行為：點擊 OK 後重新整理頁面
+            const okBtn = document.querySelector('#msgModal .btn-primary');
+            okBtn.onclick = function() { 
+                location.reload(); 
+            };
+            
+            openModal('msgModal');
         }, AUTO_LOGOUT_TIME);
     }
 
@@ -467,7 +485,7 @@
         document.addEventListener(evt, resetLogoutTimer)
     );
 
-    // --- 🔥 登入函式 (修正版：按鈕顯示 Connecting...) ---
+    // --- 🔥 登入函式 ---
     async function doLogin() {
         const user = document.getElementById('loginUser').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
@@ -550,7 +568,6 @@
         if (savedUser) applyLoginState(savedUser);
     }
 
-    // 🔥 修正：強制使用 text/plain 避免 CORS 問題
     async function sendPost(payload) {
         const res = await fetch(API_URL, { 
             method: 'POST', 
@@ -564,7 +581,6 @@
     function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
         setLoading(true);
-        // 原本邏輯保持不變
         sendPost({ action: 'get_data' }).then(data => {
             if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
 

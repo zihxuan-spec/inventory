@@ -44,7 +44,6 @@
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
         
-        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
         
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -57,7 +56,6 @@
         
         th.col-pn, td.col-pn { padding-left: 12px !important; }
         
-        /* 🔥 iPad 修正: 彈性寬度 */
         .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; font-size: 12px; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         
@@ -124,10 +122,8 @@
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-        /* 手機版專用資訊區塊 - 預設隱藏 */
         .mobile-info { display: none; }
 
-        /* 🔥 手機與平板適配設定 (RWD) */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -137,27 +133,22 @@
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
-            /* 🔥 手機排版修正：隱藏桌機欄位，隱藏 Action 欄位 (整行可點) */
             .desktop-only { display: none !important; } 
             .col-action { display: none !important; } 
 
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             
-            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             
-            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
             
-            /* 調整各欄位寬度 */
             .col-status { width: 30px !important; }
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
+            .col-pn { width: auto !important; } 
 
-            /* 🔥 手機排版美化：堆疊資訊樣式 */
             .mobile-info { 
                 display: block !important; 
                 margin-top: 6px; 
@@ -568,6 +559,7 @@
         if (savedUser) applyLoginState(savedUser);
     }
 
+    // 🔥 修正：強制使用 text/plain 避免 CORS 問題
     async function sendPost(payload) {
         const res = await fetch(API_URL, { 
             method: 'POST', 
@@ -581,6 +573,7 @@
     function fetchData() {
         if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
         setLoading(true);
+        // 原本邏輯保持不變
         sendPost({ action: 'get_data' }).then(data => {
             if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
 
@@ -703,7 +696,7 @@
         });
     }
 
-    // 🔥 修正：renderMasterTable 手機顯示優化
+    // 🔥 修正：renderMasterTable 手機顯示優化 (同步 Inventory 邏輯)
     function renderMasterTable() {
         const tbody = document.getElementById('masterBody');
         const term = document.getElementById('searchMaster').value.toLowerCase();
@@ -1015,33 +1008,89 @@
         if(items.length === 0) { showToast("No items to post", true); return; }
 
         setLoading(true);
+        // 🔥 本地樂觀更新 (Optimistic UI Update)
         try {
+            // 1. 先在本地更新資料
+            items.forEach(item => {
+                let invItem = inventoryList.find(i => i.id === item.id);
+                if (currentTxType === 'receive') {
+                    if (invItem) {
+                        invItem.stock += item.qty;
+                        if(item.loc) invItem.location = item.loc; // 更新儲位
+                    } else {
+                        // 如果是新品項，從 Master 抓資料建立
+                        const m = materialMaster[item.id];
+                        if (m) {
+                            inventoryList.push({
+                                id: item.id, model: m.model, description: m.description, 
+                                stock: item.qty, unit: m.unit, minStock: m.minStock, location: item.loc
+                            });
+                        }
+                    }
+                } else {
+                    if (invItem) invItem.stock -= item.qty;
+                }
+                
+                // 假造一筆歷史紀錄 (讓 Dashboard 也能即時更新)
+                historyList.unshift({
+                    date: new Date().toISOString(),
+                    ref: ref,
+                    action: currentTxType === 'receive' ? 'GR (In)' : 'GI (Out)',
+                    id: item.id,
+                    qty: currentTxType === 'receive' ? item.qty : -item.qty,
+                    user: user
+                });
+            });
+
+            // 2. 立即重繪畫面 (使用者覺得「好了！」)
+            renderTable();
+            renderDashboard();
+            renderMasterTable();
+            closeModal('txModal');
+            showToast("Transaction Posted!");
+
+            // 3. 背景發送請求給 Google (使用者不用等)
             await sendPost({ 
                 action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
                 [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
                 user: user, 
                 items: items 
             });
-            closeModal('txModal'); 
+            
+            // 成功後不需做任何事，因為畫面已經是新的了
+            
+        } catch(e) { 
+            // 只有萬一失敗時，才顯示錯誤並重新抓取正確資料
+            showMsg("Error", "Sync Failed: " + e.message); 
             fetchData(); 
-            showToast("Transaction Posted!");
-        } catch(e) { showMsg("Error", e.message); } 
-        finally { setLoading(false); }
+        } finally { 
+            setLoading(false); 
+        }
     }
 
     async function deleteMaster(id) {
         setLoading(true);
         try {
             const user = currentUserDisplayName || "Admin"; 
+            
+            // 🔥 本地樂觀刪除
+            delete materialMaster[id]; // 刪除 Master
+            const index = inventoryList.findIndex(i => i.id === id);
+            if(index !== -1) inventoryList.splice(index, 1); // 刪除 Inventory
+            
+            renderTable();
+            renderMasterTable();
+            renderDashboard();
+            showToast(i18n[currentLang].deleted);
+
             await sendPost({ 
                 action: 'delete_master', 
                 id: id, 
                 user: user 
             });
-            fetchData(); 
-            showToast(i18n[currentLang].deleted);
         } catch(e) { 
             showMsg("Error", e.message); 
+            fetchData(); // 失敗則回滾
         } finally { 
             setLoading(false); 
         }
@@ -1064,19 +1113,26 @@
     async function submitCreateMaster() {
         const id = document.getElementById('newId').value.trim();
         const user = document.getElementById('newUser').value;
+        const model = document.getElementById('newModel').value;
+        const desc = document.getElementById('newDesc').value;
+        const unit = document.getElementById('newUnit').value;
+        const min = document.getElementById('newMinStock').value;
+
         if(!id || !user) { showToast("ID & User Required", true); return; }
+        
         setLoading(true);
         try {
+            // 🔥 本地樂觀新增
+            materialMaster[id] = { model: model, description: desc, unit: unit, minStock: min };
+            renderMasterTable();
+            closeModal('createModal'); 
+            showToast("Created!");
+
             await sendPost({
                 action: 'create_master', id: id, 
-                model: document.getElementById('newModel').value,
-                description: document.getElementById('newDesc').value,
-                unit: document.getElementById('newUnit').value,
-                minStock: document.getElementById('newMinStock').value,
-                user: user
+                model: model, description: desc, unit: unit, minStock: min, user: user
             });
-            closeModal('createModal'); fetchData(); showToast("Created!");
-        } catch(e) { showMsg("Error", e.message); }
+        } catch(e) { showMsg("Error", e.message); fetchData(); }
         finally { setLoading(false); }
     }
 

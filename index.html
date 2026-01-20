@@ -414,7 +414,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyIfvfeaLT2IDZELollbHPyt_UT3GTcla_D62VKNOhFabg4Nn124EvLgitLhid3NT3Y0Q/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTooDlh_MKA3sRrYVNCqBZRzCrEWdSxobJBT_M-9xA5fs20Dm3LYcZ6qcpkqIr3QqBeA/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -423,7 +423,7 @@
     let currentTxType = 'receive'; 
     let currentLang = 'en';
     let currentUserDisplayName = ""; 
-    let currentUserName = ""; // 儲存帳號以便修改密碼
+    let currentUserName = ""; 
     
     // 自動登出設定
     let logoutTimer;
@@ -538,7 +538,7 @@
                 feedback.innerText = "Success!";
                 const displayName = res.message.name;
                 localStorage.setItem('wms_user', displayName);
-                localStorage.setItem('wms_uid', user); // 存帳號以便改密碼用
+                localStorage.setItem('wms_uid', user); 
                 applyLoginState(displayName, user);
             } else {
                 feedback.style.color = "#bb0000";
@@ -558,7 +558,6 @@
         }
     }
 
-    // 🔥 新增：註冊功能
     function openRegister() {
         ['regUser','regPass','regName'].forEach(id => document.getElementById(id).value = "");
         openModal('registerModal');
@@ -583,7 +582,6 @@
         finally { setLoading(false); }
     }
 
-    // 🔥 新增：修改密碼功能
     function openChangePass() {
         ['cpOld','cpNew','cpConfirm'].forEach(id => document.getElementById(id).value = "");
         openModal('changePassModal');
@@ -626,7 +624,7 @@
         currentUserName = uid || localStorage.getItem('wms_uid');
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'block';
-        document.getElementById('changePassBtn').style.display = 'block'; // 顯示改密碼按鈕
+        document.getElementById('changePassBtn').style.display = 'block'; 
         showToast("Welcome, " + currentUserDisplayName);
         fetchData(); 
         resetLogoutTimer(); 

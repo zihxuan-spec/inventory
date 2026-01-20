@@ -7,13 +7,13 @@
     
     <link rel="apple-touch-icon" href="https://placehold.co/180x180/354a5f/ffffff.png?text=WMS&font=roboto">
     <link rel="icon" href="https://placehold.co/192x192/354a5f/ffffff.png?text=WMS&font=roboto">
+    <link rel="manifest" href="manifest.json">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* --- SAP Fiori Style Theme --- */
         :root {
             --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
             --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
@@ -35,7 +35,7 @@
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
-        .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; } /* 標題設為 flex 以便放按鈕 */
+        .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .card-value { font-size: 36px; font-weight: normal; color: var(--sap-text-color); }
         .card-sub { font-size: 12px; color: #888; margin-top: 5px; }
         .card.alert { border-left: 5px solid var(--sap-critical); }
@@ -43,27 +43,20 @@
         .card.safe { border-left: 5px solid var(--sap-success); }
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
-        
-        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
-        
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
         .col-status { width: 35px; text-align: center; padding: 0 !important; }
-        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; font-size: 12px; }
-        
+        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-        
-        /* 🔥 iPad 修正: 彈性寬度 */
-        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; font-size: 12px; } 
+        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
-        
-        .col-loc { width: 80px; text-align: center; color: #555; white-space: nowrap; }
-        .col-stock { width: 80px; text-align: center; white-space: nowrap; font-size: 12px; }
-        .col-unit { width: 60px; text-align: center; white-space: nowrap; font-size: 12px; }
+        .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; white-space: nowrap; }
+        .col-stock { width: 80px; text-align: right; white-space: nowrap; }
+        .col-unit { width: 60px; text-align: center; white-space: nowrap; }
         .col-action { width: 100px; text-align: center; white-space: nowrap;}
         .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
@@ -108,14 +101,7 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        #loading { 
-            display: none; 
-            position: fixed; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            z-index: 10001; 
-            text-align: center;
-        }
+        #loading { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001; text-align: center; }
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -124,10 +110,8 @@
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-        /* 手機版專用資訊區塊 - 預設隱藏 */
         .mobile-info { display: none; }
 
-        /* 🔥 手機與平板適配設定 (RWD) */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -137,45 +121,24 @@
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
-            /* 🔥 手機排版修正：隱藏桌機欄位，隱藏 Action 欄位 (整行可點) */
             .desktop-only { display: none !important; } 
             .col-action { display: none !important; } 
 
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
             
-            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             
-            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
-            
-            /* 調整各欄位寬度 */
             .col-status { width: 30px !important; }
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
+            .col-pn { width: auto !important; } 
 
-            /* 🔥 手機排版美化：堆疊資訊樣式 */
-            .mobile-info { 
-                display: block !important; 
-                margin-top: 6px; 
-            }
-            .mobile-model { 
-                font-size: 13px; 
-                color: #444; 
-                font-weight: 500; 
-                margin-bottom: 2px;
-                white-space: normal;
-                line-height: 1.3;
-            }
-            .mobile-desc { 
-                font-size: 12px; 
-                color: #888; 
-                line-height: 1.3;
-                white-space: normal;
-            }
+            .mobile-info { display: block !important; margin-top: 6px; }
+            .mobile-model { font-size: 13px; color: #444; font-weight: 500; margin-bottom: 2px; white-space: normal; line-height: 1.3; }
+            .mobile-desc { font-size: 12px; color: #888; line-height: 1.3; white-space: normal; }
         }
     </style>
 </head>
@@ -190,10 +153,13 @@
         <div style="display:grid; gap:15px;">
             <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;" oninput="clearLoginError()">
             <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;" oninput="clearLoginError()">
-            
             <div id="loginFeedback" style="color:#bb0000; font-size:13px; text-align:center; min-height:18px; font-weight:bold;"></div>
-            
             <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()">Sign In</button>
+            
+            <div style="text-align:center; font-size:12px; margin-top:10px;">
+                <span style="color:#666;">New User? </span>
+                <span style="color:var(--sap-primary); cursor:pointer; font-weight:bold;" onclick="openRegister()">Register Here</span>
+            </div>
         </div>
     </div>
 </div>
@@ -208,6 +174,7 @@
         <span style="font-weight:bold; font-size:1.2em;">Sunlit AZ</span> WMS
     </div>
     <div style="display:flex; gap:15px; align-items:center;">
+        <div id="changePassBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="openChangePass()">🔑 Pwd</div>
         <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
         <div id="logoutBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="doLogout()">Logout ⏻</div>
     </div>
@@ -303,6 +270,46 @@
                 </thead>
                 <tbody id="masterBody"></tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div id="registerModal" class="modal-overlay">
+    <div class="std-dialog" style="width:350px;">
+        <div class="dialog-header">
+            <span>Register Account</span>
+            <span style="cursor:pointer;" onclick="closeModal('registerModal')">✕</span>
+        </div>
+        <div class="dialog-content">
+            <div style="display:grid; gap:15px;">
+                <div><label class="form-label">Username (帳號)</label><input type="text" id="regUser" class="std-input"></div>
+                <div><label class="form-label">Password (密碼)</label><input type="password" id="regPass" class="std-input"></div>
+                <div><label class="form-label">Display Name (顯示名稱)</label><input type="text" id="regName" class="std-input"></div>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-transparent" onclick="closeModal('registerModal')">Cancel</button>
+            <button class="std-btn btn-primary" onclick="doRegister()">Sign Up</button>
+        </div>
+    </div>
+</div>
+
+<div id="changePassModal" class="modal-overlay">
+    <div class="std-dialog" style="width:350px;">
+        <div class="dialog-header">
+            <span>Change Password</span>
+            <span style="cursor:pointer;" onclick="closeModal('changePassModal')">✕</span>
+        </div>
+        <div class="dialog-content">
+            <div style="display:grid; gap:15px;">
+                <div><label class="form-label">Old Password (舊密碼)</label><input type="password" id="cpOld" class="std-input"></div>
+                <div><label class="form-label">New Password (新密碼)</label><input type="password" id="cpNew" class="std-input"></div>
+                <div><label class="form-label">Confirm New (確認新密碼)</label><input type="password" id="cpConfirm" class="std-input"></div>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="std-btn btn-transparent" onclick="closeModal('changePassModal')">Cancel</button>
+            <button class="std-btn btn-primary" onclick="doChangePass()">Change</button>
         </div>
     </div>
 </div>
@@ -416,6 +423,7 @@
     let currentTxType = 'receive'; 
     let currentLang = 'en';
     let currentUserDisplayName = ""; 
+    let currentUserName = ""; // 儲存帳號以便修改密碼
     
     // 自動登出設定
     let logoutTimer;
@@ -441,7 +449,6 @@
             deleted: "Deleted!",
             msg_input_required: "Input Required",
             msg_input_empty: "Please fill in PO/Reference and User field.",
-            // 🔥 新增：庫存不足錯誤訊息
             error_title: "Insufficient Stock",
             error_msg: "Cannot issue more than available stock.",
         },
@@ -464,7 +471,6 @@
             deleted: "已刪除！",
             msg_input_required: "欄位必填",
             msg_input_empty: "請填寫單號/用途與操作人員欄位。",
-            // 🔥 新增：庫存不足錯誤訊息
             error_title: "庫存不足",
             error_msg: "領料數量不可大於現有庫存。",
         }
@@ -479,48 +485,36 @@
         openModal('msgModal');
     }
 
-    // --- 自動登出邏輯 (安全加強版) ---
+    // --- 自動登出邏輯 ---
     function resetLogoutTimer() {
         if (!localStorage.getItem('wms_user')) return; 
-        
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(() => {
-            // 1. 清除登入狀態
             localStorage.removeItem('wms_user');
+            localStorage.removeItem('wms_uid');
             
-            // 2. 立即隱藏背後所有內容
             document.querySelector('.page-header').style.display = 'none';
             document.querySelector('.content-area').style.display = 'none';
             document.querySelector('.shell-bar').style.display = 'none'; 
             
-            // 3. 顯示模態視窗
-            const title = currentLang === 'zh' ? "自動登出" : "Auto Logout";
-            const msg = currentLang === 'zh' ? "閒置過久，系統已自動登出。" : "Session timed out due to inactivity.";
-            
-            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgTitle').innerText = (currentLang==='zh'?"自動登出":"Auto Logout");
             document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-            document.getElementById('msgContent').innerText = msg;
+            document.getElementById('msgContent').innerText = (currentLang==='zh'?"閒置過久，系統已自動登出。":"Session timed out due to inactivity.");
             
-            // 4. 設定按鈕行為：點擊 OK 後重新整理頁面
             const okBtn = document.querySelector('#msgModal .btn-primary');
-            okBtn.onclick = function() { 
-                location.reload(); 
-            };
+            okBtn.onclick = function() { location.reload(); };
             
-            // 強制開啟視窗
             const modal = document.getElementById('msgModal');
             modal.style.display = 'flex';
             modal.style.zIndex = '99999'; 
-            
         }, AUTO_LOGOUT_TIME);
     }
 
-    // 監聽操作以重置計時器
     ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => 
         document.addEventListener(evt, resetLogoutTimer)
     );
 
-    // --- 登入函式 ---
+    // --- 登入與註冊 ---
     async function doLogin() {
         const user = document.getElementById('loginUser').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
@@ -528,7 +522,6 @@
         const btn = document.getElementById('btnLogin'); 
         
         feedback.innerText = "";
-
         if(!user || !pass) {
             feedback.style.color = "#bb0000";
             feedback.innerText = "Please enter username and password";
@@ -541,28 +534,21 @@
         
         try {
             const res = await sendPost({ action: 'login', username: user, password: pass });
-            
             if(res.status === 'success') {
                 feedback.innerText = "Success!";
                 const displayName = res.message.name;
                 localStorage.setItem('wms_user', displayName);
-                applyLoginState(displayName);
+                localStorage.setItem('wms_uid', user); // 存帳號以便改密碼用
+                applyLoginState(displayName, user);
             } else {
                 feedback.style.color = "#bb0000";
                 feedback.innerText = res.message || "Invalid Credentials";
                 btn.innerText = "Sign In";
                 btn.disabled = false;
-                
-                try {
-                    document.querySelector('#loginOverlay .std-dialog').animate([
-                        { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, 
-                        { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
-                    ], { duration: 300 });
-                } catch(e) {}
+                document.querySelector('#loginOverlay .std-dialog').animate([{transform:'translateX(0)'},{transform:'translateX(-10px)'},{transform:'translateX(10px)'},{transform:'translateX(0)'}],{duration:300});
             }
         } catch(e) {
             console.error(e);
-            alert("Connection Error:\n" + e.message);
             feedback.style.color = "#bb0000";
             feedback.innerText = "Connection Failed.";
             btn.innerText = "Sign In";
@@ -572,19 +558,75 @@
         }
     }
 
+    // 🔥 新增：註冊功能
+    function openRegister() {
+        ['regUser','regPass','regName'].forEach(id => document.getElementById(id).value = "");
+        openModal('registerModal');
+    }
+
+    async function doRegister() {
+        const u = document.getElementById('regUser').value.trim();
+        const p = document.getElementById('regPass').value.trim();
+        const n = document.getElementById('regName').value.trim();
+        if(!u || !p || !n) { showToast("All fields required", true); return; }
+
+        setLoading(true);
+        try {
+            const res = await sendPost({ action: 'register', username: u, password: p, name: n });
+            if(res.status === 'success') {
+                showToast("Register Success! Please Login.");
+                closeModal('registerModal');
+            } else {
+                showMsg("Error", res.message);
+            }
+        } catch(e) { showMsg("Error", e.message); }
+        finally { setLoading(false); }
+    }
+
+    // 🔥 新增：修改密碼功能
+    function openChangePass() {
+        ['cpOld','cpNew','cpConfirm'].forEach(id => document.getElementById(id).value = "");
+        openModal('changePassModal');
+    }
+
+    async function doChangePass() {
+        const oldP = document.getElementById('cpOld').value.trim();
+        const newP = document.getElementById('cpNew').value.trim();
+        const confP = document.getElementById('cpConfirm').value.trim();
+
+        if(!oldP || !newP) { showToast("Input required", true); return; }
+        if(newP !== confP) { showToast("Passwords do not match", true); return; }
+
+        setLoading(true);
+        try {
+            const res = await sendPost({ 
+                action: 'change_password', 
+                username: currentUserName, 
+                oldPassword: oldP, 
+                newPassword: newP 
+            });
+            if(res.status === 'success') {
+                showToast("Password Changed!");
+                closeModal('changePassModal');
+            } else {
+                showMsg("Error", res.message);
+            }
+        } catch(e) { showMsg("Error", e.message); }
+        finally { setLoading(false); }
+    }
+
     function clearLoginError() { 
         document.getElementById('loginFeedback').innerText = ""; 
         const btn = document.getElementById('btnLogin');
-        if(btn.disabled) {
-             btn.disabled = false;
-             btn.innerText = "Sign In";
-        }
+        if(btn.disabled) { btn.disabled = false; btn.innerText = "Sign In"; }
     }
 
-    function applyLoginState(name) {
+    function applyLoginState(name, uid) {
         currentUserDisplayName = name;
+        currentUserName = uid || localStorage.getItem('wms_uid');
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'block';
+        document.getElementById('changePassBtn').style.display = 'block'; // 顯示改密碼按鈕
         showToast("Welcome, " + currentUserDisplayName);
         fetchData(); 
         resetLogoutTimer(); 
@@ -592,12 +634,14 @@
 
     function doLogout() { 
         localStorage.removeItem('wms_user'); 
+        localStorage.removeItem('wms_uid'); 
         location.reload(); 
     }
 
     function checkAutoLogin() {
         const savedUser = localStorage.getItem('wms_user');
-        if (savedUser) applyLoginState(savedUser);
+        const savedUid = localStorage.getItem('wms_uid');
+        if (savedUser) applyLoginState(savedUser, savedUid);
     }
 
     async function sendPost(payload) {
@@ -630,7 +674,6 @@
         });
     }
 
-    // 🔥 新增：開啟報表視窗
     function openReportModal() {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -639,11 +682,9 @@
         
         document.getElementById('rptStart').value = `${yyyy}-${mm}-01`;
         document.getElementById('rptEnd').value = `${yyyy}-${mm}-${dd}`;
-        
         openModal('reportModal');
     }
 
-    // 🔥 新增：下載報表
     async function downloadReport() {
         const start = document.getElementById('rptStart').value;
         const end = document.getElementById('rptEnd').value;
@@ -667,11 +708,8 @@
             } else {
                 showMsg("Error", res.message);
             }
-        } catch(e) {
-            console.error(e); showMsg("Error", "Download failed.");
-        } finally {
-            setLoading(false);
-        }
+        } catch(e) { console.error(e); showMsg("Error", "Download failed."); }
+        finally { setLoading(false); }
     }
 
     function exportToExcel(type) {
@@ -741,7 +779,6 @@
         `).join('');
     }
 
-    // renderTable 手機顯示優化
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInv').value.toLowerCase();
@@ -778,7 +815,6 @@
         });
     }
 
-    // renderMasterTable 手機顯示優化
     function renderMasterTable() {
         const tbody = document.getElementById('masterBody');
         const term = document.getElementById('searchMaster').value.toLowerCase();
@@ -815,7 +851,6 @@
                 tbody.appendChild(tr);
 
                 const actionTd = document.getElementById(`action-${item.id}`);
-                
                 const displayBtn = document.createElement('span');
                 displayBtn.innerText = lang.txt_display;
                 displayBtn.style.color = '#0a6ed1';
@@ -830,23 +865,18 @@
                 delBtn.innerText = '✕';
                 delBtn.onclick = (e) => {
                     e.stopPropagation();
-
                     const invItem = inventoryList.find(i => i.id === item.id);
                     const currentStock = invItem ? invItem.stock : 0;
 
                     if (currentStock > 0) {
                         const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
-                        const msg = currentLang === 'zh' 
-                            ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` 
-                            : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
-                        
+                        const msg = currentLang === 'zh' ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
                         showMsg(title, msg);
                         return;
                     }
 
                     const footer = document.querySelector('#msgModal .dialog-footer');
                     const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
-
                     const title = currentLang === 'zh' ? "刪除確認" : "Delete Confirmation";
                     const msg = currentLang === 'zh' ? "確定要刪除此物料主檔嗎？(此動作無法復原)" : "Delete this master data permanently?";
                     const btnCancel = currentLang === 'zh' ? "取消" : "Cancel";
@@ -871,7 +901,6 @@
                         deleteMaster(item.id);
                         setTimeout(() => footer.innerHTML = originalFooter, 300);
                     };
-
                     openModal('msgModal');
                 };
                 actionTd.appendChild(delBtn);
@@ -891,17 +920,12 @@
             <div style="border-bottom:1px solid #eee; padding:8px 0;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                     <span style="font-weight:600; font-size:13px; color:#333;">
-                        ${h.action} 
-                        <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">
-                            (${h.qty > 0 ? '+' : ''}${h.qty})
-                        </span>
+                        ${h.action} <span style="color:${h.qty > 0 ? '#107e3e' : '#bb0000'}">(${h.qty > 0 ? '+' : ''}${h.qty})</span>
                     </span>
                     <span style="font-size:11px; color:#888;">${new Date(h.date).toLocaleDateString()}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
-                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">
-                        📄 ${h.ref || '-'}
-                    </span>
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">📄 ${h.ref || '-'}</span>
                     <span>👤 ${h.user}</span>
                 </div>
             </div>
@@ -917,12 +941,9 @@
         const lang = i18n[currentLang];
         document.getElementById('txTitle').innerText = isReceive ? lang.btn_po : lang.btn_issue;
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-        
-        // 🔥 自動帶入姓名，並鎖定為唯讀
         document.getElementById('txUser').value = currentUserDisplayName;
         document.getElementById('txUser').readOnly = true;
         document.getElementById('txUser').style.backgroundColor = "#f5f5f5"; 
-
         document.getElementById('txRef').value = "";
         document.getElementById('txBody').innerHTML = "";
         addTxRow(); 
@@ -975,19 +996,12 @@
         }
     }
 
-    // 🔥 submitTx 重大修改：新增必填檢查邏輯
     function submitTx() {
         const lang = i18n[currentLang];
         const ref = document.getElementById('txRef').value.trim();
         const user = document.getElementById('txUser').value.trim();
 
-        // 1. 檢查參考單號 (Header Ref Check)
-        if (!ref) {
-            showMsg(lang.msg_input_required, lang.lbl_ref + " " + (currentLang === 'en' ? "is required" : "未填寫"));
-            return;
-        }
-
-        if (!user) {
+        if (!ref || !user) {
             showMsg(lang.msg_input_required, lang.msg_input_empty);
             return;
         }
@@ -996,61 +1010,46 @@
         if(rows.length === 0) return;
 
         const items = [];
-        
-        // 2. 迴圈檢查每一列 (Row Loop Check)
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             const idInput = row.querySelector('.tx-id');
             const qtyInput = row.querySelector('.tx-qty');
-            const locInput = row.querySelector('.tx-loc'); // 取得行內儲位欄位
+            const locInput = row.querySelector('.tx-loc');
 
             const id = idInput ? idInput.value.trim() : "";
             const qtyStr = qtyInput ? qtyInput.value.trim() : "";
             const loc = locInput ? locInput.value.trim() : "";
 
-            // A. 檢查料號 (Part Number Check)
             if (!id) {
                 showMsg(lang.msg_input_required, `${lang.col_pn} (${currentLang === 'en' ? "Row" : "第"} ${i + 1}) ${currentLang === 'en' ? "is empty" : "未填寫"}`);
                 return;
             }
-
-            // B. 檢查數量 (Qty Check)
             if (!qtyStr) {
                 showMsg(lang.msg_input_required, `${lang.lbl_qty} (${currentLang === 'en' ? "Row" : "第"} ${i + 1}) ${currentLang === 'en' ? "is empty" : "未填寫"}`);
                 return;
             }
-            
             const qty = Number(qtyStr);
             if (isNaN(qty) || qty <= 0) {
                 showMsg(lang.msg_input_required, `${lang.lbl_qty} (${currentLang === 'en' ? "Row" : "第"} ${i + 1}) ${currentLang === 'en' ? "must be > 0" : "必須大於 0"}`);
                 return;
             }
-
-            // C. 檢查儲位 (Location Check - 只在入庫時檢查)
             if (currentTxType === 'receive' && !loc) {
                 showMsg(lang.msg_input_required, `${lang.col_loc} (${currentLang === 'en' ? "Row" : "第"} ${i + 1}) ${currentLang === 'en' ? "is empty" : "未填寫"}`);
                 return;
             }
-
-            // D. 庫存不足檢查 (Issue Stock Check)
             if (currentTxType === 'issue') {
                 const invItem = inventoryList.find(item => item.id === id);
                 const currentStock = invItem ? invItem.stock : 0;
-                
                 if (qty > currentStock) {
                     const title = currentLang === 'zh' ? "庫存不足" : "Insufficient Stock";
-                    const msg = currentLang === 'zh' 
-                        ? `料號 ${id} 庫存不足！\n現有: ${currentStock}, 需求: ${qty}`
-                        : `Part ${id} insufficient stock!\nAvailable: ${currentStock}, Request: ${qty}`;
+                    const msg = currentLang === 'zh' ? `料號 ${id} 庫存不足！\n現有: ${currentStock}, 需求: ${qty}` : `Part ${id} insufficient stock!\nAvailable: ${currentStock}, Request: ${qty}`;
                     showMsg(title, msg);
                     return; 
                 }
             }
-
             items.push({ id, qty, loc });
         }
 
-        // 通過所有檢查，顯示確認視窗
         document.getElementById('msgTitle').innerText = lang.confirm_post_title;
         document.getElementById('msgTitle').style.color = "var(--sap-primary)"; 
         document.getElementById('msgContent').innerText = lang.confirm_post_body;
@@ -1058,48 +1057,28 @@
         const okBtn = document.querySelector('#msgModal .btn-primary');
         okBtn.onclick = function() {
             closeModal('msgModal');
-            executeSubmit(items); // 直接傳遞 items，不用重新讀取
+            executeSubmit(items);
         };
-        
         openModal('msgModal');
     }
 
-    // executeSubmit 接收 items 參數
     async function executeSubmit(items) {
-        // 如果 submitTx 沒有傳 items 進來（相容性），則重新讀取（但這裡 submitTx 會傳）
         const ref = document.getElementById('txRef').value;
         const user = document.getElementById('txUser').value;
         
-        if (!items) {
-             items = [];
-             document.querySelectorAll('#txBody tr').forEach(row => {
-                const idInput = row.querySelector('.tx-id');
-                const qtyInput = row.querySelector('.tx-qty');
-                const locInput = row.querySelector('.tx-loc');
-                
-                if(idInput && qtyInput && idInput.value) {
-                    const id = String(idInput.value).trim();
-                    const qty = Number(qtyInput.value);
-                    const loc = locInput ? String(locInput.value).trim() : "";
-                    if(id && qty > 0) items.push({ id, qty, loc });
-                }
-            });
-        }
+        if (!items) { /* fallback logic if needed */ }
 
         if(items.length === 0) { showToast("No items to post", true); return; }
 
         setLoading(true);
-        // 🔥 本地樂觀更新 (Optimistic UI Update)
         try {
-            // 1. 先在本地更新資料
             items.forEach(item => {
                 let invItem = inventoryList.find(i => i.id === item.id);
                 if (currentTxType === 'receive') {
                     if (invItem) {
                         invItem.stock += item.qty;
-                        if(item.loc) invItem.location = item.loc; // 更新儲位
+                        if(item.loc) invItem.location = item.loc;
                     } else {
-                        // 如果是新品項，從 Master 抓資料建立
                         const m = materialMaster[item.id];
                         if (m) {
                             inventoryList.push({
@@ -1112,7 +1091,6 @@
                     if (invItem) invItem.stock -= item.qty;
                 }
                 
-                // 假造一筆歷史紀錄 (讓 Dashboard 也能即時更新)
                 historyList.unshift({
                     date: new Date().toISOString(),
                     ref: ref,
@@ -1123,14 +1101,12 @@
                 });
             });
 
-            // 2. 立即重繪畫面 (使用者覺得「好了！」)
             renderTable();
             renderDashboard();
             renderMasterTable();
             closeModal('txModal');
             showToast("Transaction Posted!");
 
-            // 3. 背景發送請求給 Google (使用者不用等)
             await sendPost({ 
                 action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', 
                 [currentTxType === 'receive' ? 'po' : 'purpose']: ref, 
@@ -1138,10 +1114,7 @@
                 items: items 
             });
             
-            // 成功後不需做任何事，因為畫面已經是新的了
-            
         } catch(e) { 
-            // 只有萬一失敗時，才顯示錯誤並重新抓取正確資料
             showMsg("Error", "Sync Failed: " + e.message); 
             fetchData(); 
         } finally { 
@@ -1153,34 +1126,22 @@
         setLoading(true);
         try {
             const user = currentUserDisplayName || "Admin"; 
-            
-            // 🔥 本地樂觀刪除
-            delete materialMaster[id]; // 刪除 Master
+            delete materialMaster[id]; 
             const index = inventoryList.findIndex(i => i.id === id);
-            if(index !== -1) inventoryList.splice(index, 1); // 刪除 Inventory
-            
+            if(index !== -1) inventoryList.splice(index, 1); 
             renderTable();
             renderMasterTable();
             renderDashboard();
             showToast(i18n[currentLang].deleted);
-
-            await sendPost({ 
-                action: 'delete_master', 
-                id: id, 
-                user: user 
-            });
-        } catch(e) { 
-            showMsg("Error", e.message); 
-            fetchData(); // 失敗則回滾
-        } finally { 
-            setLoading(false); 
-        }
+            await sendPost({ action: 'delete_master', id: id, user: user });
+        } catch(e) { showMsg("Error", e.message); fetchData(); } 
+        finally { setLoading(false); }
     }
 
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
-        document.getElementById('newUser').value = currentUserDisplayName; // 自動帶入
+        document.getElementById('newUser').value = currentUserDisplayName; 
         openModal('createModal');
     }
     
@@ -1203,12 +1164,10 @@
         
         setLoading(true);
         try {
-            // 🔥 本地樂觀新增
             materialMaster[id] = { model: model, description: desc, unit: unit, minStock: min };
             renderMasterTable();
             closeModal('createModal'); 
             showToast("Created!");
-
             await sendPost({
                 action: 'create_master', id: id, 
                 model: model, description: desc, unit: unit, minStock: min, user: user

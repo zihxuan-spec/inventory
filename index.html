@@ -112,7 +112,6 @@
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-        /* 🔥 新增：分頁控制列樣式 */
         .pagination-bar { 
             display: flex; 
             justify-content: space-between; 
@@ -273,7 +272,7 @@
             <button class="std-btn btn-master" onclick="openCreateMasterModal()"><span data-i18n="btn_create">Create Material</span></button>
             <button class="std-btn btn-excel" onclick="exportToExcel('master')">📥 Excel</button>
             <div class="spacer"></div>
-            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable()">
+            <input type="text" id="searchMaster" class="std-input" style="width:250px;" placeholder="Search Master Data..." onkeyup="renderMasterTable(true)">
         </div>
         <div class="table-container">
             <table>
@@ -289,6 +288,7 @@
                 </thead>
                 <tbody id="masterBody"></tbody>
             </table>
+            <div class="pagination-bar" id="masterPagination"></div>
         </div>
     </div>
 </div>
@@ -444,8 +444,12 @@
     let currentUserDisplayName = ""; 
     let currentUserName = ""; 
     
-    // 分頁變數
+    // 分頁變數 - Inventory
     let curPageInv = 1;
+    
+    // 🔥 新增：分頁變數 - Master Data
+    let curPageMaster = 1;
+
     const pageSize = 50;
     
     // 自動登出設定
@@ -791,31 +795,25 @@
         `).join('');
     }
 
-    // 🔥 修正：分頁 + 渲染邏輯
     function renderTable(resetPage = false) {
         if(resetPage) curPageInv = 1;
-        
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInv').value.toLowerCase();
         const lang = i18n[currentLang];
         tbody.innerHTML = '';
         
-        // 1. 過濾
         const filteredList = inventoryList.filter(item => 
             (item.id + item.model + item.description).toLowerCase().includes(term)
         );
 
-        // 2. 分頁計算
         const totalItems = filteredList.length;
         const totalPages = Math.ceil(totalItems / pageSize) || 1;
         if(curPageInv > totalPages) curPageInv = totalPages;
 
-        // 3. 切片
         const start = (curPageInv - 1) * pageSize;
         const end = start + pageSize;
         const displayList = filteredList.slice(start, end);
 
-        // 4. 渲染表格
         displayList.forEach((item) => {
             let statusClass = 'status-ok';
             if (item.stock <= 0) statusClass = 'status-crit';
@@ -843,18 +841,104 @@
             tbody.appendChild(tr);
         });
 
-        // 5. 更新分頁控制項
-        updatePagination(totalItems, totalPages);
+        updatePagination('invPagination', curPageInv, totalPages, totalItems, 'changePage');
     }
 
-    function updatePagination(totalItems, totalPages) {
-        const bar = document.getElementById('invPagination');
+    // 🔥 新增：Master Table 渲染與分頁
+    function renderMasterTable(resetPage = false) {
+        if(resetPage) curPageMaster = 1;
+
+        const tbody = document.getElementById('masterBody');
+        const term = document.getElementById('searchMaster').value.toLowerCase();
+        const lang = i18n[currentLang];
+        tbody.innerHTML = '';
+        
+        const masterArr = Object.keys(materialMaster).map(key => { return { id: key, ...materialMaster[key] }; });
+        
+        const filteredList = masterArr.filter(item => 
+             (item.id+item.model+item.description).toLowerCase().includes(term)
+        );
+
+        const totalItems = filteredList.length;
+        const totalPages = Math.ceil(totalItems / pageSize) || 1;
+        if(curPageMaster > totalPages) curPageMaster = totalPages;
+
+        const start = (curPageMaster - 1) * pageSize;
+        const end = start + pageSize;
+        const displayList = filteredList.slice(start, end);
+
+        displayList.forEach((item) => {
+            const tr = document.createElement('tr');
+            tr.onclick = () => {
+                let invItem = inventoryList.find(i => i.id === item.id);
+                if(!invItem) invItem = { ...item, stock: 0 };
+                openDetailsObj(invItem); 
+            };
+            tr.innerHTML = `
+                <td class="col-pn">
+                    <div style="font-size:14px;">${item.id}</div>
+                    <div class="mobile-info">
+                        <div class="mobile-model">${item.model}</div>
+                        <div class="mobile-desc">${item.description}</div>
+                    </div>
+                </td>
+                <td class="col-model desktop-only">${item.model}</td>
+                <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
+                <td class="col-unit">${item.unit}</td>
+                <td class="col-stock desktop-only">${item.minStock}</td>
+                <td class="col-action" id="action-${item.id}"></td>
+            `;
+            tbody.appendChild(tr);
+
+            const actionTd = document.getElementById(`action-${item.id}`);
+            const displayBtn = document.createElement('span');
+            displayBtn.innerText = lang.txt_display;
+            displayBtn.style.color = '#0a6ed1'; displayBtn.style.fontWeight = 'bold'; displayBtn.style.fontSize = '12px'; displayBtn.style.cursor = 'pointer';
+            displayBtn.onclick = (e) => { e.stopPropagation(); tr.onclick(); };
+            actionTd.appendChild(displayBtn);
+
+            const delBtn = document.createElement('span');
+            delBtn.className = 'btn-delete'; delBtn.innerText = '✕';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                const invItem = inventoryList.find(i => i.id === item.id);
+                const currentStock = invItem ? invItem.stock : 0;
+                if (currentStock > 0) {
+                    const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
+                    const msg = currentLang === 'zh' ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
+                    showMsg(title, msg); return;
+                }
+                const footer = document.querySelector('#msgModal .dialog-footer');
+                const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
+                const title = currentLang === 'zh' ? "刪除確認" : "Delete Confirmation";
+                const msg = currentLang === 'zh' ? "確定要刪除此物料主檔嗎？(此動作無法復原)" : "Delete this master data permanently?";
+                const btnCancel = currentLang === 'zh' ? "取消" : "Cancel";
+                const btnConfirm = currentLang === 'zh' ? "刪除" : "Delete";
+
+                document.getElementById('msgTitle').innerText = title;
+                document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
+                document.getElementById('msgContent').innerText = msg;
+                footer.innerHTML = `<button class="std-btn btn-transparent" id="msgCancel">${btnCancel}</button><button class="std-btn btn-primary" id="msgConfirm">${btnConfirm}</button>`;
+
+                document.getElementById('msgCancel').onclick = () => { closeModal('msgModal'); setTimeout(() => footer.innerHTML = originalFooter, 300); };
+                document.getElementById('msgConfirm').onclick = () => { closeModal('msgModal'); deleteMaster(item.id); setTimeout(() => footer.innerHTML = originalFooter, 300); };
+                openModal('msgModal');
+            };
+            actionTd.appendChild(delBtn);
+        });
+
+        updatePagination('masterPagination', curPageMaster, totalPages, totalItems, 'changeMasterPage');
+    }
+
+    // 通用分頁控制
+    function updatePagination(elementId, currentPage, totalPages, totalItems, changeFuncString) {
+        const bar = document.getElementById(elementId);
         const lang = i18n[currentLang];
         
         bar.innerHTML = `
-            <button class="btn-page" onclick="changePage(-1)" ${curPageInv === 1 ? 'disabled' : ''}>◀</button>
-            <span class="page-info">${lang.txt_page} ${curPageInv} ${lang.txt_of} ${totalPages} (${totalItems})</span>
-            <button class="btn-page" onclick="changePage(1)" ${curPageInv === totalPages ? 'disabled' : ''}>▶</button>
+            <button class="btn-page" onclick="${changeFuncString}(-1)" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
+            <span class="page-info">${lang.txt_page} ${currentPage} ${lang.txt_of} ${totalPages} (${totalItems})</span>
+            <button class="btn-page" onclick="${changeFuncString}(1)" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
         `;
     }
 
@@ -863,74 +947,9 @@
         renderTable(false);
     }
 
-    function renderMasterTable() {
-        const tbody = document.getElementById('masterBody');
-        const term = document.getElementById('searchMaster').value.toLowerCase();
-        const lang = i18n[currentLang];
-        tbody.innerHTML = '';
-        const masterArr = Object.keys(materialMaster).map(key => { return { id: key, ...materialMaster[key] }; });
-
-        masterArr.forEach((item) => {
-            if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
-                const tr = document.createElement('tr');
-                tr.onclick = () => {
-                    let invItem = inventoryList.find(i => i.id === item.id);
-                    if(!invItem) invItem = { ...item, stock: 0 };
-                    openDetailsObj(invItem); 
-                };
-                tr.innerHTML = `
-                    <td class="col-pn">
-                        <div style="font-size:14px;">${item.id}</div>
-                        <div class="mobile-info">
-                            <div class="mobile-model">${item.model}</div>
-                            <div class="mobile-desc">${item.description}</div>
-                        </div>
-                    </td>
-                    <td class="col-model desktop-only">${item.model}</td>
-                    <td class="col-desc desktop-only" style="color:#666; font-size:13px;">${item.description}</td>
-                    <td class="col-unit">${item.unit}</td>
-                    <td class="col-stock desktop-only">${item.minStock}</td>
-                    <td class="col-action" id="action-${item.id}"></td>
-                `;
-                tbody.appendChild(tr);
-
-                const actionTd = document.getElementById(`action-${item.id}`);
-                const displayBtn = document.createElement('span');
-                displayBtn.innerText = lang.txt_display;
-                displayBtn.style.color = '#0a6ed1'; displayBtn.style.fontWeight = 'bold'; displayBtn.style.fontSize = '12px'; displayBtn.style.cursor = 'pointer';
-                displayBtn.onclick = (e) => { e.stopPropagation(); tr.onclick(); };
-                actionTd.appendChild(displayBtn);
-
-                const delBtn = document.createElement('span');
-                delBtn.className = 'btn-delete'; delBtn.innerText = '✕';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    const invItem = inventoryList.find(i => i.id === item.id);
-                    const currentStock = invItem ? invItem.stock : 0;
-                    if (currentStock > 0) {
-                        const title = currentLang === 'zh' ? "無法刪除" : "Cannot Delete";
-                        const msg = currentLang === 'zh' ? `料號 ${item.id} 尚有庫存 (${currentStock})，請先將庫存歸零後再刪除。` : `Part ${item.id} still has stock (${currentStock}). Please clear stock first.`;
-                        showMsg(title, msg); return;
-                    }
-                    const footer = document.querySelector('#msgModal .dialog-footer');
-                    const originalFooter = `<button class="std-btn btn-primary" onclick="closeModal('msgModal')" data-i18n="btn_ok">OK</button>`;
-                    const title = currentLang === 'zh' ? "刪除確認" : "Delete Confirmation";
-                    const msg = currentLang === 'zh' ? "確定要刪除此物料主檔嗎？(此動作無法復原)" : "Delete this master data permanently?";
-                    const btnCancel = currentLang === 'zh' ? "取消" : "Cancel";
-                    const btnConfirm = currentLang === 'zh' ? "刪除" : "Delete";
-
-                    document.getElementById('msgTitle').innerText = title;
-                    document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-                    document.getElementById('msgContent').innerText = msg;
-                    footer.innerHTML = `<button class="std-btn btn-transparent" id="msgCancel">${btnCancel}</button><button class="std-btn btn-primary" id="msgConfirm">${btnConfirm}</button>`;
-
-                    document.getElementById('msgCancel').onclick = () => { closeModal('msgModal'); setTimeout(() => footer.innerHTML = originalFooter, 300); };
-                    document.getElementById('msgConfirm').onclick = () => { closeModal('msgModal'); deleteMaster(item.id); setTimeout(() => footer.innerHTML = originalFooter, 300); };
-                    openModal('msgModal');
-                };
-                actionTd.appendChild(delBtn);
-            }
-        });
+    function changeMasterPage(delta) {
+        curPageMaster += delta;
+        renderMasterTable(false);
     }
 
     function openDetailsObj(item) {

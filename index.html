@@ -44,15 +44,13 @@
         .card.safe { border-left: 5px solid var(--sap-success); }
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
-        
-        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
-        
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
+        /* 🔥 優化：鎖定狀態欄位寬度 */
         .col-status { width: 35px; min-width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
@@ -105,6 +103,7 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
+        /* 🔥 優化：Loading 置頂 */
         #loading { 
             display: none; 
             position: fixed; 
@@ -121,10 +120,8 @@
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-        /* 手機版專用資訊區塊 - 預設隱藏 */
         .mobile-info { display: none; }
 
-        /* 🔥 手機與平板適配設定 (RWD) */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -133,46 +130,20 @@
             .std-btn { flex: 1 1 auto; justify-content: center; } 
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
-            
-            /* 🔥 手機排版修正：隱藏桌機欄位，隱藏 Action 欄位 (整行可點) */
             .desktop-only { display: none !important; } 
             .col-action { display: none !important; } 
-
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-            
-            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            
-            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
-            
-            /* 調整各欄位寬度 */
             .col-status { width: 30px !important; min-width: 30px !important; } 
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
-
-            /* 🔥 手機排版美化：堆疊資訊樣式 */
-            .mobile-info { 
-                display: block !important; 
-                margin-top: 6px; 
-            }
-            .mobile-model { 
-                font-size: 13px; 
-                color: #444; 
-                font-weight: 500; 
-                margin-bottom: 2px;
-                white-space: normal;
-                line-height: 1.3;
-            }
-            .mobile-desc { 
-                font-size: 12px; 
-                color: #888; 
-                line-height: 1.3;
-                white-space: normal;
-            }
+            .col-pn { width: auto !important; } 
+            .mobile-info { display: block !important; margin-top: 6px; }
+            .mobile-model { font-size: 13px; color: #444; font-weight: 500; margin-bottom: 2px; white-space: normal; line-height: 1.3; }
+            .mobile-desc { font-size: 12px; color: #888; line-height: 1.3; white-space: normal; }
         }
     </style>
 </head>
@@ -187,9 +158,7 @@
         <div style="display:grid; gap:15px;">
             <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;" oninput="clearLoginError()">
             <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;" oninput="clearLoginError()">
-            
             <div id="loginFeedback" style="color:#bb0000; font-size:13px; text-align:center; min-height:18px; font-weight:bold;"></div>
-            
             <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()" data-i18n="btn_signin">Sign In</button>
             
             <div style="text-align:center; font-size:12px; margin-top:10px;">
@@ -450,7 +419,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxKOIZKdaVTuh1k64O1idjuCBtSqcywvljLoTGuiMLlc5p8sHCfbSsqqX1Zl932iiFVnw/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwgfqqBDV4H5xkgbfUToouwoY7MmCI-B6_Hp03NcbUpNRvA_ul0h9ycplS2oaQdcbmU/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -478,17 +447,22 @@
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display", btn_logout: "Logout", btn_pwd: "Pwd",
+            
+            // 🔥 新增的 i18n 鍵值
             lbl_account: "Username", lbl_password: "Password", lbl_name: "Display Name", 
             btn_signin: "Sign In", btn_signup: "Sign Up", btn_change: "Change",
             txt_new_user: "New User?", link_register: "Register Here",
             modal_reg_title: "Register Account", modal_cp_title: "Change Password",
             lbl_old_pass: "Old Password", lbl_new_pass: "New Password", lbl_confirm_pass: "Confirm New",
+            
+            // JS Messages
             msg_reg_success: "Register Success! Please Login.",
             msg_pass_changed: "Password Changed! Please login again.",
             msg_pass_mismatch: "Passwords do not match",
             msg_fill_all: "All fields required",
             msg_auto_logout: "Session timed out due to inactivity.",
             title_auto_logout: "Auto Logout",
+            
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
@@ -509,17 +483,22 @@
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看", btn_logout: "登出", btn_pwd: "密碼",
+            
+            // 🔥 新增的 i18n 鍵值
             lbl_account: "帳號", lbl_password: "密碼", lbl_name: "顯示名稱", 
             btn_signin: "登入", btn_signup: "註冊", btn_change: "修改",
             txt_new_user: "還沒帳號?", link_register: "點此註冊",
             modal_reg_title: "註冊帳號", modal_cp_title: "修改密碼",
             lbl_old_pass: "舊密碼", lbl_new_pass: "新密碼", lbl_confirm_pass: "確認新密碼",
+            
+            // JS Messages
             msg_reg_success: "註冊成功！請登入。",
             msg_pass_changed: "密碼已修改！請重新登入。",
             msg_pass_mismatch: "新密碼不一致",
             msg_fill_all: "請填寫所有欄位",
             msg_auto_logout: "閒置過久，系統已自動登出。",
             title_auto_logout: "自動登出",
+
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
@@ -533,10 +512,23 @@
 
     // 🔥 支援 Enter 鍵登入
     document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('loginUser').addEventListener('keypress', function (e) { if (e.key === 'Enter') doLogin(); });
-        document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') doLogin(); });
-        document.getElementById('regName').addEventListener('keypress', function (e) { if (e.key === 'Enter') doRegister(); });
-        document.getElementById('cpConfirm').addEventListener('keypress', function (e) { if (e.key === 'Enter') doChangePass(); });
+        // Login Inputs
+        document.getElementById('loginUser').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        document.getElementById('loginPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        
+        // Register Inputs
+        document.getElementById('regName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doRegister();
+        });
+        
+        // Change Password Inputs
+        document.getElementById('cpConfirm').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doChangePass();
+        });
     });
 
     function showMsg(title, text) {
@@ -548,11 +540,12 @@
         
         const modal = document.getElementById('msgModal');
         modal.style.display = 'flex';
-        modal.style.zIndex = '10005'; 
+        modal.style.zIndex = '10005'; // 確保最上層
     }
 
     function getTrans(key) { return i18n[currentLang][key] || key; }
 
+    // --- 自動登出邏輯 ---
     function resetLogoutTimer() {
         if (!localStorage.getItem('wms_user')) return; 
         clearTimeout(logoutTimer);
@@ -627,7 +620,7 @@
         openModal('registerModal');
     }
 
-    // 加入按鈕鎖定
+    // 🔥 修正：加入按鈕鎖定機制，防止重複點擊
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
@@ -636,6 +629,7 @@
 
         if(!u || !p || !n) { showToast(getTrans('msg_fill_all'), true); return; }
 
+        // 鎖定按鈕
         btn.disabled = true;
         btn.innerText = "Processing...";
         setLoading(true);
@@ -651,6 +645,7 @@
         } catch(e) { 
             showMsg("Error", e.message); 
         } finally { 
+            // 解除鎖定
             setLoading(false); 
             btn.disabled = false;
             btn.innerText = getTrans('btn_signup');
@@ -662,6 +657,7 @@
         openModal('changePassModal');
     }
 
+    // 🔥 修正：修改密碼後強制登出
     async function doChangePass() {
         const oldP = document.getElementById('cpOld').value.trim();
         const newP = document.getElementById('cpNew').value.trim();
@@ -682,7 +678,7 @@
                 showToast(getTrans('msg_pass_changed'));
                 closeModal('changePassModal');
                 
-                // 強制登出
+                // 🔥 強制登出 (延遲 1.5 秒讓使用者看到成功訊息)
                 setTimeout(() => {
                     doLogout();
                 }, 1500);
@@ -760,7 +756,6 @@
         
         document.getElementById('rptStart').value = `${yyyy}-${mm}-01`;
         document.getElementById('rptEnd').value = `${yyyy}-${mm}-${dd}`;
-        
         openModal('reportModal');
     }
 
@@ -865,13 +860,22 @@
         `).join('');
     }
 
+    // renderTable 手機顯示優化
     function renderTable() {
         const tbody = document.getElementById('inventoryBody');
         const term = document.getElementById('searchInv').value.toLowerCase();
         const lang = i18n[currentLang];
         tbody.innerHTML = '';
         
-        inventoryList.forEach((item, index) => {
+        // 🔥 優化重點：先過濾，再切片 (只取前 50 筆)
+        const filteredList = inventoryList.filter(item => 
+            (item.id + item.model + item.description).toLowerCase().includes(term)
+        );
+
+        // 限制顯示數量，大幅提升渲染速度
+        const displayList = filteredList.slice(0, 50); 
+
+        displayList.forEach((item, index) => {
             if ((item.id+item.model+item.description).toLowerCase().includes(term)) {
                 let statusClass = 'status-ok';
                 if (item.stock <= 0) statusClass = 'status-crit';
@@ -899,8 +903,18 @@
                 tbody.appendChild(tr);
             }
         });
+        
+        // (選用) 如果搜尋結果被截斷，可以顯示一個提示
+        if (filteredList.length > 50) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td colspan="8" style="text-align:center; color:#999; padding:10px; font-size:12px;">
+                ${currentLang === 'en' ? `Showing 50 of ${filteredList.length} items. Please refine search.` : `僅顯示 ${filteredList.length} 筆中的前 50 筆，請輸入關鍵字搜尋。`}
+            </td>`;
+            tbody.appendChild(tr);
+        }
     }
 
+    // renderMasterTable 手機顯示優化
     function renderMasterTable() {
         const tbody = document.getElementById('masterBody');
         const term = document.getElementById('searchMaster').value.toLowerCase();
@@ -1283,3 +1297,4 @@
 </script>
 </body>
 </html>
+}

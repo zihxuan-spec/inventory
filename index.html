@@ -107,11 +107,20 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        #loading { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99999; text-align: center; }
+        /* 🔥 修正：Loading 設為 99999 (最高) */
+        #loading { 
+            display: none; 
+            position: fixed; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            z-index: 99999; 
+            text-align: center;
+        }
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        /* 🔥 修正：Toast 設為 20000 (保證在 Login Overlay 9999 之上) */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 20000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
@@ -138,6 +147,8 @@
         .btn-page:hover:not(:disabled) { border-color: var(--sap-primary); color: var(--sap-primary); }
 
         .mobile-info { display: none; }
+
+        select.std-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%; background-size: .65em auto; }
 
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
@@ -635,7 +646,7 @@
         openModal('registerModal');
     }
 
-    // 🔥 修正：註冊不再傳送部門，由後端強制設為 Pending
+    // 🔥 修正：註冊成功後，使用 showMsg 顯示明顯的彈窗提示
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
@@ -648,8 +659,12 @@
         try {
             const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
-                showToast(getTrans('msg_reg_success'));
                 closeModal('registerModal');
+                // 🔥 顯示彈窗而不是 Toast
+                const msg = currentLang === 'en' 
+                    ? "Registration sent! Your account is 'Pending'.\nAn admin has been notified." 
+                    : "申請已送出！\n您的帳號目前為 '待審核' 狀態。\n系統已發信通知管理員，請靜待開通。";
+                showMsg("Registration Sent", msg);
             } else {
                 showMsg("Error", res.message);
             }

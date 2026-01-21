@@ -45,6 +45,7 @@
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
         
+        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
         
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -462,8 +463,9 @@
     
     // 自動登出設定
     let logoutTimer;
-    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 分鐘 (毫秒)
+    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
 
+    // 🔥 全面 i18n 字典
     const i18n = {
         en: {
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
@@ -531,23 +533,10 @@
 
     // 🔥 支援 Enter 鍵登入
     document.addEventListener("DOMContentLoaded", function() {
-        // Login Inputs
-        document.getElementById('loginUser').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') doLogin();
-        });
-        document.getElementById('loginPass').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') doLogin();
-        });
-        
-        // Register Inputs
-        document.getElementById('regName').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') doRegister();
-        });
-        
-        // Change Password Inputs
-        document.getElementById('cpConfirm').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') doChangePass();
-        });
+        document.getElementById('loginUser').addEventListener('keypress', function (e) { if (e.key === 'Enter') doLogin(); });
+        document.getElementById('loginPass').addEventListener('keypress', function (e) { if (e.key === 'Enter') doLogin(); });
+        document.getElementById('regName').addEventListener('keypress', function (e) { if (e.key === 'Enter') doRegister(); });
+        document.getElementById('cpConfirm').addEventListener('keypress', function (e) { if (e.key === 'Enter') doChangePass(); });
     });
 
     function showMsg(title, text) {
@@ -559,7 +548,7 @@
         
         const modal = document.getElementById('msgModal');
         modal.style.display = 'flex';
-        modal.style.zIndex = '10005'; // 確保最上層
+        modal.style.zIndex = '10005'; 
     }
 
     function getTrans(key) { return i18n[currentLang][key] || key; }
@@ -638,7 +627,7 @@
         openModal('registerModal');
     }
 
-    // 🔥 修正：加入按鈕鎖定機制，防止重複點擊
+    // 加入按鈕鎖定
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
@@ -647,7 +636,6 @@
 
         if(!u || !p || !n) { showToast(getTrans('msg_fill_all'), true); return; }
 
-        // 鎖定按鈕
         btn.disabled = true;
         btn.innerText = "Processing...";
         setLoading(true);
@@ -663,7 +651,6 @@
         } catch(e) { 
             showMsg("Error", e.message); 
         } finally { 
-            // 解除鎖定
             setLoading(false); 
             btn.disabled = false;
             btn.innerText = getTrans('btn_signup');
@@ -675,7 +662,6 @@
         openModal('changePassModal');
     }
 
-    // 🔥 修正：修改密碼後強制登出
     async function doChangePass() {
         const oldP = document.getElementById('cpOld').value.trim();
         const newP = document.getElementById('cpNew').value.trim();
@@ -696,7 +682,7 @@
                 showToast(getTrans('msg_pass_changed'));
                 closeModal('changePassModal');
                 
-                // 🔥 強制登出 (延遲 1.5 秒讓使用者看到成功訊息)
+                // 強制登出
                 setTimeout(() => {
                     doLogout();
                 }, 1500);
@@ -774,6 +760,7 @@
         
         document.getElementById('rptStart').value = `${yyyy}-${mm}-01`;
         document.getElementById('rptEnd').value = `${yyyy}-${mm}-${dd}`;
+        
         openModal('reportModal');
     }
 
@@ -862,7 +849,14 @@
         document.querySelector('[data-i18n="card_crit"]').innerText = lang.card_crit.replace('(0)', `(${crit})`);
 
         const histDiv = document.getElementById('dashHistory');
-        histDiv.innerHTML = historyList.slice(0, 10).map(h => `
+        
+        // 🔥🔥🔥 關鍵修正：在這裡過濾掉 "User Register" 和 "Change Pwd"
+        const displayList = historyList.filter(h => 
+            h.action !== 'User Register' && 
+            h.action !== 'Change Pwd'
+        );
+
+        histDiv.innerHTML = displayList.slice(0, 10).map(h => `
             <div style="border-bottom:1px solid #eee; padding:5px 0;">
                 <span style="font-weight:bold;">${h.id}</span> 
                 <span style="float:right; color:${h.qty>0?'green':'red'}">${h.qty>0?'+':''}${h.qty}</span>

@@ -45,7 +45,6 @@
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
         
-        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
         
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
@@ -53,16 +52,11 @@
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        /* 🔥 修正：加入 min-width 鎖定狀態燈寬度 */
         .col-status { width: 35px; min-width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
-        
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-        
-        /* 🔥 iPad 修正: 彈性寬度 */
         .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
-        
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; white-space: nowrap; }
         .col-stock { width: 80px; text-align: right; white-space: nowrap; }
         .col-unit { width: 60px; text-align: center; white-space: nowrap; }
@@ -110,7 +104,6 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        /* 🔥 Loading 設為最高層級 */
         #loading { 
             display: none; 
             position: fixed; 
@@ -140,7 +133,7 @@
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
             
-            /* 🔥 手機排版修正 */
+            /* 🔥 手機排版修正：隱藏桌機欄位，隱藏 Action 欄位 (整行可點) */
             .desktop-only { display: none !important; } 
             .col-action { display: none !important; } 
 
@@ -154,7 +147,7 @@
             th, td { padding: 8px 4px !important; }
             
             /* 調整各欄位寬度 */
-            .col-status { width: 30px !important; min-width: 30px !important; } /* 🔥 min-width */
+            .col-status { width: 30px !important; min-width: 30px !important; } 
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
@@ -469,9 +462,8 @@
     
     // 自動登出設定
     let logoutTimer;
-    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
+    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 分鐘 (毫秒)
 
-    // 🔥 全面 i18n 字典
     const i18n = {
         en: {
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
@@ -484,22 +476,17 @@
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display", btn_logout: "Logout", btn_pwd: "Pwd",
-            
-            // 🔥 新增的 i18n 鍵值
             lbl_account: "Username", lbl_password: "Password", lbl_name: "Display Name", 
             btn_signin: "Sign In", btn_signup: "Sign Up", btn_change: "Change",
             txt_new_user: "New User?", link_register: "Register Here",
             modal_reg_title: "Register Account", modal_cp_title: "Change Password",
             lbl_old_pass: "Old Password", lbl_new_pass: "New Password", lbl_confirm_pass: "Confirm New",
-            
-            // JS Messages
             msg_reg_success: "Register Success! Please Login.",
-            msg_pass_changed: "Password Changed!",
+            msg_pass_changed: "Password Changed! Please login again.",
             msg_pass_mismatch: "Passwords do not match",
             msg_fill_all: "All fields required",
             msg_auto_logout: "Session timed out due to inactivity.",
             title_auto_logout: "Auto Logout",
-            
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
@@ -520,22 +507,17 @@
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看", btn_logout: "登出", btn_pwd: "密碼",
-            
-            // 🔥 新增的 i18n 鍵值
             lbl_account: "帳號", lbl_password: "密碼", lbl_name: "顯示名稱", 
             btn_signin: "登入", btn_signup: "註冊", btn_change: "修改",
             txt_new_user: "還沒帳號?", link_register: "點此註冊",
             modal_reg_title: "註冊帳號", modal_cp_title: "修改密碼",
             lbl_old_pass: "舊密碼", lbl_new_pass: "新密碼", lbl_confirm_pass: "確認新密碼",
-            
-            // JS Messages
             msg_reg_success: "註冊成功！請登入。",
-            msg_pass_changed: "密碼已修改！",
+            msg_pass_changed: "密碼已修改！請重新登入。",
             msg_pass_mismatch: "新密碼不一致",
             msg_fill_all: "請填寫所有欄位",
             msg_auto_logout: "閒置過久，系統已自動登出。",
             title_auto_logout: "自動登出",
-
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
@@ -546,6 +528,27 @@
             error_msg: "領料數量不可大於現有庫存。",
         }
     };
+
+    // 🔥 支援 Enter 鍵登入
+    document.addEventListener("DOMContentLoaded", function() {
+        // Login Inputs
+        document.getElementById('loginUser').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        document.getElementById('loginPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        
+        // Register Inputs
+        document.getElementById('regName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doRegister();
+        });
+        
+        // Change Password Inputs
+        document.getElementById('cpConfirm').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') doChangePass();
+        });
+    });
 
     function showMsg(title, text) {
         document.getElementById('msgTitle').innerText = title;
@@ -577,7 +580,6 @@
             
             const okBtn = document.querySelector('#msgModal .btn-primary');
             okBtn.onclick = function() { location.reload(); };
-            
             const modal = document.getElementById('msgModal');
             modal.style.display = 'flex'; modal.style.zIndex = '99999'; 
         }, AUTO_LOGOUT_TIME);
@@ -673,6 +675,7 @@
         openModal('changePassModal');
     }
 
+    // 🔥 修正：修改密碼後強制登出
     async function doChangePass() {
         const oldP = document.getElementById('cpOld').value.trim();
         const newP = document.getElementById('cpNew').value.trim();
@@ -692,6 +695,11 @@
             if(res.status === 'success') {
                 showToast(getTrans('msg_pass_changed'));
                 closeModal('changePassModal');
+                
+                // 🔥 強制登出 (延遲 1.5 秒讓使用者看到成功訊息)
+                setTimeout(() => {
+                    doLogout();
+                }, 1500);
             } else {
                 showMsg("Error", res.message);
             }

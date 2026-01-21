@@ -269,7 +269,7 @@
     </div>
 </div>
 
-<div id="registerModal" class="modal-overlay">
+<div id="registerModal" class="modal-overlay" style="z-index: 10002;">
     <div class="std-dialog" style="width:350px;">
         <div class="dialog-header">
             <span data-i18n="modal_reg_title">Register Account</span>
@@ -409,7 +409,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxqq81tYPkTdSY0G6paCA7e1ihuHv1QblvIBtK_SbXMXM7xd1n9GgYlIHbOYvMw8DjSaQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxKOIZKdaVTuh1k64O1idjuCBtSqcywvljLoTGuiMLlc5p8sHCfbSsqqX1Zl932iiFVnw/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -424,7 +424,7 @@
     let logoutTimer;
     const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
 
-    // 🔥 全面 i18n 字典
+    // 🔥 i18n 字典
     const i18n = {
         en: {
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
@@ -437,22 +437,17 @@
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display", btn_logout: "Logout", btn_pwd: "Pwd",
-            
-            // 🔥 新增的 i18n 鍵值 (確保跟HTML中data-i18n一致)
             lbl_account: "Username", lbl_password: "Password", lbl_name: "Display Name", 
             btn_signin: "Sign In", btn_signup: "Sign Up", btn_change: "Change",
             txt_new_user: "New User?", link_register: "Register Here",
             modal_reg_title: "Register Account", modal_cp_title: "Change Password",
             lbl_old_pass: "Old Password", lbl_new_pass: "New Password", lbl_confirm_pass: "Confirm New",
-            
-            // JS Messages
             msg_reg_success: "Register Success! Please Login.",
             msg_pass_changed: "Password Changed!",
             msg_pass_mismatch: "Passwords do not match",
             msg_fill_all: "All fields required",
             msg_auto_logout: "Session timed out due to inactivity.",
             title_auto_logout: "Auto Logout",
-            
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
@@ -473,22 +468,17 @@
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看", btn_logout: "登出", btn_pwd: "密碼",
-            
-            // 🔥 新增的 i18n 鍵值
             lbl_account: "帳號", lbl_password: "密碼", lbl_name: "顯示名稱", 
             btn_signin: "登入", btn_signup: "註冊", btn_change: "修改",
             txt_new_user: "還沒帳號?", link_register: "點此註冊",
             modal_reg_title: "註冊帳號", modal_cp_title: "修改密碼",
             lbl_old_pass: "舊密碼", lbl_new_pass: "新密碼", lbl_confirm_pass: "確認新密碼",
-            
-            // JS Messages
             msg_reg_success: "註冊成功！請登入。",
             msg_pass_changed: "密碼已修改！",
             msg_pass_mismatch: "新密碼不一致",
             msg_fill_all: "請填寫所有欄位",
             msg_auto_logout: "閒置過久，系統已自動登出。",
             title_auto_logout: "自動登出",
-
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
@@ -509,9 +499,8 @@
         openModal('msgModal');
     }
 
-    function getTrans(key) { return i18n[currentLang][key] || key; } // 輔助函式
+    function getTrans(key) { return i18n[currentLang][key] || key; }
 
-    // --- 自動登出邏輯 ---
     function resetLogoutTimer() {
         if (!localStorage.getItem('wms_user')) return; 
         clearTimeout(logoutTimer);

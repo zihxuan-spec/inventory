@@ -139,9 +139,6 @@
 
         .mobile-info { display: none; }
 
-        /* 🔥 下拉選單樣式 */
-        select.std-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%; background-size: .65em auto; }
-
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -185,6 +182,18 @@
                 <span style="color:var(--sap-primary); cursor:pointer; font-weight:bold;" onclick="openRegister()" data-i18n="link_register">Register Here</span>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="pendingOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--sap-bg-color); z-index:9998; display:none; justify-content:center; align-items:center;">
+    <div class="std-dialog" style="width:350px; padding:30px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:10px;">⏳</div>
+        <h2 style="margin:0; color:#333;">Account Pending</h2>
+        <p style="color:#666; font-size:14px; margin:15px 0 25px 0; line-height:1.5;">
+            您的帳號目前正在審核中 (Pending Approval)。<br>
+            請聯繫管理員為您分配部門權限。
+        </p>
+        <button class="std-btn btn-primary" style="width:100%; justify-content:center;" onclick="doLogout()">Back to Login</button>
     </div>
 </div>
 
@@ -312,14 +321,8 @@
                 <div><label class="form-label" data-i18n="lbl_account">Username</label><input type="text" id="regUser" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_password">Password</label><input type="password" id="regPass" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_name">Display Name</label><input type="text" id="regName" class="std-input"></div>
-                <div>
-                    <label class="form-label">Department</label>
-                    <select id="regDept" class="std-input">
-                        <option value="" disabled selected>-- 請選擇部門 (Select) --</option>
-                        <option value="PROD">Production (生管部)</option>
-                        <option value="QC">QC (品管部)</option>
-                        <option value="FAC">Facility (廠務部)</option>
-                    </select>
+                <div style="font-size:12px; color:#666; background:#f9f9f9; padding:10px; border-radius:4px;">
+                    <span data-i18n="msg_reg_note">Note: New accounts are set to "Pending". An admin must assign your department.</span>
                 </div>
             </div>
         </div>
@@ -450,7 +453,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbysTBOuGyyQveA9uqRDQTPQm5_sYhQ8ROVfERIHt9vJR_5WKQuKqdj8AKtVTgMeHYEfUQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxVKCsqd_Dz3fVbKraDE_JaA7Rn3UtXjI4ESGGiGsx-VQzHu2VtsxVkpb1Ax9VQOQuSQQ/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -506,7 +509,7 @@
             error_title: "Insufficient Stock",
             error_msg: "Cannot issue more than available stock.",
             txt_page: "Page", txt_of: "of",
-            msg_select_dept: "Please select a department."
+            msg_reg_note: "Note: New accounts are set to 'Pending'. An admin must assign your department."
         },
         zh: {
             tab_inv: "庫存列表", tab_dash: "管理看板", tab_master: "物料主檔", btn_refresh: "刷新",
@@ -539,7 +542,7 @@
             error_title: "庫存不足",
             error_msg: "領料數量不可大於現有庫存。",
             txt_page: "第", txt_of: "頁 / 共",
-            msg_select_dept: "請選擇部門。"
+            msg_reg_note: "注意：新帳號預設為「待審核」，需由管理員分配部門權限。"
         }
     };
 
@@ -629,24 +632,21 @@
 
     function openRegister() {
         ['regUser','regPass','regName'].forEach(id => document.getElementById(id).value = "");
-        document.getElementById('regDept').value = ""; // 🔥 重置部門選項
         openModal('registerModal');
     }
 
+    // 🔥 修正：註冊不再傳送部門，由後端強制設為 Pending
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
         const n = document.getElementById('regName').value.trim();
-        const d = document.getElementById('regDept').value; 
         const btn = document.getElementById('btnDoRegister');
         
         if(!u || !p || !n) { showToast(getTrans('msg_fill_all'), true); return; }
-        // 🔥 部門防呆驗證
-        if (!d) { showToast(getTrans('msg_select_dept'), true); return; }
 
         btn.disabled = true; btn.innerText = "Processing..."; setLoading(true);
         try {
-            const res = await sendPost({ action: 'register', username: u, password: p, name: n, dept: d });
+            const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
                 showToast(getTrans('msg_reg_success'));
                 closeModal('registerModal');
@@ -694,6 +694,15 @@
         currentUserDept = dept || localStorage.getItem('wms_dept') || "";
         
         document.getElementById('loginOverlay').style.display = 'none';
+        
+        // 🔥 顯示待審核畫面
+        if (currentUserDept === "Pending") {
+            document.getElementById('pendingOverlay').style.display = 'flex';
+            return; // 停止執行後續
+        } else {
+            document.getElementById('pendingOverlay').style.display = 'none';
+        }
+
         document.getElementById('logoutBtn').style.display = 'block';
         document.getElementById('changePassBtn').style.display = 'block'; 
         
@@ -733,6 +742,15 @@
         setLoading(true);
         sendPost({ action: 'get_data', user: currentUserName }).then(data => {
             if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
+            
+            // 🔥 二次檢查：如果後端說要 Pending，立即鎖定
+            if (data.message.isPending) {
+                localStorage.setItem('wms_dept', "Pending");
+                document.getElementById('pendingOverlay').style.display = 'flex';
+                setLoading(false);
+                return;
+            }
+
             materialMaster = data.message.master; 
             inventoryList = data.message.inventory;
             historyList = data.message.history || [];

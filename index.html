@@ -14,6 +14,7 @@
 
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
+        /* --- SAP Fiori Style Theme --- */
         :root {
             --sap-shell-color: #354a5f; --sap-bg-color: #edf0f4; --sap-surface-color: #ffffff;
             --sap-text-color: #32363a; --sap-border-color: #d9d9d9;
@@ -101,7 +102,15 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        #loading { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001; text-align: center; }
+        /* 🔥 修正 1: 將 Loading 轉圈圈的 z-index 設為最高 (99999)，確保它會擋住所有視窗，防止重複點擊 */
+        #loading { 
+            display: none; 
+            position: fixed; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            z-index: 99999; 
+            text-align: center;
+        }
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -284,7 +293,7 @@
         </div>
         <div class="dialog-footer">
             <button class="std-btn btn-transparent" onclick="closeModal('registerModal')" data-i18n="btn_cancel">Cancel</button>
-            <button class="std-btn btn-primary" onclick="doRegister()" data-i18n="btn_signup">Sign Up</button>
+            <button class="std-btn btn-primary" onclick="doRegister()" data-i18n="btn_signup" id="btnDoRegister">Sign Up</button>
         </div>
     </div>
 </div>
@@ -424,7 +433,7 @@
     let logoutTimer;
     const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
 
-    // 🔥 i18n 字典
+    // 🔥 全面 i18n 字典
     const i18n = {
         en: {
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
@@ -575,13 +584,20 @@
         openModal('registerModal');
     }
 
+    // 🔥 修正：加入按鈕鎖定機制，防止重複點擊
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
         const n = document.getElementById('regName').value.trim();
+        const btn = document.getElementById('btnDoRegister');
+
         if(!u || !p || !n) { showToast(getTrans('msg_fill_all'), true); return; }
 
+        // 鎖定按鈕
+        btn.disabled = true;
+        btn.innerText = "Processing...";
         setLoading(true);
+
         try {
             const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
@@ -590,8 +606,14 @@
             } else {
                 showMsg("Error", res.message);
             }
-        } catch(e) { showMsg("Error", e.message); }
-        finally { setLoading(false); }
+        } catch(e) { 
+            showMsg("Error", e.message); 
+        } finally { 
+            // 解除鎖定
+            setLoading(false); 
+            btn.disabled = false;
+            btn.innerText = getTrans('btn_signup');
+        }
     }
 
     function openChangePass() {

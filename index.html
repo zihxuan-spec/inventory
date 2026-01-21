@@ -44,17 +44,25 @@
         .card.safe { border-left: 5px solid var(--sap-success); }
 
         .table-container { background: var(--sap-surface-color); border: 1px solid var(--sap-border-color); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-top: 1rem; overflow-x: auto; }
+        
+        /* 🔥 iPad 修正: 預設使用自動寬度 */
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: auto; min-width: 100%; }
+        
         thead { background-color: #f7f7f7; border-bottom: 1px solid var(--sap-border-color); }
         th { padding: 10px 16px; font-weight: normal; color: #6a6d70; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
         td { padding: 10px 16px; border-bottom: 1px solid #eeeeee; vertical-align: middle; color: var(--sap-text-color); }
         tr:hover { background-color: #ebf5fe; cursor: pointer; }
 
-        .col-status { width: 35px; text-align: center; padding: 0 !important; }
+        /* 🔥 修正：加入 min-width 鎖定狀態燈寬度 */
+        .col-status { width: 35px; min-width: 35px; text-align: center; padding: 0 !important; }
         .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
+        
         th.col-pn, td.col-pn { padding-left: 12px !important; }
+        
+        /* 🔥 iPad 修正: 彈性寬度 */
         .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
         .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
+        
         .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; white-space: nowrap; }
         .col-stock { width: 80px; text-align: right; white-space: nowrap; }
         .col-unit { width: 60px; text-align: center; white-space: nowrap; }
@@ -102,7 +110,7 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        /* 🔥 修正 1: 將 Loading 轉圈圈的 z-index 設為最高 (99999)，確保它會擋住所有視窗，防止重複點擊 */
+        /* 🔥 Loading 設為最高層級 */
         #loading { 
             display: none; 
             position: fixed; 
@@ -119,8 +127,10 @@
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
         .tx-remove { position: absolute; top: 5px; right: 5px; color: #bb0000; font-size: 20px; font-weight: bold; cursor: pointer; }
 
+        /* 手機版專用資訊區塊 - 預設隱藏 */
         .mobile-info { display: none; }
 
+        /* 🔥 手機與平板適配設定 (RWD) */
         @media (max-width: 992px) { 
             .page-header { padding: 10px 15px; flex-direction: row; align-items: center; }
             .nav-tabs { gap: 15px; overflow-x: auto; padding-bottom: 0; }
@@ -129,20 +139,46 @@
             .std-btn { flex: 1 1 auto; justify-content: center; } 
             .spacer { display: none; }
             .toolbar input { width: 100% !important; order: 99; margin-top: 5px; }
+            
+            /* 🔥 手機排版修正 */
             .desktop-only { display: none !important; } 
             .col-action { display: none !important; } 
+
             .std-dialog, .std-dialog.large { width: 95% !important; max-height: 85vh; }
             .dialog-header-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            
+            /* 讓表格在手機上可以橫向滑動 (如果內容真的很寬) */
             .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            
+            /* 表格緊湊模式 */
             th, td { padding: 8px 4px !important; }
-            .col-status { width: 30px !important; }
+            
+            /* 調整各欄位寬度 */
+            .col-status { width: 30px !important; min-width: 30px !important; } /* 🔥 min-width */
             .col-loc { width: 60px !important; text-align: center !important; font-size: 12px; }
             .col-stock { width: 60px !important; text-align: right !important; font-size: 12px; }
             .col-unit { width: 50px !important; text-align: center !important; font-size: 12px; }
-            .col-pn { width: auto !important; } 
-            .mobile-info { display: block !important; margin-top: 6px; }
-            .mobile-model { font-size: 13px; color: #444; font-weight: 500; margin-bottom: 2px; white-space: normal; line-height: 1.3; }
-            .mobile-desc { font-size: 12px; color: #888; line-height: 1.3; white-space: normal; }
+            .col-pn { width: auto !important; } /* 讓料號欄位自動延展 */
+
+            /* 🔥 手機排版美化：堆疊資訊樣式 */
+            .mobile-info { 
+                display: block !important; 
+                margin-top: 6px; 
+            }
+            .mobile-model { 
+                font-size: 13px; 
+                color: #444; 
+                font-weight: 500; 
+                margin-bottom: 2px;
+                white-space: normal;
+                line-height: 1.3;
+            }
+            .mobile-desc { 
+                font-size: 12px; 
+                color: #888; 
+                line-height: 1.3;
+                white-space: normal;
+            }
         }
     </style>
 </head>
@@ -157,7 +193,9 @@
         <div style="display:grid; gap:15px;">
             <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;" oninput="clearLoginError()">
             <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;" oninput="clearLoginError()">
+            
             <div id="loginFeedback" style="color:#bb0000; font-size:13px; text-align:center; min-height:18px; font-weight:bold;"></div>
+            
             <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()" data-i18n="btn_signin">Sign In</button>
             
             <div style="text-align:center; font-size:12px; margin-top:10px;">
@@ -400,7 +438,7 @@
     </div>
 </div>
 
-<div id="msgModal" class="modal-overlay" style="z-index: 2000;">
+<div id="msgModal" class="modal-overlay" style="z-index: 10003;">
     <div class="std-dialog" style="width: 400px; max-width: 90%;">
         <div class="dialog-header">
             <span id="msgTitle" style="color: var(--sap-critical);">System Message</span>
@@ -446,17 +484,22 @@
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
             txt_display: "Display", btn_logout: "Logout", btn_pwd: "Pwd",
+            
+            // 🔥 新增的 i18n 鍵值
             lbl_account: "Username", lbl_password: "Password", lbl_name: "Display Name", 
             btn_signin: "Sign In", btn_signup: "Sign Up", btn_change: "Change",
             txt_new_user: "New User?", link_register: "Register Here",
             modal_reg_title: "Register Account", modal_cp_title: "Change Password",
             lbl_old_pass: "Old Password", lbl_new_pass: "New Password", lbl_confirm_pass: "Confirm New",
+            
+            // JS Messages
             msg_reg_success: "Register Success! Please Login.",
             msg_pass_changed: "Password Changed!",
             msg_pass_mismatch: "Passwords do not match",
             msg_fill_all: "All fields required",
             msg_auto_logout: "Session timed out due to inactivity.",
             title_auto_logout: "Auto Logout",
+            
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
@@ -477,17 +520,22 @@
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
             txt_display: "查看", btn_logout: "登出", btn_pwd: "密碼",
+            
+            // 🔥 新增的 i18n 鍵值
             lbl_account: "帳號", lbl_password: "密碼", lbl_name: "顯示名稱", 
             btn_signin: "登入", btn_signup: "註冊", btn_change: "修改",
             txt_new_user: "還沒帳號?", link_register: "點此註冊",
             modal_reg_title: "註冊帳號", modal_cp_title: "修改密碼",
             lbl_old_pass: "舊密碼", lbl_new_pass: "新密碼", lbl_confirm_pass: "確認新密碼",
+            
+            // JS Messages
             msg_reg_success: "註冊成功！請登入。",
             msg_pass_changed: "密碼已修改！",
             msg_pass_mismatch: "新密碼不一致",
             msg_fill_all: "請填寫所有欄位",
             msg_auto_logout: "閒置過久，系統已自動登出。",
             title_auto_logout: "自動登出",
+
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
@@ -505,7 +553,10 @@
         document.getElementById('msgContent').innerText = text;
         const okBtn = document.querySelector('#msgModal .btn-primary');
         okBtn.onclick = function() { closeModal('msgModal'); };
-        openModal('msgModal');
+        
+        const modal = document.getElementById('msgModal');
+        modal.style.display = 'flex';
+        modal.style.zIndex = '10005'; // 確保最上層
     }
 
     function getTrans(key) { return i18n[currentLang][key] || key; }
@@ -526,6 +577,7 @@
             
             const okBtn = document.querySelector('#msgModal .btn-primary');
             okBtn.onclick = function() { location.reload(); };
+            
             const modal = document.getElementById('msgModal');
             modal.style.display = 'flex'; modal.style.zIndex = '99999'; 
         }, AUTO_LOGOUT_TIME);

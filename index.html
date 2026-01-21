@@ -154,11 +154,11 @@
             <input type="text" id="loginUser" class="std-input" placeholder="Username" style="width:100%;" oninput="clearLoginError()">
             <input type="password" id="loginPass" class="std-input" placeholder="Password" style="width:100%;" oninput="clearLoginError()">
             <div id="loginFeedback" style="color:#bb0000; font-size:13px; text-align:center; min-height:18px; font-weight:bold;"></div>
-            <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()">Sign In</button>
+            <button id="btnLogin" class="std-btn btn-primary" style="width:100%; justify-content:center; height:40px;" onclick="doLogin()" data-i18n="btn_signin">Sign In</button>
             
             <div style="text-align:center; font-size:12px; margin-top:10px;">
-                <span style="color:#666;">New User? </span>
-                <span style="color:var(--sap-primary); cursor:pointer; font-weight:bold;" onclick="openRegister()">Register Here</span>
+                <span style="color:#666;" data-i18n="txt_new_user">New User? </span>
+                <span style="color:var(--sap-primary); cursor:pointer; font-weight:bold;" onclick="openRegister()" data-i18n="link_register">Register Here</span>
             </div>
         </div>
     </div>
@@ -174,9 +174,9 @@
         <span style="font-weight:bold; font-size:1.2em;">Sunlit AZ</span> WMS
     </div>
     <div style="display:flex; gap:15px; align-items:center;">
-        <div id="changePassBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="openChangePass()">🔑 Pwd</div>
+        <div id="changePassBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="openChangePass()">🔑 <span data-i18n="btn_pwd">Pwd</span></div>
         <div style="cursor:pointer; font-size:12px; opacity:0.9;" onclick="toggleLanguage()">EN / 繁中</div>
-        <div id="logoutBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="doLogout()">Logout ⏻</div>
+        <div id="logoutBtn" style="cursor:pointer; font-size:12px; opacity:0.9; display:none;" onclick="doLogout()"><span data-i18n="btn_logout">Logout</span> ⏻</div>
     </div>
 </div>
 
@@ -277,19 +277,19 @@
 <div id="registerModal" class="modal-overlay">
     <div class="std-dialog" style="width:350px;">
         <div class="dialog-header">
-            <span>Register Account</span>
+            <span data-i18n="modal_reg_title">Register Account</span>
             <span style="cursor:pointer;" onclick="closeModal('registerModal')">✕</span>
         </div>
         <div class="dialog-content">
             <div style="display:grid; gap:15px;">
-                <div><label class="form-label">Username (帳號)</label><input type="text" id="regUser" class="std-input"></div>
-                <div><label class="form-label">Password (密碼)</label><input type="password" id="regPass" class="std-input"></div>
-                <div><label class="form-label">Display Name (顯示名稱)</label><input type="text" id="regName" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_account">Username</label><input type="text" id="regUser" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_password">Password</label><input type="password" id="regPass" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_name">Display Name</label><input type="text" id="regName" class="std-input"></div>
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn btn-transparent" onclick="closeModal('registerModal')">Cancel</button>
-            <button class="std-btn btn-primary" onclick="doRegister()">Sign Up</button>
+            <button class="std-btn btn-transparent" onclick="closeModal('registerModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn btn-primary" onclick="doRegister()" data-i18n="btn_signup">Sign Up</button>
         </div>
     </div>
 </div>
@@ -297,19 +297,19 @@
 <div id="changePassModal" class="modal-overlay">
     <div class="std-dialog" style="width:350px;">
         <div class="dialog-header">
-            <span>Change Password</span>
+            <span data-i18n="modal_cp_title">Change Password</span>
             <span style="cursor:pointer;" onclick="closeModal('changePassModal')">✕</span>
         </div>
         <div class="dialog-content">
             <div style="display:grid; gap:15px;">
-                <div><label class="form-label">Old Password (舊密碼)</label><input type="password" id="cpOld" class="std-input"></div>
-                <div><label class="form-label">New Password (新密碼)</label><input type="password" id="cpNew" class="std-input"></div>
-                <div><label class="form-label">Confirm New (確認新密碼)</label><input type="password" id="cpConfirm" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_old_pass">Old Password</label><input type="password" id="cpOld" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_new_pass">New Password</label><input type="password" id="cpNew" class="std-input"></div>
+                <div><label class="form-label" data-i18n="lbl_confirm_pass">Confirm New</label><input type="password" id="cpConfirm" class="std-input"></div>
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="std-btn btn-transparent" onclick="closeModal('changePassModal')">Cancel</button>
-            <button class="std-btn btn-primary" onclick="doChangePass()">Change</button>
+            <button class="std-btn btn-transparent" onclick="closeModal('changePassModal')" data-i18n="btn_cancel">Cancel</button>
+            <button class="std-btn btn-primary" onclick="doChangePass()" data-i18n="btn_change">Change</button>
         </div>
     </div>
 </div>
@@ -414,7 +414,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwTooDlh_MKA3sRrYVNCqBZRzCrEWdSxobJBT_M-9xA5fs20Dm3LYcZ6qcpkqIr3QqBeA/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbyD84VWzBN2SzP1ec_L8onK7cNunNnnNmp6oHaFzsueXaVLJXR6vK7MCxapJnk_DGbc1A/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -427,8 +427,9 @@
     
     // 自動登出設定
     let logoutTimer;
-    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; // 30 分鐘 (毫秒)
+    const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
 
+    // 🔥 全面 i18n 字典
     const i18n = {
         en: {
             tab_inv: "Inventory", tab_dash: "Dashboard", tab_master: "Master Data", btn_refresh: "Refresh",
@@ -440,9 +441,23 @@
             card_low: "Low Stock", sub_low: "Below Safety Level",
             card_total: "Total Items", sub_total: "Active SKU Count",
             card_hist: "Recent Movements", modal_detail: "Details",
-            txt_display: "Display",
-            msg_unknown_title: "Unknown Part Number",
-            msg_unknown_body: "⚠️ Unknown Part Number!\nPlease create this item in 'Master Data' before receiving.",
+            txt_display: "Display", btn_logout: "Logout", btn_pwd: "Pwd",
+            
+            // 🔥 新增的 i18n 鍵值
+            lbl_account: "Username", lbl_password: "Password", lbl_name: "Display Name", 
+            btn_signin: "Sign In", btn_signup: "Sign Up", btn_change: "Change",
+            txt_new_user: "New User?", link_register: "Register Here",
+            modal_reg_title: "Register Account", modal_cp_title: "Change Password",
+            lbl_old_pass: "Old Password", lbl_new_pass: "New Password", lbl_confirm_pass: "Confirm New",
+            
+            // JS Messages
+            msg_reg_success: "Register Success! Please Login.",
+            msg_pass_changed: "Password Changed!",
+            msg_pass_mismatch: "Passwords do not match",
+            msg_fill_all: "All fields required",
+            msg_auto_logout: "Session timed out due to inactivity.",
+            title_auto_logout: "Auto Logout",
+            
             confirm_post_title: "Post Confirmation", 
             confirm_post_body: "Are you sure you want to post these transactions?",
             confirm_delete: "Delete this master data?",
@@ -462,9 +477,23 @@
             card_low: "低庫存", sub_low: "低於安全水位",
             card_total: "物料總數", sub_total: "系統內 SKU",
             card_hist: "最近異動", modal_detail: "詳細資訊",
-            txt_display: "查看",
-            msg_unknown_title: "未知料號",
-            msg_unknown_body: "⚠️ 未知料號！\n請先至「Master Data」建立料號資料，才能進行入庫。",
+            txt_display: "查看", btn_logout: "登出", btn_pwd: "密碼",
+            
+            // 🔥 新增的 i18n 鍵值
+            lbl_account: "帳號", lbl_password: "密碼", lbl_name: "顯示名稱", 
+            btn_signin: "登入", btn_signup: "註冊", btn_change: "修改",
+            txt_new_user: "還沒帳號?", link_register: "點此註冊",
+            modal_reg_title: "註冊帳號", modal_cp_title: "修改密碼",
+            lbl_old_pass: "舊密碼", lbl_new_pass: "新密碼", lbl_confirm_pass: "確認新密碼",
+            
+            // JS Messages
+            msg_reg_success: "註冊成功！請登入。",
+            msg_pass_changed: "密碼已修改！",
+            msg_pass_mismatch: "新密碼不一致",
+            msg_fill_all: "請填寫所有欄位",
+            msg_auto_logout: "閒置過久，系統已自動登出。",
+            title_auto_logout: "自動登出",
+
             confirm_post_title: "過帳確認", 
             confirm_post_body: "您確定要提交這些異動資料嗎？",
             confirm_delete: "確定要刪除此物料主檔嗎？",
@@ -485,6 +514,8 @@
         openModal('msgModal');
     }
 
+    function getTrans(key) { return i18n[currentLang][key] || key; } // 輔助函式
+
     // --- 自動登出邏輯 ---
     function resetLogoutTimer() {
         if (!localStorage.getItem('wms_user')) return; 
@@ -492,21 +523,18 @@
         logoutTimer = setTimeout(() => {
             localStorage.removeItem('wms_user');
             localStorage.removeItem('wms_uid');
-            
             document.querySelector('.page-header').style.display = 'none';
             document.querySelector('.content-area').style.display = 'none';
             document.querySelector('.shell-bar').style.display = 'none'; 
             
-            document.getElementById('msgTitle').innerText = (currentLang==='zh'?"自動登出":"Auto Logout");
+            document.getElementById('msgTitle').innerText = getTrans('title_auto_logout');
             document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-            document.getElementById('msgContent').innerText = (currentLang==='zh'?"閒置過久，系統已自動登出。":"Session timed out due to inactivity.");
+            document.getElementById('msgContent').innerText = getTrans('msg_auto_logout');
             
             const okBtn = document.querySelector('#msgModal .btn-primary');
             okBtn.onclick = function() { location.reload(); };
-            
             const modal = document.getElementById('msgModal');
-            modal.style.display = 'flex';
-            modal.style.zIndex = '99999'; 
+            modal.style.display = 'flex'; modal.style.zIndex = '99999'; 
         }, AUTO_LOGOUT_TIME);
     }
 
@@ -543,7 +571,7 @@
             } else {
                 feedback.style.color = "#bb0000";
                 feedback.innerText = res.message || "Invalid Credentials";
-                btn.innerText = "Sign In";
+                btn.innerText = getTrans('btn_signin');
                 btn.disabled = false;
                 document.querySelector('#loginOverlay .std-dialog').animate([{transform:'translateX(0)'},{transform:'translateX(-10px)'},{transform:'translateX(10px)'},{transform:'translateX(0)'}],{duration:300});
             }
@@ -551,7 +579,7 @@
             console.error(e);
             feedback.style.color = "#bb0000";
             feedback.innerText = "Connection Failed.";
-            btn.innerText = "Sign In";
+            btn.innerText = getTrans('btn_signin');
             btn.disabled = false;
         } finally {
             setLoading(false);
@@ -567,13 +595,13 @@
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
         const n = document.getElementById('regName').value.trim();
-        if(!u || !p || !n) { showToast("All fields required", true); return; }
+        if(!u || !p || !n) { showToast(getTrans('msg_fill_all'), true); return; }
 
         setLoading(true);
         try {
             const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
-                showToast("Register Success! Please Login.");
+                showToast(getTrans('msg_reg_success'));
                 closeModal('registerModal');
             } else {
                 showMsg("Error", res.message);
@@ -592,8 +620,8 @@
         const newP = document.getElementById('cpNew').value.trim();
         const confP = document.getElementById('cpConfirm').value.trim();
 
-        if(!oldP || !newP) { showToast("Input required", true); return; }
-        if(newP !== confP) { showToast("Passwords do not match", true); return; }
+        if(!oldP || !newP) { showToast(getTrans('msg_fill_all'), true); return; }
+        if(newP !== confP) { showToast(getTrans('msg_pass_mismatch'), true); return; }
 
         setLoading(true);
         try {
@@ -604,7 +632,7 @@
                 newPassword: newP 
             });
             if(res.status === 'success') {
-                showToast("Password Changed!");
+                showToast(getTrans('msg_pass_changed'));
                 closeModal('changePassModal');
             } else {
                 showMsg("Error", res.message);
@@ -616,7 +644,7 @@
     function clearLoginError() { 
         document.getElementById('loginFeedback').innerText = ""; 
         const btn = document.getElementById('btnLogin');
-        if(btn.disabled) { btn.disabled = false; btn.innerText = "Sign In"; }
+        if(btn.disabled) { btn.disabled = false; btn.innerText = getTrans('btn_signin'); }
     }
 
     function applyLoginState(name, uid) {

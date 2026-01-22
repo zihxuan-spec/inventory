@@ -107,7 +107,6 @@
         .tx-input:focus { outline: none; border-color: var(--sap-primary); box-shadow: 0 0 0 1px var(--sap-primary) inset; }
         .tx-input[readonly] { background-color: #f5f5f5; border-color: #d9d9d9; color: #666; cursor: default; }
         
-        /* 🔥 修正：Loading 設為 99999 (最高) */
         #loading { 
             display: none; 
             position: fixed; 
@@ -119,7 +118,6 @@
         .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--sap-primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* 🔥 修正：Toast 設為 20000 (保證在 Login Overlay 9999 之上) */
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #32363a; color: white; padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 20000; font-size: 13px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         .tx-row { border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative; background: #fafafa; }
@@ -396,6 +394,9 @@
                 <div class="form-full"><label class="form-label" data-i18n="col_desc">Description</label><input type="text" id="newDesc" class="std-input"></div>
                 <div><label class="form-label" data-i18n="col_unit">Base UoM</label><input type="text" id="newUnit" class="std-input"></div>
                 <div><label class="form-label" data-i18n="lbl_safe">Safety Stock</label><input type="number" id="newMinStock" class="std-input" value="0"></div>
+                
+                <div><label class="form-label">Department</label><input type="text" id="newDept" class="std-input" readonly disabled style="background:#f5f5f5; color:#666;"></div>
+                
                 <div><label class="form-label" data-i18n="lbl_user">User</label><input type="text" id="newUser" class="std-input"></div>
             </div>
         </div>
@@ -646,7 +647,6 @@
         openModal('registerModal');
     }
 
-    // 🔥 修正：註冊成功後，使用 showMsg 顯示明顯的彈窗提示
     async function doRegister() {
         const u = document.getElementById('regUser').value.trim();
         const p = document.getElementById('regPass').value.trim();
@@ -657,10 +657,10 @@
 
         btn.disabled = true; btn.innerText = "Processing..."; setLoading(true);
         try {
+            // 🔥 移除部門參數
             const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
                 closeModal('registerModal');
-                // 🔥 顯示彈窗而不是 Toast
                 const msg = currentLang === 'en' 
                     ? "Registration sent! Your account is 'Pending'.\nAn admin has been notified." 
                     : "申請已送出！\n您的帳號目前為 '待審核' 狀態。\n系統已發信通知管理員，請靜待開通。";
@@ -1226,6 +1226,7 @@
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
+        document.getElementById('newDept').value = currentUserDept; // 🔥 這裡會自動帶入部門
         document.getElementById('newUser').value = currentUserDisplayName; 
         openModal('createModal');
     }

@@ -577,22 +577,17 @@
 
     function getTrans(key) { return i18n[currentLang][key] || key; }
 
+    // 🔥 安全性修正：時間戳記檢查
     function resetLogoutTimer() {
         if (!localStorage.getItem('wms_user')) return; 
+        
+        // 記錄最後活動時間
+        localStorage.setItem('wms_last_active', Date.now());
+
         clearTimeout(logoutTimer);
         logoutTimer = setTimeout(() => {
-            localStorage.removeItem('wms_user');
-            localStorage.removeItem('wms_uid');
-            document.querySelector('.page-header').style.display = 'none';
-            document.querySelector('.content-area').style.display = 'none';
-            document.querySelector('.shell-bar').style.display = 'none'; 
-            document.getElementById('msgTitle').innerText = getTrans('title_auto_logout');
-            document.getElementById('msgTitle').style.color = "var(--sap-critical)"; 
-            document.getElementById('msgContent').innerText = getTrans('msg_auto_logout');
-            const okBtn = document.querySelector('#msgModal .btn-primary');
-            okBtn.onclick = function() { location.reload(); };
-            const modal = document.getElementById('msgModal');
-            modal.style.display = 'flex'; modal.style.zIndex = '99999'; 
+            // 觸發登出 (僅限頁面開啟時)
+            doLogout();
         }, AUTO_LOGOUT_TIME);
     }
 
@@ -620,9 +615,13 @@
                 feedback.innerText = "Success!";
                 const displayName = res.message.name;
                 const displayDept = res.message.dept; 
+                
+                // 儲存資料與時間戳記
                 localStorage.setItem('wms_user', displayName);
                 localStorage.setItem('wms_uid', user); 
                 localStorage.setItem('wms_dept', displayDept); 
+                localStorage.setItem('wms_last_active', Date.now()); 
+
                 applyLoginState(displayName, user, displayDept);
             } else {
                 feedback.style.color = "#bb0000";
@@ -657,7 +656,6 @@
 
         btn.disabled = true; btn.innerText = "Processing..."; setLoading(true);
         try {
-            // 🔥 移除部門參數
             const res = await sendPost({ action: 'register', username: u, password: p, name: n });
             if(res.status === 'success') {
                 closeModal('registerModal');
@@ -732,6 +730,7 @@
         localStorage.removeItem('wms_user'); 
         localStorage.removeItem('wms_uid'); 
         localStorage.removeItem('wms_dept'); 
+        localStorage.removeItem('wms_last_active'); // 清除時間戳
         location.reload(); 
     }
 
@@ -739,6 +738,15 @@
         const savedUser = localStorage.getItem('wms_user');
         const savedUid = localStorage.getItem('wms_uid');
         const savedDept = localStorage.getItem('wms_dept');
+        const lastActive = localStorage.getItem('wms_last_active');
+
+        // 🔥 檢查是否過期 (關閉網頁後的時間檢查)
+        if (lastActive && (Date.now() - lastActive > AUTO_LOGOUT_TIME)) {
+            // 過期了，強制登出
+            doLogout(); 
+            return;
+        }
+
         if (savedUser) applyLoginState(savedUser, savedUid, savedDept);
     }
 

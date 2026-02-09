@@ -35,7 +35,12 @@
         .nav-item.active { color: var(--sap-primary); border-bottom-color: var(--sap-primary); }
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); }
+        
+        /* 🔥 修改：讓 Card 變成可點擊的樣式 */
+        .card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--sap-border-color); transition: transform 0.1s, box-shadow 0.1s; cursor: pointer; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card:active { transform: translateY(0); }
+
         .card-title { font-size: 13px; color: #666; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .card-value { font-size: 36px; font-weight: normal; color: var(--sap-text-color); }
         .card-sub { font-size: 12px; color: #888; margin-top: 5px; }
@@ -146,6 +151,22 @@
 
         .mobile-info { display: none; }
 
+        /* 🔥 新增過濾器提示樣式 */
+        #filterTag {
+            display: none;
+            background: #e0f0ff;
+            color: #0a6ed1;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        #filterTag:hover { background: #d0e8ff; }
+
         select.std-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right .7em top 50%; background-size: .65em auto; }
 
         @media (max-width: 992px) { 
@@ -240,22 +261,22 @@
 <div class="content-area">
     <div id="viewDashboard">
         <div class="dashboard-grid">
-            <div class="card alert">
+            <div class="card alert" onclick="applyFilter('crit')" title="Click to filter">
                 <div class="card-title" data-i18n="card_crit">Critical Stock</div>
                 <div class="card-value" id="dashCrit" style="color:#bb0000">0</div>
                 <div class="card-sub" data-i18n="sub_crit">Items Out of Stock</div>
             </div>
-            <div class="card warn">
+            <div class="card warn" onclick="applyFilter('low')" title="Click to filter">
                 <div class="card-title" data-i18n="card_low">Low Stock</div>
                 <div class="card-value" id="dashLow" style="color:#e9730c">0</div>
                 <div class="card-sub" data-i18n="sub_low">Items below safety level</div>
             </div>
-            <div class="card safe">
+            <div class="card safe" onclick="applyFilter('all')" title="Show All">
                 <div class="card-title" data-i18n="card_total">Total Items</div>
                 <div class="card-value" id="dashTotal">0</div>
                 <div class="card-sub" data-i18n="sub_total">Active SKU Count</div>
             </div>
-            <div class="card">
+            <div class="card" style="cursor: default;">
                 <div class="card-title">
                     <span data-i18n="card_hist">Recent Movements</span>
                     <button class="std-btn btn-transparent" style="font-size:12px; padding:2px 8px; height:auto;" onclick="openReportModal()">📊 Report</button>
@@ -271,6 +292,12 @@
             <button class="std-btn btn-issue" onclick="openTxModal('issue')"><span data-i18n="btn_issue">Goods Issue</span></button>
             <button class="std-btn btn-excel" onclick="exportToExcel('inventory')">📥 Excel</button>
             <div class="spacer"></div>
+            
+            <div id="filterTag" onclick="applyFilter('all')">
+                <span id="filterText">Filter Active</span> 
+                <span style="font-size:14px; margin-left:2px;">✕</span>
+            </div>
+
             <input type="text" id="searchInv" class="std-input" style="width:250px;" placeholder="Search Inventory..." onkeyup="renderTable(true)">
         </div>
         <div class="table-container">
@@ -483,6 +510,9 @@
     let sortCol = '';
     let sortAsc = true;
     
+    // 🔥 新增：目前過濾狀態 (all, crit, low)
+    let currentFilter = 'all';
+
     let logoutTimer;
     const AUTO_LOGOUT_TIME = 30 * 60 * 1000; 
 
@@ -575,11 +605,8 @@
     function getTrans(key) { return i18n[currentLang][key] || key; }
 
     function checkAutoLogin() {
-        // 🔥🔥 嚴格資安：關閉網頁/分頁即登出 🔥🔥
         const navEntry = performance.getEntriesByType("navigation")[0];
         const navType = navEntry ? navEntry.type : "navigate";
-
-        // 如果不是 F5 重新整理，也不是上一頁/下一頁，判定為「新開啟」，強制登出
         if (navType !== 'reload' && navType !== 'back_forward') {
             sessionStorage.clear();
         }
@@ -589,7 +616,6 @@
         const savedDept = sessionStorage.getItem('wms_dept');
         const lastActive = sessionStorage.getItem('wms_last_active');
 
-        // 檢查閒置超時 (30分鐘)
         if (lastActive && (Date.now() - lastActive > AUTO_LOGOUT_TIME)) {
             doLogout(); 
             return;
@@ -771,7 +797,14 @@
             }
 
             materialMaster = data.message.master; 
-            inventoryList = data.message.inventory;
+            
+            // 🔥 關鍵修正：強制將庫存與安全庫存轉為數字 (Number)
+            inventoryList = data.message.inventory.map(item => ({
+                ...item,
+                stock: Number(item.stock),
+                minStock: Number(item.minStock)
+            }));
+            
             historyList = data.message.history || [];
             
             if(data.message.userDept) {
@@ -784,6 +817,24 @@
             renderDashboard();
             renderMasterTable();
         }).catch(e => { console.error(e); showToast("Network Error", true); }).finally(() => { setLoading(false); });
+    }
+
+    // 🔥 新增：過濾器應用函式
+    function applyFilter(filterType) {
+        currentFilter = filterType;
+        switchView('inventory');
+        renderTable(true);
+        
+        // 更新過濾標籤顯示
+        const tag = document.getElementById('filterTag');
+        const text = document.getElementById('filterText');
+        if(filterType === 'all') {
+            tag.style.display = 'none';
+        } else {
+            tag.style.display = 'inline-flex';
+            if(filterType === 'crit') text.innerText = "Showing: Critical Stock";
+            if(filterType === 'low') text.innerText = "Showing: Low Stock";
+        }
     }
 
     function openReportModal() {
@@ -853,10 +904,10 @@
 
     function renderDashboard() {
         let crit = 0, low = 0, total = inventoryList.length;
+        // 🔥 這裡的邏輯必須和 renderTable 的狀態燈邏輯完全一致
         inventoryList.forEach(item => {
-            // 🔥 修正邏輯：小於 MinStock 才是橘燈，等於 MinStock 還是綠燈
             if(item.stock <= 0) crit++;
-            else if(item.stock < item.minStock) low++; 
+            else if(item.stock < item.minStock) low++; // 只有真正小於才是 Low
         });
         document.getElementById('dashCrit').innerText = crit;
         document.getElementById('dashLow').innerText = low;
@@ -899,9 +950,20 @@
         const lang = i18n[currentLang];
         tbody.innerHTML = '';
         
-        let filteredList = inventoryList.filter(item => 
-            (item.id + item.model + item.description).toLowerCase().includes(term)
-        );
+        let filteredList = inventoryList.filter(item => {
+            // 1. 搜尋過濾
+            const matchSearch = (item.id + item.model + item.description).toLowerCase().includes(term);
+            
+            // 2. 狀態過濾 (🔥 新功能)
+            let matchStatus = true;
+            if(currentFilter === 'crit') {
+                matchStatus = (item.stock <= 0);
+            } else if (currentFilter === 'low') {
+                matchStatus = (item.stock > 0 && item.stock < item.minStock);
+            }
+            
+            return matchSearch && matchStatus;
+        });
 
         if (sortCol) {
             filteredList.sort((a, b) => {
@@ -919,21 +981,18 @@
 
         const totalItems = filteredList.length;
         const totalPages = Math.ceil(totalItems / pageSize) || 1;
-        if(curPageInv > totalPages) curPageInv = totalPages;
+        if(curPageInv > totalPages && totalPages > 0) curPageInv = totalPages;
+        if(totalPages === 0) curPageInv = 1;
 
         const start = (curPageInv - 1) * pageSize;
         const end = start + pageSize;
         const displayList = filteredList.slice(start, end);
 
         displayList.forEach((item) => {
-            // 🔥 修正狀態燈邏輯 🔥
-            let statusClass = 'status-ok'; // 預設綠色 (Stock >= MinStock)
-            
-            if (item.stock <= 0) {
-                statusClass = 'status-crit'; // 紅色 (Stock <= 0)
-            } else if (item.stock < item.minStock) { 
-                statusClass = 'status-low';  // 橘色 (Stock < MinStock)
-            }
+            // 🔥 修正狀態燈邏輯：小於 MinStock 才是橘燈
+            let statusClass = 'status-ok'; 
+            if (item.stock <= 0) statusClass = 'status-crit';
+            else if (item.stock < item.minStock) statusClass = 'status-low';
 
             const tr = document.createElement('tr');
             tr.onclick = () => openDetailsObj(item);
@@ -967,7 +1026,7 @@
         bar.innerHTML = `
             <button class="btn-page" onclick="${changeFuncString}(-1)" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
             <span class="page-info">${lang.txt_page} ${currentPage} ${lang.txt_of} ${totalPages} (${totalItems})</span>
-            <button class="btn-page" onclick="${changeFuncString}(1)" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
+            <button class="btn-page" onclick="${changeFuncString}(1)" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}>▶</button>
         `;
     }
 
@@ -1148,7 +1207,7 @@
     function submitTx() {
         const lang = i18n[currentLang];
         const ref = document.getElementById('txRef').value.trim();
-        const user = document.getElementById('txUser').value.trim(); // 這邊其實是 DisplayName，不適合後端查詢
+        const user = document.getElementById('txUser').value.trim(); 
         if (!ref || !user) { showMsg(lang.msg_input_required, lang.msg_input_empty); return; }
         const rows = document.querySelectorAll('#txBody tr');
         if(rows.length === 0) return;
@@ -1189,7 +1248,7 @@
         const ref = document.getElementById('txRef').value;
         const displayUser = document.getElementById('txUser').value; // 僅用於前端顯示
         
-        // 🔥 關鍵修改：發送給後端時使用 currentUserName (ID)，確保後端能查到部門
+        // 發送給後端時使用 currentUserName (ID)
         const user = currentUserName;
 
         if (!items) { items = []; /* fallback */ }
@@ -1218,7 +1277,6 @@
             renderMasterTable();
             closeModal('txModal');
             showToast("Transaction Posted!");
-            // 發送 ID 給後端
             await sendPost({ action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', [currentTxType === 'receive' ? 'po' : 'purpose']: ref, user: user, items: items });
         } catch(e) { showMsg("Error", "Sync Failed: " + e.message); fetchData(); } finally { setLoading(false); }
     }
@@ -1226,7 +1284,6 @@
     async function deleteMaster(id) {
         setLoading(true);
         try {
-            // 🔥 關鍵修改：發送 ID 給後端
             const user = currentUserName; 
             
             delete materialMaster[id]; 
@@ -1240,16 +1297,13 @@
         } catch(e) { showMsg("Error", e.message); fetchData(); } finally { setLoading(false); }
     }
 
-    // 🔥 修正部門自動帶入邏輯
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
         
-        // 優先使用已登入的部門，如果沒有則顯示 Pending
         const dept = sessionStorage.getItem('wms_dept') || "Pending";
         document.getElementById('newDept').value = dept; 
         
-        // 這裡顯示名字 (Display Name) 給使用者看比較友善
         document.getElementById('newUser').value = currentUserDisplayName || sessionStorage.getItem('wms_user'); 
         openModal('createModal');
     }
@@ -1263,7 +1317,6 @@
 
     async function submitCreateMaster() {
         const id = document.getElementById('newId').value.trim();
-        // 畫面上顯示的是名字 (Display Name)
         const displayUser = document.getElementById('newUser').value;
         const model = document.getElementById('newModel').value;
         const desc = document.getElementById('newDesc').value;
@@ -1278,7 +1331,6 @@
             closeModal('createModal'); 
             showToast("Created!");
             
-            // 🔥 關鍵修改：發送給後端時使用 currentUserName (ID)，這樣後端才能在 A 欄找到人並查部門
             const backendUser = currentUserName;
             
             await sendPost({ action: 'create_master', id: id, model: model, description: desc, unit: unit, minStock: min, user: backendUser });

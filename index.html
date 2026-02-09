@@ -56,15 +56,15 @@
         .sort-icon { font-size: 10px; margin-left: 5px; color: var(--sap-primary); }
 
         .col-status { width: 35px; min-width: 35px; text-align: center; padding: 0 !important; }
-        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; font-size: 12px; }
+        .col-pn { width: 15%; min-width: 120px; font-weight: bold; color: var(--sap-primary); vertical-align: top; }
         th.col-pn, td.col-pn { padding-left: 12px !important; }
-        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; font-size: 12px; } 
-        .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; font-size: 12px; } 
-        .col-loc { width: 80px; text-align: center; color: #555; white-space: nowrap; font-size: 12px; }
-        .col-stock { width: 80px; text-align: right; white-space: nowrap; font-size: 12px; }
-        .col-unit { width: 60px; text-align: center; white-space: nowrap; font-size: 12px; }
+        .col-model { width: 25%; min-width: 150px; max-width: 300px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
+        .col-desc { width: 30%; min-width: 150px; white-space: normal; word-wrap: break-word; line-height: 1.3; } 
+        .col-loc { width: 80px; text-align: center; font-weight: bold; color: #555; white-space: nowrap; }
+        .col-stock { width: 80px; text-align: right; white-space: nowrap; }
+        .col-unit { width: 60px; text-align: center; white-space: nowrap; }
         .col-action { width: 100px; text-align: center; white-space: nowrap;}
-        .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .col-loc span { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
         .toolbar { padding: 10px 0; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; width: 100%; }
         .spacer { flex-grow: 1; }
@@ -465,7 +465,7 @@
     // ==========================================
     // 請填入您的最新 API 網址 (Do not forget!)
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzolTcJweI5zoCwBBnWJL_IOPsqdqY_TuKMFFoEsdnF6l4SADr8NTHgGhGizxD9kZkH/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbykdoICUEYDPZvDBcU8AQOWgEz4zv1pS9M-b0K7601syGVm8DPBtiKGVpls_jGCXjil7Q/exec"; 
     // ==========================================
 
     let inventoryList = [];
@@ -1142,7 +1142,7 @@
     function submitTx() {
         const lang = i18n[currentLang];
         const ref = document.getElementById('txRef').value.trim();
-        const user = document.getElementById('txUser').value.trim();
+        const user = document.getElementById('txUser').value.trim(); // 這邊其實是 DisplayName，不適合後端查詢
         if (!ref || !user) { showMsg(lang.msg_input_required, lang.msg_input_empty); return; }
         const rows = document.querySelectorAll('#txBody tr');
         if(rows.length === 0) return;
@@ -1181,7 +1181,11 @@
 
     async function executeSubmit(items) {
         const ref = document.getElementById('txRef').value;
-        const user = document.getElementById('txUser').value;
+        const displayUser = document.getElementById('txUser').value; // 僅用於前端顯示
+        
+        // 🔥 關鍵修改：發送給後端時使用 currentUserName (ID)，確保後端能查到部門
+        const user = currentUserName;
+
         if (!items) { items = []; /* fallback */ }
         if(items.length === 0) { showToast("No items to post", true); return; }
         setLoading(true);
@@ -1201,13 +1205,14 @@
                 } else {
                     if (invItem) invItem.stock -= item.qty;
                 }
-                historyList.unshift({ date: new Date().toISOString(), ref: ref, action: currentTxType === 'receive' ? 'GR (In)' : 'GI (Out)', id: item.id, qty: currentTxType === 'receive' ? item.qty : -item.qty, user: user });
+                historyList.unshift({ date: new Date().toISOString(), ref: ref, action: currentTxType === 'receive' ? 'GR (In)' : 'GI (Out)', id: item.id, qty: currentTxType === 'receive' ? item.qty : -item.qty, user: displayUser });
             });
             renderTable();
             renderDashboard();
             renderMasterTable();
             closeModal('txModal');
             showToast("Transaction Posted!");
+            // 發送 ID 給後端
             await sendPost({ action: currentTxType === 'receive' ? 'bulk_receive' : 'bulk_issue', [currentTxType === 'receive' ? 'po' : 'purpose']: ref, user: user, items: items });
         } catch(e) { showMsg("Error", "Sync Failed: " + e.message); fetchData(); } finally { setLoading(false); }
     }
@@ -1215,7 +1220,9 @@
     async function deleteMaster(id) {
         setLoading(true);
         try {
-            const user = currentUserDisplayName || "Admin"; 
+            // 🔥 關鍵修改：發送 ID 給後端
+            const user = currentUserName; 
+            
             delete materialMaster[id]; 
             const index = inventoryList.findIndex(i => i.id === id);
             if(index !== -1) inventoryList.splice(index, 1); 
@@ -1236,6 +1243,7 @@
         const dept = sessionStorage.getItem('wms_dept') || "Pending";
         document.getElementById('newDept').value = dept; 
         
+        // 這裡顯示名字 (Display Name) 給使用者看比較友善
         document.getElementById('newUser').value = currentUserDisplayName || sessionStorage.getItem('wms_user'); 
         openModal('createModal');
     }
@@ -1249,19 +1257,25 @@
 
     async function submitCreateMaster() {
         const id = document.getElementById('newId').value.trim();
-        const user = document.getElementById('newUser').value;
+        // 畫面上顯示的是名字 (Display Name)
+        const displayUser = document.getElementById('newUser').value;
         const model = document.getElementById('newModel').value;
         const desc = document.getElementById('newDesc').value;
         const unit = document.getElementById('newUnit').value;
         const min = document.getElementById('newMinStock').value;
-        if(!id || !user) { showToast("ID & User Required", true); return; }
+        
+        if(!id || !displayUser) { showToast("ID & User Required", true); return; }
         setLoading(true);
         try {
             materialMaster[id] = { model: model, description: desc, unit: unit, minStock: min };
             renderMasterTable();
             closeModal('createModal'); 
             showToast("Created!");
-            await sendPost({ action: 'create_master', id: id, model: model, description: desc, unit: unit, minStock: min, user: user });
+            
+            // 🔥 關鍵修改：發送給後端時使用 currentUserName (ID)，這樣後端才能在 A 欄找到人並查部門
+            const backendUser = currentUserName;
+            
+            await sendPost({ action: 'create_master', id: id, model: model, description: desc, unit: unit, minStock: min, user: backendUser });
         } catch(e) { showMsg("Error", e.message); fetchData(); } finally { setLoading(false); }
     }
 

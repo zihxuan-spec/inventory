@@ -475,11 +475,8 @@
     let currentLang = 'en';
     let currentUserDisplayName = ""; 
     let currentUserName = ""; 
-    
-    // 🔥 新增：部門變數
     let currentUserDept = "";
 
-    // 分頁與排序
     let curPageInv = 1;
     let curPageMaster = 1;
     const pageSize = 50;
@@ -577,18 +574,35 @@
 
     function getTrans(key) { return i18n[currentLang][key] || key; }
 
-    // 🔥 安全性修正：時間戳記檢查
-    function resetLogoutTimer() {
-        if (!localStorage.getItem('wms_user')) return; 
-        
-        // 記錄最後活動時間
-        localStorage.setItem('wms_last_active', Date.now());
+    function checkAutoLogin() {
+        // 🔥🔥 嚴格資安：關閉網頁/分頁即登出 🔥🔥
+        const navEntry = performance.getEntriesByType("navigation")[0];
+        const navType = navEntry ? navEntry.type : "navigate";
 
+        // 如果不是 F5 重新整理，也不是上一頁/下一頁，判定為「新開啟」，強制登出
+        if (navType !== 'reload' && navType !== 'back_forward') {
+            sessionStorage.clear();
+        }
+
+        const savedUser = sessionStorage.getItem('wms_user');
+        const savedUid = sessionStorage.getItem('wms_uid');
+        const savedDept = sessionStorage.getItem('wms_dept');
+        const lastActive = sessionStorage.getItem('wms_last_active');
+
+        // 檢查閒置超時 (30分鐘)
+        if (lastActive && (Date.now() - lastActive > AUTO_LOGOUT_TIME)) {
+            doLogout(); 
+            return;
+        }
+
+        if (savedUser) applyLoginState(savedUser, savedUid, savedDept);
+    }
+
+    function resetLogoutTimer() {
+        if (!sessionStorage.getItem('wms_user')) return; 
+        sessionStorage.setItem('wms_last_active', Date.now());
         clearTimeout(logoutTimer);
-        logoutTimer = setTimeout(() => {
-            // 觸發登出 (僅限頁面開啟時)
-            doLogout();
-        }, AUTO_LOGOUT_TIME);
+        logoutTimer = setTimeout(() => { doLogout(); }, AUTO_LOGOUT_TIME);
     }
 
     ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => 
@@ -616,11 +630,10 @@
                 const displayName = res.message.name;
                 const displayDept = res.message.dept; 
                 
-                // 儲存資料與時間戳記
-                localStorage.setItem('wms_user', displayName);
-                localStorage.setItem('wms_uid', user); 
-                localStorage.setItem('wms_dept', displayDept); 
-                localStorage.setItem('wms_last_active', Date.now()); 
+                sessionStorage.setItem('wms_user', displayName);
+                sessionStorage.setItem('wms_uid', user); 
+                sessionStorage.setItem('wms_dept', displayDept); 
+                sessionStorage.setItem('wms_last_active', Date.now()); 
 
                 applyLoginState(displayName, user, displayDept);
             } else {
@@ -703,15 +716,14 @@
 
     function applyLoginState(name, uid, dept) {
         currentUserDisplayName = name;
-        currentUserName = uid || localStorage.getItem('wms_uid');
-        currentUserDept = dept || localStorage.getItem('wms_dept') || "";
+        currentUserName = uid || sessionStorage.getItem('wms_uid');
+        currentUserDept = dept || sessionStorage.getItem('wms_dept') || "";
         
         document.getElementById('loginOverlay').style.display = 'none';
         
-        // 🔥 顯示待審核畫面
         if (currentUserDept === "Pending") {
             document.getElementById('pendingOverlay').style.display = 'flex';
-            return; // 停止執行後續
+            return; 
         } else {
             document.getElementById('pendingOverlay').style.display = 'none';
         }
@@ -727,30 +739,16 @@
     }
 
     function doLogout() { 
-        localStorage.removeItem('wms_user'); 
-        localStorage.removeItem('wms_uid'); 
-        localStorage.removeItem('wms_dept'); 
-        localStorage.removeItem('wms_last_active'); // 清除時間戳
+        sessionStorage.clear(); 
         location.reload(); 
     }
 
-    function checkAutoLogin() {
-        const savedUser = localStorage.getItem('wms_user');
-        const savedUid = localStorage.getItem('wms_uid');
-        const savedDept = localStorage.getItem('wms_dept');
-        const lastActive = localStorage.getItem('wms_last_active');
-
-        // 🔥 檢查是否過期 (關閉網頁後的時間檢查)
-        if (lastActive && (Date.now() - lastActive > AUTO_LOGOUT_TIME)) {
-            // 過期了，強制登出
-            doLogout(); 
-            return;
-        }
-
-        if (savedUser) applyLoginState(savedUser, savedUid, savedDept);
-    }
-
     async function sendPost(payload) {
+        if(!API_URL || API_URL.includes("請填入")) { 
+            showMsg("Error", "請先設定正確的 API_URL！"); 
+            setLoading(false);
+            throw new Error("API URL not set");
+        }
         const res = await fetch(API_URL, { 
             method: 'POST', 
             headers: { "Content-Type": "text/plain" },
@@ -761,14 +759,12 @@
     }
 
     function fetchData() {
-        if(API_URL.includes("YOUR_GOOGLE")) { showMsg("Error", "Setup API URL first!"); return; }
         setLoading(true);
         sendPost({ action: 'get_data', user: currentUserName }).then(data => {
             if (data.status === 'error') { showMsg("Backend Error", data.message); return; }
             
-            // 🔥 二次檢查：如果後端說要 Pending，立即鎖定
             if (data.message.isPending) {
-                localStorage.setItem('wms_dept', "Pending");
+                sessionStorage.setItem('wms_dept', "Pending");
                 document.getElementById('pendingOverlay').style.display = 'flex';
                 setLoading(false);
                 return;
@@ -780,7 +776,7 @@
             
             if(data.message.userDept) {
                 currentUserDept = data.message.userDept;
-                localStorage.setItem('wms_dept', currentUserDept);
+                sessionStorage.setItem('wms_dept', currentUserDept);
                 document.getElementById('userInfoDisplay').innerText = `${currentUserDisplayName} (${currentUserDept})`;
             }
 
@@ -1231,11 +1227,16 @@
         } catch(e) { showMsg("Error", e.message); fetchData(); } finally { setLoading(false); }
     }
 
+    // 🔥 修正部門自動帶入邏輯
     function openCreateMasterModal() {
         ['newId','newModel','newDesc','newUnit','newUser'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('newMinStock').value = 0;
-        document.getElementById('newDept').value = currentUserDept; // 🔥 這裡會自動帶入部門
-        document.getElementById('newUser').value = currentUserDisplayName; 
+        
+        // 優先使用已登入的部門，如果沒有則顯示 Pending
+        const dept = sessionStorage.getItem('wms_dept') || "Pending";
+        document.getElementById('newDept').value = dept; 
+        
+        document.getElementById('newUser').value = currentUserDisplayName || sessionStorage.getItem('wms_user'); 
         openModal('createModal');
     }
     
